@@ -50,7 +50,8 @@ export function ParentDashboardPage() {
   const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; pin: string } | null>(null)
   const [createdChildren, setCreatedChildren] = useState<typeof mockStudents>([])
   const children = [...mockStudents, ...createdChildren]
-  const childrenCount = children.length
+  const childrenNames = children.map((child) => child.firstName).join(' and ')
+  const childrenVerb = children.length === 1 ? 'is' : 'are'
   const updateChildForm = (field: keyof typeof childForm, value: string) =>
     setChildForm((current) => ({ ...current, [field]: value }))
   const closeChildModal = () => {
@@ -104,7 +105,7 @@ export function ParentDashboardPage() {
           Welcome back, {user?.name?.split(' ')[0] ?? 'there'}
         </h1>
         <p className="mt-1 text-sm text-text-muted">
-          Here&apos;s how {mockChild.name.split(' ')[0]} is doing this week, across {childrenCount} children.
+          {childrenNames ? `Here’s how ${childrenNames} ${childrenVerb} doing this week.` : 'Add a child profile to start tracking learning progress.'}
         </p>
       </div>
 
@@ -139,25 +140,29 @@ export function ParentDashboardPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <Card className="lg:col-span-1">
-          <CardContent className="flex flex-col items-center p-6 text-center">
-            <Avatar name={mockChild.name} size="lg" />
-            <h3 className="mt-3 text-base font-semibold text-text">
-              {mockChild.name}
-            </h3>
-            <p className="text-sm text-text-muted">{mockChild.grade}</p>
-            <Badge variant="secondary" className="mt-3">
-              {mockChild.streakDays}-day streak
-            </Badge>
-            <Link
-              to={routes.child}
-              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-            >
-              View {mockChild.name.split(' ')[0]}&apos;s dashboard
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 lg:col-span-1">
+          {children.map((child) => (
+            <Card key={child.id}>
+              <CardContent className="flex flex-col items-center p-6 text-center">
+                <Avatar name={`${child.firstName} ${child.lastName}`} size="lg" />
+                <h3 className="mt-3 text-base font-semibold text-text">
+                  {child.firstName} {child.lastName}
+                </h3>
+                <p className="text-sm text-text-muted">Grade {child.grade}</p>
+                <Badge variant="secondary" className="mt-3">
+                  {child.streakDays}-day streak
+                </Badge>
+                <Link
+                  to={`${routes.child}?studentId=${child.studentId}`}
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  View {child.firstName}&apos;s dashboard
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-3">
           <StatCard
