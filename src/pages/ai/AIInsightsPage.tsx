@@ -30,6 +30,7 @@ export function AIInsightsPage() {
   const [subjectFocus, setSubjectFocus] = useState('all')
   const [isThinking, setIsThinking] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messageIdRef = useRef(0)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -43,7 +44,7 @@ export function AIInsightsPage() {
     if (!trimmed || isThinking) return
 
     const userMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${++messageIdRef.current}`,
       role: 'user',
       content: trimmed,
       timestamp: timeNow(),
@@ -55,7 +56,7 @@ export function AIInsightsPage() {
     setTimeout(
       () => {
         const aiMessage: ChatMessage = {
-          id: `msg-${Date.now()}-ai`,
+          id: `msg-${++messageIdRef.current}-ai`,
           role: 'assistant',
           content: getMockAIResponse(trimmed),
           timestamp: timeNow(),
@@ -63,7 +64,7 @@ export function AIInsightsPage() {
         setMessages((prev) => [...prev, aiMessage])
         setIsThinking(false)
       },
-      900 + Math.random() * 500,
+      1100,
     )
   }
 

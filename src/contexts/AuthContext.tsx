@@ -1,7 +1,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from 'react'
@@ -55,13 +54,8 @@ function nameFromEmail(email: string): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    setUser(readMockSession())
-    setIsLoading(false)
-  }, [])
+  const [user, setUser] = useState<User | null>(() => readMockSession())
+  const [isLoading] = useState(false)
 
   async function login(email: string, password: string) {
     // Mock auth: any non-empty password is accepted. Referenced only to
@@ -120,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {
