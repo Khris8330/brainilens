@@ -198,26 +198,28 @@ export function ParentDashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Progress over time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LineChart data={weeklyTrend} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Subject performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BarChart data={subjectPerformanceChart} />
-          </CardContent>
-        </Card>
-      </div>
+      {children.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress over time</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LineChart data={weeklyTrend} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Subject performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BarChart data={subjectPerformanceChart} />
+              </CardContent>
+            </Card>
+          </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent activity</CardTitle>
@@ -271,8 +273,8 @@ export function ParentDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center gap-2">
             <Sparkles className="size-4 text-secondary" aria-hidden="true" />
             <CardTitle>AI recommendations</CardTitle>
@@ -309,7 +311,9 @@ export function ParentDashboardPage() {
             ))}
           </CardContent>
         </Card>
-      </div>
+          </div>
+        </>
+      )}
 
       <Modal
         isOpen={isAddChildOpen}
