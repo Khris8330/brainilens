@@ -53,6 +53,12 @@ function nameFromEmail(email: string): string {
     .join(' ')
 }
 
+function parentIdFromEmail(email: string): string {
+  return email.trim().toLowerCase() === 'parent@example.com'
+    ? 'parent-001'
+    : `parent-${email.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => readMockSession())
   const [isLoading] = useState(false)
@@ -63,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void password
     await new Promise((resolve) => setTimeout(resolve, 900))
     const mockUser: User = {
-      id: 'mock-user-1',
+      id: parentIdFromEmail(email),
       name: nameFromEmail(email) || 'Parent',
       email,
       role: 'parent',
@@ -93,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void password
     await new Promise((resolve) => setTimeout(resolve, 900))
     const mockUser: User = {
-      id: 'mock-user-1',
+      id: parentIdFromEmail(email),
       name: fullName,
       email,
       role: 'parent',

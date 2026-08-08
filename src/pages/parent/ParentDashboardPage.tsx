@@ -49,7 +49,8 @@ export function ParentDashboardPage() {
   const [childForm, setChildForm] = useState({ firstName: '', lastName: '', grade: '' })
   const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; pin: string } | null>(null)
   const [createdChildren, setCreatedChildren] = useState<typeof mockStudents>([])
-  const children = [...mockStudents, ...createdChildren]
+  const registeredChildren = mockStudents.filter((child) => child.parentId === user?.id)
+  const children = [...registeredChildren, ...createdChildren]
   const childrenNames = children.map((child) => child.firstName).join(' and ')
   const childrenVerb = children.length === 1 ? 'is' : 'are'
   const updateChildForm = (field: keyof typeof childForm, value: string) =>
@@ -121,7 +122,13 @@ export function ParentDashboardPage() {
           </Button>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
-          {children.map((child) => (
+          {children.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border p-6 text-center sm:col-span-2">
+              <p className="text-sm font-medium text-text">No child profiles yet.</p>
+              <p className="mt-1 text-sm text-text-muted">Create a profile for your child to get started.</p>
+              <Button className="mt-4" size="sm" onClick={() => setIsAddChildOpen(true)}>Create Child Profile</Button>
+            </div>
+          ) : children.map((child) => (
             <div key={child.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-4">
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar name={`${child.firstName} ${child.lastName}`} />
@@ -139,9 +146,10 @@ export function ParentDashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <div className="grid gap-4 lg:col-span-1">
-          {children.map((child) => (
+      {children.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          <div className="grid gap-4 lg:col-span-1">
+            {children.map((child) => (
             <Card key={child.id}>
               <CardContent className="flex flex-col items-center p-6 text-center">
                 <Avatar name={`${child.firstName} ${child.lastName}`} size="lg" />
@@ -161,10 +169,10 @@ export function ParentDashboardPage() {
                 </Link>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-3">
           <StatCard
             icon={Clock}
             label="Weekly learning hours"
@@ -186,8 +194,9 @@ export function ParentDashboardPage() {
             sub={`${pending} still pending`}
             accent="accent"
           />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
