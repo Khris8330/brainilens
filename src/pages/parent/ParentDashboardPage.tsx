@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Clock,
@@ -9,6 +10,8 @@ import {
   ClipboardList,
   Bot,
   FileBarChart,
+  Plus,
+  Copy,
 } from 'lucide-react'
 import {
   Card,
@@ -17,6 +20,9 @@ import {
   CardContent,
   Badge,
   Avatar,
+  Button,
+  Input,
+  Modal,
 } from '@/components/ui'
 import { BarChart, LineChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
@@ -39,7 +45,37 @@ const statusVariant: Record<string, 'warning' | 'primary' | 'success'> = {
 
 export function ParentDashboardPage() {
   const { user } = useAuth()
-  const childrenCount = mockStudents.length
+  const [isAddChildOpen, setIsAddChildOpen] = useState(false)
+  const [childForm, setChildForm] = useState({ firstName: '', lastName: '', grade: '' })
+  const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; pin: string } | null>(null)
+  const [createdChildren, setCreatedChildren] = useState<typeof mockStudents>([])
+  const children = [...mockStudents, ...createdChildren]
+  const childrenCount = children.length
+  const updateChildForm = (field: keyof typeof childForm, value: string) =>
+    setChildForm((current) => ({ ...current, [field]: value }))
+  const closeChildModal = () => {
+    setIsAddChildOpen(false)
+    setCreatedCredentials(null)
+    setChildForm({ firstName: '', lastName: '', grade: '' })
+  }
+  const createChild = () => {
+    if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()) return
+    const nextNumber = 1001 + children.length
+    const newChild = {
+      id: `student-${nextNumber}`,
+      studentId: `STU-${nextNumber}`,
+      pin: String(1000 + Math.floor(Math.random() * 9000)),
+      firstName: childForm.firstName.trim(),
+      lastName: childForm.lastName.trim(),
+      grade: Number(childForm.grade),
+      parentId: user?.id ?? 'mock-user-1',
+      streakDays: 0,
+      progress: 0,
+    }
+    setCreatedChildren((current) => [...current, newChild])
+    setCreatedCredentials({ studentId: newChild.studentId, pin: newChild.pin })
+  }
+
   const completed = initialAssignments.filter(
     (a) => a.status === 'completed',
   ).length
@@ -71,6 +107,36 @@ export function ParentDashboardPage() {
           Here&apos;s how {mockChild.name.split(' ')[0]} is doing this week, across {childrenCount} children.
         </p>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <div>
+            <CardTitle>My Children</CardTitle>
+            <p className="mt-1 text-sm text-text-muted">Manage profiles and share secure login details.</p>
+          </div>
+          <Button size="sm" onClick={() => setIsAddChildOpen(true)}>
+            <Plus className="size-4" aria-hidden="true" />
+            Add Child
+          </Button>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2">
+          {children.map((child) => (
+            <div key={child.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar name={`${child.firstName} ${child.lastName}`} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-text">{child.firstName} {child.lastName}</p>
+                  <p className="text-xs text-text-muted">Grade {child.grade} · {child.studentId}</p>
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-semibold text-text">{child.progress}%</p>
+                <p className="text-xs text-text-muted">{child.streakDays}-day streak</p>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <Card className="lg:col-span-1">
@@ -230,6 +296,46 @@ export function ParentDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Modal
+        isOpen={isAddChildOpen}
+        onClose={closeChildModal}
+        title={createdCredentials ? 'Child profile created' : 'Add a child'}
+        description={createdCredentials ? 'Give these credentials to your child so they can log in.' : 'Create a profile for your child to access the student portal.'}
+      >
+        {createdCredentials ? (
+          <div className="flex flex-col gap-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Credential label="Student ID" value={createdCredentials.studentId} />
+              <Credential label="PIN" value={createdCredentials.pin} />
+            </div>
+            <Button onClick={closeChildModal}>Done</Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input label="First name" value={childForm.firstName} onChange={(event) => updateChildForm('firstName', event.target.value)} />
+              <Input label="Last name" value={childForm.lastName} onChange={(event) => updateChildForm('lastName', event.target.value)} />
+            </div>
+            <Input label="Grade" type="number" min="1" max="12" placeholder="6" value={childForm.grade} onChange={(event) => updateChildForm('grade', event.target.value)} />
+            <p className="text-xs leading-relaxed text-text-muted">Student ID and PIN will be generated automatically after you create the profile.</p>
+            <Button onClick={createChild} disabled={!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()}>Create Child Profile</Button>
+          </div>
+        )}
+      </Modal>
+    </div>
+  )
+}
+
+function Credential({ label, value }: { label: string; value: string }) {
+  const copyCredential = () => void navigator.clipboard?.writeText(value)
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-text-muted">{label}</span>
+      <button type="button" onClick={copyCredential} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-left text-sm font-semibold text-text hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+        {value}
+        <Copy className="size-4 text-text-muted" aria-hidden="true" />
+      </button>
     </div>
   )
 }
