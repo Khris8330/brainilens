@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Flame, Bot, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
 import {
   Card,
@@ -12,12 +12,17 @@ import {
 import { routes } from '@/routes'
 import {
   mockChild,
+  mockStudents,
   subjects,
   achievements,
   initialAssignments,
 } from '@/data/mockData'
 
 export function ChildProgressPage() {
+  const [searchParams] = useSearchParams()
+  const selectedStudent = mockStudents.find(
+    (student) => student.studentId === searchParams.get('studentId'),
+  ) ?? mockStudents[0]
   const currentAssignments = initialAssignments.filter(
     (a) => a.status !== 'completed',
   )
@@ -32,7 +37,7 @@ export function ChildProgressPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-text">
-          Hi {mockChild.name.split(' ')[0]}! 👋
+          Hi {selectedStudent.firstName}! 👋
         </h1>
         <p className="mt-1 text-sm text-text-muted">
           Let&apos;s see how your learning is going this week.
@@ -47,7 +52,7 @@ export function ChildProgressPage() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-text">
-                {mockChild.streakDays} days
+                {selectedStudent.streakDays} days
               </p>
               <p className="text-xs text-text-muted">Learning streak</p>
             </div>
