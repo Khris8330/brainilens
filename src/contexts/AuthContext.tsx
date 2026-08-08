@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { User } from '@/types'
+import { mockStudents } from '@/data/mockData'
 
 /**
  * MOCK AUTHENTICATION — MILESTONE 1 ONLY
@@ -23,6 +24,7 @@ interface AuthContextValue {
   user: User | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
+  loginAsStudent: (studentId: string, pin: string) => Promise<void>
   register: (fullName: string, email: string, password: string) => Promise<void>
   logout: () => void
 }
@@ -76,6 +78,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(mockUser)
   }
 
+  async function loginAsStudent(studentId: string, pin: string) {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    const student = mockStudents.find(
+      (candidate) => candidate.studentId.toLowerCase() === studentId.trim().toLowerCase() && candidate.pin === pin.trim(),
+    )
+    if (!student) throw new Error('Student ID or PIN is incorrect.')
+    const mockUser: User = {
+      id: student.id,
+      name: `${student.firstName} ${student.lastName}`,
+      email: '',
+      role: 'student',
+      studentId: student.studentId,
+    }
+    writeMockSession(mockUser)
+    setUser(mockUser)
+  }
+
   async function register(fullName: string, email: string, password: string) {
     void password
     await new Promise((resolve) => setTimeout(resolve, 900))
@@ -95,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginAsStudent, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

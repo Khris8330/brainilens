@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, logout } = useAuth()
-  const navItems = user?.role === 'child' ? childNavItems : parentNavItems
+  const navItems = user?.role === 'child' || user?.role === 'student' ? childNavItems : parentNavItems
 
   return (
     <div className="flex min-h-screen bg-background">

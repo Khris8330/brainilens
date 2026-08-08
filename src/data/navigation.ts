@@ -27,12 +27,12 @@ export const parentNavItems: NavItem[] = [
 ]
 
 export const childNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/child', icon: Home },
-  { label: 'My Learning', href: '/weekly-learning', icon: NotebookPen },
-  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
-  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
-  { label: 'Progress', href: '/reports', icon: TrendingUp },
-  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Dashboard', href: '/student', icon: Home },
+  { label: "Today's Learning", href: '/student/learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/student/assignments', icon: ClipboardList },
+  { label: 'AI Companion', href: '/student/ai', icon: Bot, badge: 'New' },
+  { label: 'Progress', href: '/student/progress', icon: TrendingUp },
+  { label: 'Profile', href: '/student/profile', icon: Settings },
 ]
 
 

@@ -28,6 +28,7 @@ import {
   recentActivity,
   aiRecommendations,
   initialAssignments,
+  mockStudents,
 } from '@/data/mockData'
 
 const statusVariant: Record<string, 'warning' | 'primary' | 'success'> = {
@@ -38,6 +39,7 @@ const statusVariant: Record<string, 'warning' | 'primary' | 'success'> = {
 
 export function ParentDashboardPage() {
   const { user } = useAuth()
+  const childrenCount = mockStudents.length
   const completed = initialAssignments.filter(
     (a) => a.status === 'completed',
   ).length
@@ -66,7 +68,7 @@ export function ParentDashboardPage() {
           Welcome back, {user?.name?.split(' ')[0] ?? 'there'}
         </h1>
         <p className="mt-1 text-sm text-text-muted">
-          Here&apos;s how {mockChild.name.split(' ')[0]} is doing this week.
+          Here&apos;s how {mockChild.name.split(' ')[0]} is doing this week, across {childrenCount} children.
         </p>
       </div>
 

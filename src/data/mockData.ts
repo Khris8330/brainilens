@@ -9,6 +9,23 @@ import type { BarChartData } from '@/components/charts'
 import type { LineChartData } from '@/components/charts'
 import type { DonutSegment } from '@/components/charts'
 
+export interface MockStudent {
+  id: string
+  studentId: string
+  pin: string
+  firstName: string
+  lastName: string
+  grade: number
+  parentId: string
+  streakDays: number
+  progress: number
+}
+
+export const mockStudents: MockStudent[] = [
+  { id: 'student-001', studentId: 'STU-1001', pin: '1234', firstName: 'Alex', lastName: 'Johnson', grade: 6, parentId: 'parent-001', streakDays: 7, progress: 72 },
+  { id: 'student-002', studentId: 'STU-1002', pin: '5678', firstName: 'Maya', lastName: 'Johnson', grade: 4, parentId: 'parent-001', streakDays: 4, progress: 61 },
+]
+
 export const mockChild = {
   name: 'Emma Johnson',
   grade: '4th Grade',
