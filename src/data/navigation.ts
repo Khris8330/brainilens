@@ -4,7 +4,9 @@ import {
   Home,
   Settings,
   Users,
-  GraduationCap,
+  NotebookPen,
+  ClipboardList,
+  TrendingUp,
 } from 'lucide-react'
 import type { NavItem, User } from '@/types'
 
@@ -15,13 +17,24 @@ export const mockUser: User = {
   role: 'parent',
 }
 
-export const dashboardNavItems: NavItem[] = [
-  { label: 'Parent Dashboard', href: '/parent', icon: Home },
-  { label: 'Child Progress', href: '/child', icon: GraduationCap },
+export const parentNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/parent', icon: Home },
+  { label: 'Weekly Learning', href: '/weekly-learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
+  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
-  { label: 'AI Insights', href: '/ai', icon: Bot, badge: 'New' },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
+
+export const childNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/child', icon: Home },
+  { label: 'My Learning', href: '/weekly-learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
+  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
+  { label: 'Progress', href: '/reports', icon: TrendingUp },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
 
 export const landingNavItems: NavItem[] = [
   { label: 'Features', href: '/#features', icon: Home },

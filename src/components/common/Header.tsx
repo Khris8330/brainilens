@@ -1,4 +1,4 @@
-import { Bell, Menu, GraduationCap } from 'lucide-react'
+import { Bell, Menu, GraduationCap, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/utils'
 import { Avatar, Button } from '@/components/ui'
@@ -10,6 +10,7 @@ export interface HeaderProps {
   navItems?: NavItem[]
   user?: User
   onMenuClick?: () => void
+  onLogout?: () => void
   className?: string
 }
 
@@ -18,6 +19,7 @@ export function Header({
   navItems = [],
   user,
   onMenuClick,
+  onLogout,
   className,
 }: HeaderProps) {
   const isDashboard = variant === 'dashboard'
@@ -76,6 +78,16 @@ export function Header({
                   </p>
                 </div>
               </div>
+              {onLogout && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onLogout}
+                  aria-label="Log out"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                </Button>
+              )}
             </>
           ) : (
             <>

@@ -4,11 +4,14 @@ import {
   AuthLayout,
   DashboardLayout,
 } from '@/layouts'
+import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ParentDashboardPage } from '@/pages/parent/ParentDashboardPage'
 import { ChildProgressPage } from '@/pages/child/ChildProgressPage'
+import { WeeklyLearningPage } from '@/pages/weekly-learning/WeeklyLearningPage'
+import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage'
 import { ReportsPage } from '@/pages/reports/ReportsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { AIInsightsPage } from '@/pages/ai/AIInsightsPage'
@@ -37,7 +40,11 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <DashboardLayout />,
+    element: (
+      <RequireAuth>
+        <DashboardLayout />
+      </RequireAuth>
+    ),
     children: [
       {
         path: '/parent',
@@ -46,6 +53,14 @@ export const router = createBrowserRouter([
       {
         path: '/child',
         element: <ChildProgressPage />,
+      },
+      {
+        path: '/weekly-learning',
+        element: <WeeklyLearningPage />,
+      },
+      {
+        path: '/assignments',
+        element: <AssignmentsPage />,
       },
       {
         path: '/reports',
@@ -69,6 +84,8 @@ export const routes = {
   register: '/auth/register',
   parent: '/parent',
   child: '/child',
+  weeklyLearning: '/weekly-learning',
+  assignments: '/assignments',
   reports: '/reports',
   settings: '/settings',
   ai: '/ai',

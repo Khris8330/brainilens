@@ -2,15 +2,18 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Header, Sidebar } from '@/components/common'
-import { dashboardNavItems, mockUser } from '@/data/navigation'
+import { parentNavItems, childNavItems } from '@/data/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navItems = user?.role === 'child' ? childNavItems : parentNavItems
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar
-        items={dashboardNavItems}
+        items={navItems}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -18,8 +21,9 @@ export function DashboardLayout() {
       <div className="flex flex-1 flex-col lg:pl-0">
         <Header
           variant="dashboard"
-          user={mockUser}
+          user={user ?? undefined}
           onMenuClick={() => setSidebarOpen(true)}
+          onLogout={logout}
         />
 
         <motion.main
