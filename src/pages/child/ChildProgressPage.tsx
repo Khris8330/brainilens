@@ -20,9 +20,13 @@ import {
 
 export function ChildProgressPage() {
   const [searchParams] = useSearchParams()
-  const selectedStudent = mockStudents.find(
-    (student) => student.studentId === searchParams.get('studentId'),
-  ) ?? mockStudents[0]
+  const requestedStudentId = searchParams.get('studentId')
+  const selectedStudent = requestedStudentId
+    ? mockStudents.find((student) => student.studentId === requestedStudentId)
+    : undefined
+  if (!selectedStudent) {
+    return <div className="rounded-lg border border-border p-6 text-sm text-text-muted">Student profile not found.</div>
+  }
   const currentAssignments = initialAssignments.filter(
     (a) => a.status !== 'completed',
   )

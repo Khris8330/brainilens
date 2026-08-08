@@ -26,6 +26,10 @@ export const mockStudents: MockStudent[] = [
   { id: 'student-002', studentId: 'STU-1002', pin: '5678', firstName: 'Maya', lastName: 'Johnson', grade: 4, parentId: 'parent-001', streakDays: 4, progress: 61 },
 ]
 
+export function addMockStudent(student: MockStudent) {
+  mockStudents.push(student)
+}
+
 export const mockChild = {
   name: 'Emma Johnson',
   grade: '4th Grade',

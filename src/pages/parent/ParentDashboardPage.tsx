@@ -35,6 +35,7 @@ import {
   aiRecommendations,
   initialAssignments,
   mockStudents,
+  addMockStudent,
 } from '@/data/mockData'
 
 const statusVariant: Record<string, 'warning' | 'primary' | 'success'> = {
@@ -62,7 +63,7 @@ export function ParentDashboardPage() {
   }
   const createChild = () => {
     if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()) return
-    const nextNumber = 1001 + children.length
+    const nextNumber = Math.max(...mockStudents.map((student) => Number(student.studentId.replace('STU-', ''))), 1000) + 1
     const newChild = {
       id: `student-${nextNumber}`,
       studentId: `STU-${nextNumber}`,
@@ -74,6 +75,7 @@ export function ParentDashboardPage() {
       streakDays: 0,
       progress: 0,
     }
+    addMockStudent(newChild)
     setCreatedChildren((current) => [...current, newChild])
     setCreatedCredentials({ studentId: newChild.studentId, pin: newChild.pin })
   }
@@ -229,7 +231,7 @@ export function ParentDashboardPage() {
               <div key={item.id} className="flex gap-3 text-sm">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
                 <div>
-                  <p className="text-text">{item.description}</p>
+                  <p className="text-text">{item.description.replace(/Emma/g, childrenNames || 'your child')}</p>
                   <p className="text-xs text-text-muted">{item.timestamp}</p>
                 </div>
               </div>
