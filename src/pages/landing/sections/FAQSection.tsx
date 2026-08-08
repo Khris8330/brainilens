@@ -19,7 +19,7 @@ const faqs = [
   {
     question: 'Can I use this for more than one child?',
     answer:
-      'Yes. The Starter plan includes one child profile, and the Family plan supports up to four \u2014 each with its own independent tracking, assignments, and reports.',
+      'Yes. The Starter plan includes one child profile, and the Family plan supports up to four , each with its own independent tracking, assignments, and reports.',
   },
   {
     question: 'Is my child\u2019s data kept private?',
@@ -29,7 +29,7 @@ const faqs = [
   {
     question: 'Can schools use this with an entire classroom?',
     answer:
-      'Yes \u2014 the School plan adds a teacher dashboard and district-level reporting for rolling this out to a full classroom or grade level.',
+      'Yes , the School plan adds a teacher dashboard and district-level reporting for rolling this out to a full classroom or grade level.',
   },
 ]
 

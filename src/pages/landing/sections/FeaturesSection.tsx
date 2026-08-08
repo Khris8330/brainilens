@@ -56,7 +56,7 @@ const features: Feature[] = [
     icon: Bell,
     title: 'Parent Notifications',
     description:
-      'Get nudged only when it matters \u2014 a milestone reached, an assignment overdue, or a topic that needs support.',
+      'Get nudged only when it matters , a milestone reached, an assignment overdue, or a topic that needs support.',
     accent: 'accent',
   },
 ]

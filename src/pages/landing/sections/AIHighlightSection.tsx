@@ -6,7 +6,7 @@ const points = [
   {
     title: 'Explains concepts in plain language',
     description:
-      'When a concept doesn\u2019t click the first time, the companion breaks it down a different way \u2014 with examples suited to your child\u2019s grade level.',
+      'When a concept doesn\u2019t click the first time, the companion breaks it down a different way , with examples suited to your child\u2019s grade level.',
   },
   {
     title: 'Answers questions, patiently',
@@ -49,7 +49,7 @@ export function AIHighlightSection() {
           </h2>
           <p className="mt-4 text-lg text-text-muted">
             The AI Study Companion works alongside your child during study
-            sessions &mdash; not to do the work for them, but to help ideas
+            sessions , not to do the work for them, but to help ideas
             actually stick.
           </p>
 

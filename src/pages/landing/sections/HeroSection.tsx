@@ -33,7 +33,7 @@ export function HeroSection() {
             See exactly how your child is progressing, every week. Growth
             Tracker AI turns assignments, study sessions, and quiz results
             into a clear picture of what they&apos;ve mastered and what
-            needs more practice &mdash; so you always know how to help.
+            needs more practice, so you always know how to help.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -81,7 +81,7 @@ export function HeroSection() {
           <div className="text-center">
             <Play className="mx-auto size-8 text-primary" aria-hidden="true" />
             <p className="mt-2 text-sm">
-              Demo video coming soon &mdash; in the meantime, create a free
+              Demo video coming soon, in the meantime, create a free
               account to explore the product yourself.
             </p>
           </div>
