@@ -8,7 +8,7 @@ import type { User } from '@/types'
 import { mockStudents } from '@/data/mockData'
 
 /**
- * MOCK AUTHENTICATION — MILESTONE 1 ONLY
+ * MOCK AUTHENTICATION , MILESTONE 1 ONLY
  * ----------------------------------------------------
  * This is NOT real authentication. There is no backend, no password
  * hashing, and no session verification. Any "valid-looking" email and

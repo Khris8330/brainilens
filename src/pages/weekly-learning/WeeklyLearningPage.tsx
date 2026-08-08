@@ -16,11 +16,11 @@ import type { WeeklyLearningEntry } from '@/types'
 
 const subjectOptions = subjects.map((s) => ({ value: s.name, label: s.name }))
 const understandingLabels = [
-  '1 — Struggling',
-  '2 — Needs practice',
-  '3 — Getting there',
-  '4 — Confident',
-  '5 — Mastered',
+  '1 , Struggling',
+  '2 , Needs practice',
+  '3 , Getting there',
+  '4 , Confident',
+  '5 , Mastered',
 ]
 
 type FormState = Omit<WeeklyLearningEntry, 'id'>

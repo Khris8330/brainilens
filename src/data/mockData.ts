@@ -75,14 +75,14 @@ export const assignmentCompletionDonut: DonutSegment[] = [
 ]
 
 export const recentActivity: ActivityItem[] = [
-  { id: '1', description: 'Emma completed "Fractions Practice Set 3" — scored 92%', timestamp: '2 hours ago' },
+  { id: '1', description: 'Emma completed "Fractions Practice Set 3" , scored 92%', timestamp: '2 hours ago' },
   { id: '2', description: 'Weekly learning check-in submitted for Science', timestamp: 'Yesterday' },
   { id: '3', description: 'AI Study Companion session on long division (18 min)', timestamp: '2 days ago' },
   { id: '4', description: 'New assignment generated: "Reading Comprehension: Ecosystems"', timestamp: '3 days ago' },
 ]
 
 export const aiRecommendations: string[] = [
-  'Spend 15 extra minutes this week on long division — accuracy dipped slightly on the last two attempts.',
+  'Spend 15 extra minutes this week on long division , accuracy dipped slightly on the last two attempts.',
   'Reading comprehension is strong; consider introducing a chapter book above current grade level.',
   'Science vocabulary retention would benefit from short daily flashcard review.',
 ]
