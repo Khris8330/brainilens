@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
-import { AIIllustration } from '../components/AIIllustration'
 
 const points = [
   {
@@ -31,7 +30,11 @@ export function AIHighlightSection() {
           transition={{ duration: 0.5 }}
           className="order-2 flex justify-center lg:order-1"
         >
-          <AIIllustration />
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff3f71d4-fca5-4817-9607-4daa70ca6f11-XV5wB7jqJrCoyH7YPmzO7cWF71johU.png"
+            alt="Lens, the BrainiLens AI learning companion, helping a child study"
+            className="h-auto w-full max-w-md rounded-2xl object-cover shadow-soft"
+          />
         </motion.div>
 
         <motion.div
