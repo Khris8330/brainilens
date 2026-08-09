@@ -31,9 +31,9 @@ export function AIHighlightSection() {
           className="order-2 flex justify-center lg:order-1"
         >
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff3f71d4-fca5-4817-9607-4daa70ca6f11-XV5wB7jqJrCoyH7YPmzO7cWF71johU.png"
-            alt="Lens, the BrainiLens AI learning companion, helping a child study"
-            className="h-auto w-full max-w-md rounded-2xl object-cover shadow-soft"
+            src="/images/lens-mascot.png"
+            alt="Lens, the BrainiLens AI learning companion, in a bright classroom"
+            className="h-auto min-h-[28rem] w-full rounded-3xl object-cover shadow-soft sm:min-h-[34rem] lg:min-h-[42rem]"
           />
         </motion.div>
 
