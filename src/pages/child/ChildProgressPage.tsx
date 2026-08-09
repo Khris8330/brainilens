@@ -11,7 +11,6 @@ import {
 } from '@/components/ui'
 import { routes } from '@/routes'
 import {
-  mockChild,
   getMockStudents,
   subjects,
   achievements,
@@ -33,9 +32,9 @@ export function ChildProgressPage() {
   const completedAssignments = initialAssignments.filter(
     (a) => a.status === 'completed',
   )
-  const weeklyPct = Math.round(
-    (mockChild.weeklyHoursCompleted / mockChild.weeklyHoursGoal) * 100,
-  )
+  const weeklyHoursCompleted = selectedStudent.progress / 10
+  const weeklyHoursGoal = 8
+  const weeklyPct = Math.round((weeklyHoursCompleted / weeklyHoursGoal) * 100)
 
   return (
     <div className="space-y-6">
@@ -67,13 +66,13 @@ export function ChildProgressPage() {
           <CardContent className="p-5">
             <ProgressBar
               label="Weekly progress"
-              value={mockChild.weeklyHoursCompleted}
-              max={mockChild.weeklyHoursGoal}
+              value={weeklyHoursCompleted}
+              max={weeklyHoursGoal}
               showValue
               variant="secondary"
             />
             <p className="mt-2 text-xs text-text-muted">
-              {mockChild.weeklyHoursCompleted}h of {mockChild.weeklyHoursGoal}h
+              {weeklyHoursCompleted}h of {weeklyHoursGoal}h
               this week ({weeklyPct}%)
             </p>
           </CardContent>

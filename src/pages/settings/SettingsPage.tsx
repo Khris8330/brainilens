@@ -12,7 +12,7 @@ import {
   Select,
 } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
-import { mockChild } from '@/data/mockData'
+import { getMockStudents } from '@/data/mockData'
 
 function useSavedFeedback() {
   const [saved, setSaved] = useState(false)
@@ -44,9 +44,10 @@ export function SettingsPage() {
   const [name, setName] = useState(user?.name ?? '')
   const [email, setEmail] = useState(user?.email ?? '')
   const profile = useSavedFeedback()
+  const child = getMockStudents().find((student) => student.parentId === user?.id)
 
-  const [childName, setChildName] = useState(mockChild.name)
-  const [grade, setGrade] = useState(mockChild.grade)
+  const [childName, setChildName] = useState(child ? `${child.firstName} ${child.lastName}` : '')
+  const [grade, setGrade] = useState(child ? `Grade ${child.grade}` : '')
   const childInfo = useSavedFeedback()
 
   const [emailNotifs, setEmailNotifs] = useState(true)

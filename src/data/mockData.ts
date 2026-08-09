@@ -43,14 +43,6 @@ export function addMockStudent(student: MockStudent) {
   localStorage.setItem(MOCK_STUDENTS_KEY, JSON.stringify([...students, student]))
 }
 
-export const mockChild = {
-  name: 'Emma Johnson',
-  grade: '4th Grade',
-  streakDays: 12,
-  weeklyHoursGoal: 8,
-  weeklyHoursCompleted: 6.5,
-}
-
 export const subjects: Subject[] = [
   { name: 'Math', mastery: 78, color: '#2563eb' },
   { name: 'Reading', mastery: 88, color: '#14b8a6' },
@@ -88,7 +80,7 @@ export const assignmentCompletionDonut: DonutSegment[] = [
 ]
 
 export const recentActivity: ActivityItem[] = [
-  { id: '1', description: 'Emma completed "Fractions Practice Set 3" , scored 92%', timestamp: '2 hours ago' },
+  { id: '1', description: 'Completed "Fractions Practice Set 3" , scored 92%', timestamp: '2 hours ago' },
   { id: '2', description: 'Weekly learning check-in submitted for Science', timestamp: 'Yesterday' },
   { id: '3', description: 'AI Study Companion session on long division (18 min)', timestamp: '2 days ago' },
   { id: '4', description: 'New assignment generated: "Reading Comprehension: Ecosystems"', timestamp: '3 days ago' },

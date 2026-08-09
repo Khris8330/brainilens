@@ -28,7 +28,6 @@ import { BarChart, LineChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
 import { routes } from '@/routes'
 import {
-  mockChild,
   subjectPerformanceChart,
   weeklyTrend,
   recentActivity,
@@ -94,6 +93,9 @@ export function ParentDashboardPage() {
   const upcoming = initialAssignments
     .filter((a) => a.status !== 'completed')
     .slice(0, 3)
+  const primaryChild = children[0]
+  const weeklyHoursGoal = 8
+  const weeklyHoursCompleted = primaryChild ? primaryChild.progress / 10 : 0
 
   const quickActions = [
     { label: 'Log weekly learning', href: routes.weeklyLearning, icon: NotebookPen },
@@ -179,8 +181,8 @@ export function ParentDashboardPage() {
           <StatCard
             icon={Clock}
             label="Weekly learning hours"
-            value={`${mockChild.weeklyHoursCompleted}h`}
-            sub={`of ${mockChild.weeklyHoursGoal}h goal`}
+            value={`${weeklyHoursCompleted}h`}
+            sub={`of ${weeklyHoursGoal}h goal`}
             accent="primary"
           />
           <StatCard
@@ -232,7 +234,7 @@ export function ParentDashboardPage() {
               <div key={item.id} className="flex gap-3 text-sm">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
                 <div>
-                  <p className="text-text">{item.description.replace(/Emma/g, childrenNames || 'your child')}</p>
+                  <p className="text-text">{item.description}</p>
                   <p className="text-xs text-text-muted">{item.timestamp}</p>
                 </div>
               </div>
