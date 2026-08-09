@@ -90,7 +90,7 @@ export function ChildProgressPage() {
                     Need help studying?
                   </p>
                   <p className="text-xs text-primary">
-                    Ask your AI Study Companion
+                    Ask your Lens AI Companion
                   </p>
                 </div>
               </div>
@@ -212,7 +212,7 @@ export function ChildProgressPage() {
               Stuck on something this week?
             </h3>
             <p className="mt-1 text-sm text-white/85">
-              Your AI Study Companion is ready to help, any time.
+              Lens is ready to help, any time.
             </p>
           </div>
           <Link to={routes.ai}>

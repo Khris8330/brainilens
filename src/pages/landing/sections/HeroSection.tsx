@@ -5,7 +5,6 @@ import { ArrowRight, Play, Sparkles } from 'lucide-react'
 import { Button, Modal } from '@/components/ui'
 import { routes } from '@/routes'
 import { GrowthArc } from '../components/GrowthArc'
-import { HeroIllustration } from '../components/HeroIllustration'
 
 export function HeroSection() {
   const [demoOpen, setDemoOpen] = useState(false)
@@ -26,13 +25,13 @@ export function HeroSection() {
           </span>
 
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
-            Track Your Child&apos;s Learning Growth with AI
+            Track Your Child&apos;s Learning Growth with BrainiLens
           </h1>
 
           <p className="mt-5 max-w-xl text-lg text-text-muted">
-            See exactly how your child is progressing, every week. Growth
-            Tracker AI turns assignments, study sessions, and quiz results
-            into a clear picture of what they&apos;ve mastered and what
+            See exactly how your child is progressing, every week. BrainiLens turns
+            assignments, study sessions, and quiz results into a clear picture
+            of what they&apos;ve mastered and what
             needs more practice, so you always know how to help.
           </p>
 
@@ -66,14 +65,18 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.15, ease: [0.4, 0, 0.2, 1] }}
           className="flex justify-center lg:justify-end"
         >
-          <HeroIllustration />
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff3f71d4-fca5-4817-9607-4daa70ca6f11-XV5wB7jqJrCoyH7YPmzO7cWF71johU.png"
+            alt="A child learning fractions alongside Lens, the BrainiLens AI companion"
+            className="h-auto w-full max-w-xl rounded-2xl object-cover shadow-soft"
+          />
         </motion.div>
       </div>
 
       <Modal
         isOpen={demoOpen}
         onClose={() => setDemoOpen(false)}
-        title="See Growth Tracker AI in action"
+        title="See BrainiLens in action"
         description="A 3-minute walkthrough of weekly tracking, AI evaluation, and monthly reports."
         size="md"
       >

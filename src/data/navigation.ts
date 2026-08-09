@@ -21,7 +21,7 @@ export const parentNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/parent', icon: Home },
   { label: 'Weekly Learning', href: '/weekly-learning', icon: NotebookPen },
   { label: 'Assignments', href: '/assignments', icon: ClipboardList },
-  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
+  { label: 'Lens AI', href: '/ai', icon: Bot, badge: 'New' },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -30,7 +30,7 @@ export const childNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/student', icon: Home },
   { label: "Today's Learning", href: '/student/learning', icon: NotebookPen },
   { label: 'Assignments', href: '/student/assignments', icon: ClipboardList },
-  { label: 'AI Companion', href: '/student/ai', icon: Bot, badge: 'New' },
+  { label: 'Lens AI', href: '/student/ai', icon: Bot, badge: 'New' },
   { label: 'Progress', href: '/student/progress', icon: TrendingUp },
   { label: 'Profile', href: '/student/profile', icon: Settings },
 ]
@@ -45,7 +45,7 @@ export const landingNavItems: NavItem[] = [
 export const footerLinks = {
   features: [
     { label: 'Weekly Tracker', href: '/#features' },
-    { label: 'AI Study Companion', href: '/#features' },
+    { label: 'Lens AI', href: '/#features' },
     { label: 'Progress Analytics', href: '/#features' },
     { label: 'Pricing', href: '/#pricing' },
   ],

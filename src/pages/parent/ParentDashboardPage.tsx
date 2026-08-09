@@ -101,7 +101,7 @@ export function ParentDashboardPage() {
   const quickActions = [
     { label: 'Log weekly learning', href: routes.weeklyLearning, icon: NotebookPen },
     { label: 'View assignments', href: routes.assignments, icon: ClipboardList },
-    { label: 'Ask AI companion', href: routes.ai, icon: Bot },
+    { label: 'Ask Lens', href: routes.ai, icon: Bot },
     { label: 'Open reports', href: routes.reports, icon: FileBarChart },
   ]
 

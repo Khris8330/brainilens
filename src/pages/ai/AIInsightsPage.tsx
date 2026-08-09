@@ -16,7 +16,7 @@ const initialMessages: ChatMessage[] = [
     id: 'welcome',
     role: 'assistant',
     content:
-      "Hi! I'm your AI Study Companion. Ask me to explain a concept, help with homework, or just tell me what you're working on this week.",
+      "Hi! I'm your Lens AI Companion. Ask me to explain a concept, help with homework, or just tell me what you're working on this week.",
     timestamp: new Date().toISOString(),
   },
 ]
@@ -80,7 +80,7 @@ export function AIInsightsPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-text">
             <Bot className="size-6 text-secondary" aria-hidden="true" />
-            AI Study Companion
+            Lens AI Companion
           </h1>
           <p className="mt-1 text-sm text-text-muted">
             A patient tutor for questions, big or small.

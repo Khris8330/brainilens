@@ -12,9 +12,9 @@ const faqs = [
       'No. Assignments are generated based on your child\u2019s weekly check-ins, and the AI evaluates responses automatically. You can add context manually if you\u2019d like, but it isn\u2019t required.',
   },
   {
-    question: 'What age range is Growth Tracker AI designed for?',
+    question: 'What age range is BrainiLens designed for?',
     answer:
-      'Growth Tracker AI works well for children from early elementary through middle school. Younger children can complete check-ins with a parent alongside them.',
+      'BrainiLens works well for children from early elementary through middle school. Younger children can complete check-ins with a parent alongside them.',
   },
   {
     question: 'Can I use this for more than one child?',

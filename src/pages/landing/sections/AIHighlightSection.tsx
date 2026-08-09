@@ -42,14 +42,13 @@ export function AIHighlightSection() {
           className="order-1 lg:order-2"
         >
           <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary-light px-3 py-1 text-xs font-medium text-secondary">
-            AI Study Companion
+            Meet Lens, your AI learning companion
           </span>
           <h2 className="mt-5 text-3xl sm:text-4xl">
             A patient tutor that&apos;s always in the room
           </h2>
           <p className="mt-4 text-lg text-text-muted">
-            The AI Study Companion works alongside your child during study
-            sessions , not to do the work for them, but to help ideas
+            Lens works alongside your child during study sessions , not to do the work for them, but to help ideas
             actually stick.
           </p>
 

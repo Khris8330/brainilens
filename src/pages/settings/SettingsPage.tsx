@@ -225,7 +225,7 @@ export function SettingsPage() {
           <Palette className="size-4 text-secondary" aria-hidden="true" />
           <div>
             <CardTitle>Appearance</CardTitle>
-            <CardDescription>How Growth Tracker AI looks to you.</CardDescription>
+            <CardDescription>How BrainiLens looks to you.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>

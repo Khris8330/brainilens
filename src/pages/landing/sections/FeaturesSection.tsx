@@ -26,7 +26,7 @@ const features: Feature[] = [
   },
   {
     icon: Bot,
-    title: 'AI Study Companion',
+    title: 'Lens AI Companion',
     description:
       'An always-available tutor that answers questions in your child\u2019s own words and gently checks their understanding.',
     accent: 'secondary',

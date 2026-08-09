@@ -82,7 +82,7 @@ export const assignmentCompletionDonut: DonutSegment[] = [
 export const recentActivity: ActivityItem[] = [
   { id: '1', description: 'Completed "Fractions Practice Set 3" , scored 92%', timestamp: '2 hours ago' },
   { id: '2', description: 'Weekly learning check-in submitted for Science', timestamp: 'Yesterday' },
-  { id: '3', description: 'AI Study Companion session on long division (18 min)', timestamp: '2 days ago' },
+  { id: '3', description: 'Lens session on long division (18 min)', timestamp: '2 days ago' },
   { id: '4', description: 'New assignment generated: "Reading Comprehension: Ecosystems"', timestamp: '3 days ago' },
 ]
 
