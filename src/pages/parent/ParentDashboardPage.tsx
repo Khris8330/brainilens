@@ -35,6 +35,7 @@ import {
   aiRecommendations,
   initialAssignments,
   mockStudents,
+  getMockStudents,
   addMockStudent,
 } from '@/data/mockData'
 
@@ -50,8 +51,8 @@ export function ParentDashboardPage() {
   const [childForm, setChildForm] = useState({ firstName: '', lastName: '', grade: '' })
   const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; pin: string } | null>(null)
   const [createdChildren, setCreatedChildren] = useState<typeof mockStudents>([])
-  const registeredChildren = mockStudents.filter((child) => child.parentId === user?.id)
-  const children = [...registeredChildren, ...createdChildren]
+  const registeredChildren = getMockStudents().filter((child) => child.parentId === user?.id)
+  const children = [...registeredChildren, ...createdChildren.filter((child) => !registeredChildren.some((registered) => registered.id === child.id))]
   const childrenNames = children.map((child) => child.firstName).join(' and ')
   const childrenVerb = children.length === 1 ? 'is' : 'are'
   const updateChildForm = (field: keyof typeof childForm, value: string) =>

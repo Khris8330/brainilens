@@ -26,8 +26,21 @@ export const mockStudents: MockStudent[] = [
   { id: 'student-002', studentId: 'STU-1002', pin: '5678', firstName: 'Maya', lastName: 'Johnson', grade: 4, parentId: 'parent-001', streakDays: 4, progress: 61 },
 ]
 
+const MOCK_STUDENTS_KEY = 'gta_mock_students'
+
+export function getMockStudents(): MockStudent[] {
+  try {
+    const raw = localStorage.getItem(MOCK_STUDENTS_KEY)
+    const stored = raw ? (JSON.parse(raw) as MockStudent[]) : []
+    return [...mockStudents, ...stored.filter((student) => !mockStudents.some((base) => base.id === student.id))]
+  } catch {
+    return [...mockStudents]
+  }
+}
+
 export function addMockStudent(student: MockStudent) {
-  mockStudents.push(student)
+  const students = getMockStudents().filter((candidate) => candidate.id !== student.id)
+  localStorage.setItem(MOCK_STUDENTS_KEY, JSON.stringify([...students, student]))
 }
 
 export const mockChild = {

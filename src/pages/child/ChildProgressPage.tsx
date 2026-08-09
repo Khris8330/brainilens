@@ -12,7 +12,7 @@ import {
 import { routes } from '@/routes'
 import {
   mockChild,
-  mockStudents,
+  getMockStudents,
   subjects,
   achievements,
   initialAssignments,
@@ -22,7 +22,7 @@ export function ChildProgressPage() {
   const [searchParams] = useSearchParams()
   const requestedStudentId = searchParams.get('studentId')
   const selectedStudent = requestedStudentId
-    ? mockStudents.find((student) => student.studentId === requestedStudentId)
+    ? getMockStudents().find((student) => student.studentId === requestedStudentId)
     : undefined
   if (!selectedStudent) {
     return <div className="rounded-lg border border-border p-6 text-sm text-text-muted">Student profile not found.</div>

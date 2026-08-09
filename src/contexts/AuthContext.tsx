@@ -5,7 +5,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { User } from '@/types'
-import { mockStudents } from '@/data/mockData'
+import { getMockStudents } from '@/data/mockData'
 
 /**
  * MOCK AUTHENTICATION , MILESTONE 1 ONLY
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loginAsStudent(studentId: string, pin: string) {
     await new Promise((resolve) => setTimeout(resolve, 500))
-    const student = mockStudents.find(
+    const student = getMockStudents().find(
       (candidate) => candidate.studentId.toLowerCase() === studentId.trim().toLowerCase() && candidate.pin === pin.trim(),
     )
     if (!student) throw new Error('Student ID or PIN is incorrect.')
