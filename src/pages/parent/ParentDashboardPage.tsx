@@ -26,6 +26,7 @@ import {
 } from '@/components/ui'
 import { BarChart, LineChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
+import { formatNigeriaDate } from '@/lib/time'
 import { routes } from '@/routes'
 import {
   subjectPerformanceChart,
@@ -258,10 +259,7 @@ export function ParentDashboardPage() {
                   </p>
                   <p className="text-xs text-text-muted">
                     Due{' '}
-                    {new Date(a.dueDate).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {formatNigeriaDate(a.dueDate)}
                   </p>
                 </div>
                 <Badge variant={statusVariant[a.status]}>{a.status}</Badge>

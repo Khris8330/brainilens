@@ -4,6 +4,7 @@ import { Card, CardContent, Button, Select } from '@/components/ui'
 import { subjects } from '@/data/mockData'
 import { suggestedQuestions, getMockAIResponse } from '@/data/aiResponses'
 import type { ChatMessage } from '@/types'
+import { formatNigeriaTime } from '@/lib/time'
 
 const subjectOptions = [
   { value: 'all', label: 'All subjects' },
@@ -123,6 +124,7 @@ export function AIInsightsPage() {
                 }`}
               >
                 {message.content}
+                <span className="mt-1 block text-[11px] opacity-70">{formatNigeriaTime(message.timestamp)}</span>
               </div>
             </div>
           ))}
