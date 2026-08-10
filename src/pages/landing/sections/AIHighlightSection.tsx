@@ -31,7 +31,7 @@ export function AIHighlightSection() {
           className="order-2 flex justify-center lg:order-1"
         >
           <img
-            src="/images/lens-mascot.png"
+            src="/images/brainilens-lens.png"
             alt="Lens, the BrainiLens AI learning companion, in a bright classroom"
             className="h-auto min-h-[28rem] w-full rounded-3xl object-cover shadow-soft sm:min-h-[34rem] lg:min-h-[42rem]"
           />

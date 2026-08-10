@@ -66,7 +66,7 @@ export function HeroSection() {
           className="flex justify-center lg:justify-end"
         >
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff3f71d4-fca5-4817-9607-4daa70ca6f11-XV5wB7jqJrCoyH7YPmzO7cWF71johU.png"
+            src="/images/brainilens-hero.png"
             alt="A child learning fractions alongside Lens, the BrainiLens AI companion"
             className="h-auto w-full rounded-3xl object-cover shadow-soft lg:min-h-[42rem]"
           />
