@@ -34,7 +34,7 @@ async function mapUser(session: Session | null): Promise<User | null> {
     name: profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
     email: profile?.email ?? authUser.email ?? '',
     avatarUrl: profile?.avatar_url ?? undefined,
-    role: profile?.role === 'child' ? 'child' : 'parent',
+    role: profile?.role === 'admin' ? 'admin' : profile?.role === 'child' ? 'child' : 'parent',
   }
 }
 
@@ -90,7 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: { full_name: fullName.trim(), role: 'parent' },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo:
+          import.meta.env.VITE_SUPABASE_REDIRECT_URL ??
+          `${window.location.origin}/auth/callback`,
       },
     })
     if (error) throw new Error(authErrorMessage(error))
