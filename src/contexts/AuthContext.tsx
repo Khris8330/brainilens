@@ -19,15 +19,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function mapUser(session: Session | null): User | null {
+async function mapUser(session: Session | null): Promise<User | null> {
   const authUser = session?.user
   if (!authUser) return null
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, email, avatar_url, role')
+    .eq('id', authUser.id)
+    .maybeSingle()
+
   return {
     id: authUser.id,
-    name: authUser.user_metadata?.full_name ?? 'Parent',
-    email: authUser.email ?? '',
-    role: authUser.user_metadata?.role === 'child' ? 'child' : 'parent',
+    name: profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
+    email: profile?.email ?? authUser.email ?? '',
+    avatarUrl: profile?.avatar_url ?? undefined,
+    role: profile?.role === 'child' ? 'child' : 'parent',
   }
 }
 
@@ -50,16 +57,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (mounted) {
-        setUser(mapUser(data.session))
+        setUser(await mapUser(data.session))
         setIsLoading(false)
       }
     })
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(mapUser(session))
-      setIsLoading(false)
+      void mapUser(session).then((nextUser) => {
+        if (mounted) {
+          setUser(nextUser)
+          setIsLoading(false)
+        }
+      })
     })
 
     return () => {
@@ -94,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) throw new Error('useAuth must be used within an AuthProvider')
