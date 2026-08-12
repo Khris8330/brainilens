@@ -26,7 +26,7 @@ const features: Feature[] = [
   },
   {
     icon: Bot,
-    title: 'AI Study Companion',
+    title: 'Lens AI Companion',
     description:
       'An always-available tutor that answers questions in your child\u2019s own words and gently checks their understanding.',
     accent: 'secondary',
@@ -56,7 +56,7 @@ const features: Feature[] = [
     icon: Bell,
     title: 'Parent Notifications',
     description:
-      'Get nudged only when it matters \u2014 a milestone reached, an assignment overdue, or a topic that needs support.',
+      'Get nudged only when it matters , a milestone reached, an assignment overdue, or a topic that needs support.',
     accent: 'accent',
   },
 ]

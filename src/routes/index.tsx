@@ -16,6 +16,12 @@ import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage'
 import { ReportsPage } from '@/pages/reports/ReportsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { AIInsightsPage } from '@/pages/ai/AIInsightsPage'
+import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
+import { StudentLearningPage } from '@/pages/student/StudentLearningPage'
+import { StudentAssignmentsPage } from '@/pages/student/StudentAssignmentsPage'
+import { StudentProgressPage } from '@/pages/student/StudentProgressPage'
+import { StudentAIPage } from '@/pages/student/StudentAIPage'
+import { StudentProfilePage } from '@/pages/student/StudentProfilePage'
 
 export const router = createBrowserRouter([
   {
@@ -46,7 +52,7 @@ export const router = createBrowserRouter([
   },
   {
     element: (
-      <RequireAuth>
+      <RequireAuth role="parent">
         <DashboardLayout />
       </RequireAuth>
     ),
@@ -81,6 +87,39 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  {
+    element: (
+      <RequireAuth role="student">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [
+      {
+        path: '/student',
+        element: <StudentDashboardPage />,
+      },
+      {
+        path: '/student/learning',
+        element: <StudentLearningPage />,
+      },
+      {
+        path: '/student/assignments',
+        element: <StudentAssignmentsPage />,
+      },
+      {
+        path: '/student/progress',
+        element: <StudentProgressPage />,
+      },
+      {
+        path: '/student/ai',
+        element: <StudentAIPage />,
+      },
+      {
+        path: '/student/profile',
+        element: <StudentProfilePage />,
+      },
+    ],
+  },
 ])
 
 export const routes = {
@@ -94,4 +133,10 @@ export const routes = {
   reports: '/reports',
   settings: '/settings',
   ai: '/ai',
+  student: '/student',
+  studentLearning: '/student/learning',
+  studentAssignments: '/student/assignments',
+  studentProgress: '/student/progress',
+  studentAi: '/student/ai',
+  studentProfile: '/student/profile',
 } as const

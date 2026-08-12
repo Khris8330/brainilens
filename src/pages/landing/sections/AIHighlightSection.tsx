@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
-import { AIIllustration } from '../components/AIIllustration'
 
 const points = [
   {
     title: 'Explains concepts in plain language',
     description:
-      'When a concept doesn\u2019t click the first time, the companion breaks it down a different way \u2014 with examples suited to your child\u2019s grade level.',
+      'When a concept doesn\u2019t click the first time, the companion breaks it down a different way , with examples suited to your child\u2019s grade level.',
   },
   {
     title: 'Answers questions, patiently',
@@ -31,7 +30,11 @@ export function AIHighlightSection() {
           transition={{ duration: 0.5 }}
           className="order-2 flex justify-center lg:order-1"
         >
-          <AIIllustration />
+          <img
+            src="/images/brainilens-lens.png"
+            alt="Lens, the BrainiLens AI learning companion, in a bright classroom"
+            className="h-auto min-h-[28rem] w-full rounded-3xl object-cover shadow-soft sm:min-h-[34rem] lg:min-h-[42rem]"
+          />
         </motion.div>
 
         <motion.div
@@ -42,14 +45,13 @@ export function AIHighlightSection() {
           className="order-1 lg:order-2"
         >
           <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary-light px-3 py-1 text-xs font-medium text-secondary">
-            AI Study Companion
+            Meet Lens, your AI learning companion
           </span>
           <h2 className="mt-5 text-3xl sm:text-4xl">
             A patient tutor that&apos;s always in the room
           </h2>
           <p className="mt-4 text-lg text-text-muted">
-            The AI Study Companion works alongside your child during study
-            sessions &mdash; not to do the work for them, but to help ideas
+            Lens works alongside your child during study sessions , not to do the work for them, but to help ideas
             actually stick.
           </p>
 

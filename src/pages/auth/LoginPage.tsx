@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Mail, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -47,12 +47,6 @@ export function LoginPage() {
     }
   }
 
-  function fillDemoAccount() {
-    setEmail('parent@example.com')
-    setPassword('password123')
-    setError('')
-  }
-
   return (
     <Card>
       <CardContent className="p-6 sm:p-8">
@@ -60,15 +54,6 @@ export function LoginPage() {
         <p className="mt-1 text-sm text-text-muted">
           Log in to see this week&apos;s progress.
         </p>
-
-        <button
-          type="button"
-          onClick={fillDemoAccount}
-          className="mt-4 w-full rounded-lg border border-dashed border-primary/30 bg-primary-light px-3 py-2 text-left text-xs text-primary transition-colors hover:bg-primary/10"
-        >
-          <span className="font-semibold">Demo account:</span>{' '}
-          parent@example.com &middot; password123 &mdash; tap to autofill
-        </button>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
           <Input
@@ -133,18 +118,6 @@ export function LoginPage() {
             />
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            size="lg"
-            onClick={() =>
-              setError('Google sign-in is a demo action in this milestone.')
-            }
-          >
-            <Mail className="size-4" aria-hidden="true" />
-            Continue with Google
-          </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-text-muted">

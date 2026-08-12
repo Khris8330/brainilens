@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /parent
+Disallow: /child
+Disallow: /reports
+Disallow: /settings
+Disallow: /ai
+Disallow: /assignments
+Disallow: /weekly-learning
+Disallow: /student
+
+Sitemap: https://brainilens.vercel.app/sitemap.xml

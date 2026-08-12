@@ -54,7 +54,7 @@ export function RegisterPage() {
           Create your account
         </h2>
         <p className="mt-1 text-sm text-text-muted">
-          Free for your first child&apos;s profile — no credit card required.
+          Free for your first child&apos;s profile , no credit card required.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>

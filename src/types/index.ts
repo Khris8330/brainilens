@@ -30,7 +30,9 @@ export interface User {
   name: string
   email: string
   avatarUrl?: string
-  role: 'parent' | 'child' | 'admin'
+  role: 'parent' | 'student' | 'child' | 'admin'
+  studentId?: string
+  pin?: string
 }
 
 export interface BreadcrumbItem {

@@ -7,18 +7,21 @@ import {
   Button,
 } from '@/components/ui'
 import { BarChart, LineChart, DonutChart } from '@/components/charts'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   subjectPerformanceChart,
   weeklyTrend,
   monthlyTrend,
   assignmentCompletionDonut,
   aiRecommendations,
-  mockChild,
+  getMockStudents,
   initialAssignments,
 } from '@/data/mockData'
 
 export function ReportsPage() {
-  const totalHours = mockChild.weeklyHoursCompleted * 4
+  const { user } = useAuth()
+  const child = getMockStudents().find((student) => student.parentId === user?.id)
+  const totalHours = child ? (child.progress / 10) * 4 : 0
   const completedCount = initialAssignments.filter(
     (a) => a.status === 'completed',
   ).length
@@ -29,7 +32,7 @@ export function ReportsPage() {
         <div>
           <h1 className="text-2xl font-semibold text-text">Reports</h1>
           <p className="mt-1 text-sm text-text-muted">
-            A full picture of {mockChild.name.split(' ')[0]}&apos;s growth
+            A full picture of {child?.firstName ?? 'your child'}&apos;s growth
             this month.
           </p>
         </div>

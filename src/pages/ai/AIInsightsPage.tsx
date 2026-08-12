@@ -4,6 +4,7 @@ import { Card, CardContent, Button, Select } from '@/components/ui'
 import { subjects } from '@/data/mockData'
 import { suggestedQuestions, getMockAIResponse } from '@/data/aiResponses'
 import type { ChatMessage } from '@/types'
+import { formatNigeriaTime } from '@/lib/time'
 
 const subjectOptions = [
   { value: 'all', label: 'All subjects' },
@@ -15,7 +16,7 @@ const initialMessages: ChatMessage[] = [
     id: 'welcome',
     role: 'assistant',
     content:
-      "Hi! I'm your AI Study Companion. Ask me to explain a concept, help with homework, or just tell me what you're working on this week.",
+      "Hi! I'm your Lens AI Companion. Ask me to explain a concept, help with homework, or just tell me what you're working on this week.",
     timestamp: new Date().toISOString(),
   },
 ]
@@ -30,6 +31,7 @@ export function AIInsightsPage() {
   const [subjectFocus, setSubjectFocus] = useState('all')
   const [isThinking, setIsThinking] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messageIdRef = useRef(0)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -43,7 +45,7 @@ export function AIInsightsPage() {
     if (!trimmed || isThinking) return
 
     const userMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${++messageIdRef.current}`,
       role: 'user',
       content: trimmed,
       timestamp: timeNow(),
@@ -55,7 +57,7 @@ export function AIInsightsPage() {
     setTimeout(
       () => {
         const aiMessage: ChatMessage = {
-          id: `msg-${Date.now()}-ai`,
+          id: `msg-${++messageIdRef.current}-ai`,
           role: 'assistant',
           content: getMockAIResponse(trimmed),
           timestamp: timeNow(),
@@ -63,7 +65,7 @@ export function AIInsightsPage() {
         setMessages((prev) => [...prev, aiMessage])
         setIsThinking(false)
       },
-      900 + Math.random() * 500,
+      1100,
     )
   }
 
@@ -78,7 +80,7 @@ export function AIInsightsPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-text">
             <Bot className="size-6 text-secondary" aria-hidden="true" />
-            AI Study Companion
+            Lens AI Companion
           </h1>
           <p className="mt-1 text-sm text-text-muted">
             A patient tutor for questions, big or small.
@@ -122,6 +124,7 @@ export function AIInsightsPage() {
                 }`}
               >
                 {message.content}
+                <span className="mt-1 block text-[11px] opacity-70">{formatNigeriaTime(message.timestamp)}</span>
               </div>
             </div>
           ))}

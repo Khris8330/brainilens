@@ -16,7 +16,7 @@ export function Footer() {
                 />
               </div>
               <span className="text-sm font-semibold text-text">
-                Growth Tracker AI
+                BrainiLens
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-text-muted">
@@ -33,7 +33,7 @@ export function Footer() {
 
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-text-muted">
-            &copy; {new Date().getFullYear()} Learning Growth Tracker AI. All
+            &copy; {new Date().getFullYear()} BrainiLens. All
             rights reserved.
           </p>
         </div>

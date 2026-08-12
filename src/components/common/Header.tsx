@@ -50,7 +50,7 @@ export function Header({
               <GraduationCap className="size-5 text-white" aria-hidden="true" />
             </div>
             <span className="hidden text-sm font-semibold text-text sm:inline">
-              Learning Growth Tracker AI
+              BrainiLens
             </span>
           </Link>
         </div>

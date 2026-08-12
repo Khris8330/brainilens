@@ -27,7 +27,7 @@ const plans = [
     description: 'Full AI tracking and reporting for the whole household.',
     features: [
       'Up to 4 child profiles',
-      'AI Study Companion',
+      'Lens AI Companion',
       'Assignment management',
       'Advanced progress analytics',
       'Monthly PDF reports',

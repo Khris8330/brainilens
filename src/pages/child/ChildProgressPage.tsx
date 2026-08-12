@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Flame, Bot, Trophy, ArrowRight, CheckCircle2 } from 'lucide-react'
 import {
   Card,
@@ -11,28 +11,36 @@ import {
 } from '@/components/ui'
 import { routes } from '@/routes'
 import {
-  mockChild,
+  getMockStudents,
   subjects,
   achievements,
   initialAssignments,
 } from '@/data/mockData'
 
 export function ChildProgressPage() {
+  const [searchParams] = useSearchParams()
+  const requestedStudentId = searchParams.get('studentId')
+  const selectedStudent = requestedStudentId
+    ? getMockStudents().find((student) => student.studentId === requestedStudentId)
+    : undefined
+  if (!selectedStudent) {
+    return <div className="rounded-lg border border-border p-6 text-sm text-text-muted">Student profile not found.</div>
+  }
   const currentAssignments = initialAssignments.filter(
     (a) => a.status !== 'completed',
   )
   const completedAssignments = initialAssignments.filter(
     (a) => a.status === 'completed',
   )
-  const weeklyPct = Math.round(
-    (mockChild.weeklyHoursCompleted / mockChild.weeklyHoursGoal) * 100,
-  )
+  const weeklyHoursCompleted = selectedStudent.progress / 10
+  const weeklyHoursGoal = 8
+  const weeklyPct = Math.round((weeklyHoursCompleted / weeklyHoursGoal) * 100)
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-text">
-          Hi {mockChild.name.split(' ')[0]}! 👋
+          Hi {selectedStudent.firstName}! 👋
         </h1>
         <p className="mt-1 text-sm text-text-muted">
           Let&apos;s see how your learning is going this week.
@@ -47,7 +55,7 @@ export function ChildProgressPage() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-text">
-                {mockChild.streakDays} days
+                {selectedStudent.streakDays} days
               </p>
               <p className="text-xs text-text-muted">Learning streak</p>
             </div>
@@ -58,13 +66,13 @@ export function ChildProgressPage() {
           <CardContent className="p-5">
             <ProgressBar
               label="Weekly progress"
-              value={mockChild.weeklyHoursCompleted}
-              max={mockChild.weeklyHoursGoal}
+              value={weeklyHoursCompleted}
+              max={weeklyHoursGoal}
               showValue
               variant="secondary"
             />
             <p className="mt-2 text-xs text-text-muted">
-              {mockChild.weeklyHoursCompleted}h of {mockChild.weeklyHoursGoal}h
+              {weeklyHoursCompleted}h of {weeklyHoursGoal}h
               this week ({weeklyPct}%)
             </p>
           </CardContent>
@@ -82,7 +90,7 @@ export function ChildProgressPage() {
                     Need help studying?
                   </p>
                   <p className="text-xs text-primary">
-                    Ask your AI Study Companion
+                    Ask your Lens AI Companion
                   </p>
                 </div>
               </div>
@@ -204,7 +212,7 @@ export function ChildProgressPage() {
               Stuck on something this week?
             </h3>
             <p className="mt-1 text-sm text-white/85">
-              Your AI Study Companion is ready to help, any time.
+              Lens is ready to help, any time.
             </p>
           </div>
           <Link to={routes.ai}>

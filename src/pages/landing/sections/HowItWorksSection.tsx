@@ -24,7 +24,7 @@ const steps = [
     icon: ListChecks,
     title: 'Assignments generated',
     description:
-      'Growth Tracker AI builds a short list of relevant practice for the week ahead.',
+      'BrainiLens builds a short list of relevant practice for the week ahead.',
   },
   {
     icon: Bot,

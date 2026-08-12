@@ -16,17 +16,20 @@ export function DonutChart({ data, size = 140, className }: DonutChartProps) {
   const total = data.reduce((sum, d) => sum + d.value, 0)
   const radius = 40
   const circumference = 2 * Math.PI * radius
-  let offset = 0
+  const offsets = data.reduce<number[]>((values, segment) => {
+    const previous = values.at(-1) ?? 0
+    const pct = segment.value / total
+    return [...values, previous + pct * circumference]
+  }, [])
 
   return (
     <div className={cn('flex flex-col items-center gap-4 sm:flex-row sm:gap-6', className)}>
       <div className="relative" style={{ width: size, height: size }}>
         <svg viewBox="0 0 100 100" className="size-full -rotate-90">
-          {data.map((segment) => {
+          {data.map((segment, index) => {
             const pct = segment.value / total
             const dash = pct * circumference
-            const currentOffset = offset
-            offset += dash
+            const currentOffset = index === 0 ? 0 : offsets[index - 1]
             return (
               <circle
                 key={segment.label}
