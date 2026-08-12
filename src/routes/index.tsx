@@ -8,6 +8,7 @@ import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { RoleSelectionPage } from '@/pages/auth/RoleSelectionPage'
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage'
 import { ParentDashboardPage } from '@/pages/parent/ParentDashboardPage'
 import { ChildProgressPage } from '@/pages/child/ChildProgressPage'
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
+      {
+        path: '/auth/role',
+        element: <RoleSelectionPage />,
+      },
       {
         path: '/auth/login',
         element: <LoginPage />,
@@ -124,6 +129,7 @@ export const router = createBrowserRouter([
 
 export const routes = {
   landing: '/',
+  roleSelection: '/auth/role',
   login: '/auth/login',
   register: '/auth/register',
   parent: '/parent',

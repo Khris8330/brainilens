@@ -26,7 +26,7 @@ export function CTASection() {
               Join families and classrooms already using weekly insights to
               help kids build lasting momentum.
             </p>
-            <Link to={routes.register} className="mt-8 inline-block">
+            <Link to={routes.roleSelection} className="mt-8 inline-block">
               <Button
                 size="lg"
                 className="bg-white text-primary hover:bg-white/90"

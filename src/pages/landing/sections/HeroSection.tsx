@@ -36,7 +36,7 @@ export function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link to={routes.register}>
+            <Link to={routes.roleSelection}>
               <Button size="lg" className="w-full sm:w-auto">
                 Get Started
                 <ArrowRight className="size-4" aria-hidden="true" />

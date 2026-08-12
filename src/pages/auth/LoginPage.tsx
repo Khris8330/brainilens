@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
+import { routes } from '@/routes'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -123,7 +124,7 @@ export function LoginPage() {
         <p className="mt-6 text-center text-sm text-text-muted">
           Don&apos;t have an account?{' '}
           <Link
-            to="/auth/register"
+            to={routes.register}
             className="font-medium text-primary hover:underline"
           >
             Sign up
