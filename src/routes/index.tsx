@@ -8,6 +8,7 @@ import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage'
 import { ParentDashboardPage } from '@/pages/parent/ParentDashboardPage'
 import { ChildProgressPage } from '@/pages/child/ChildProgressPage'
 import { WeeklyLearningPage } from '@/pages/weekly-learning/WeeklyLearningPage'
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
       {
         path: '/auth/register',
         element: <RegisterPage />,
+      },
+      {
+        path: '/auth/callback',
+        element: <AuthCallbackPage />,
       },
     ],
   },

@@ -37,8 +37,14 @@ export function RegisterPage() {
     }
 
     setIsSubmitting(true)
-    await register(fullName, email, password)
-    navigate('/parent', { replace: true })
+    try {
+      await register(fullName, email, password)
+      navigate('/parent', { replace: true })
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : 'We could not create your account. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

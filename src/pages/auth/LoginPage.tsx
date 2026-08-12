@@ -37,8 +37,14 @@ export function LoginPage() {
     }
 
     setIsSubmitting(true)
-    await login(email, password)
-    navigate(redirectTo, { replace: true })
+    try {
+      await login(email, password)
+      navigate(redirectTo, { replace: true })
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : 'We could not log you in. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function fillDemoAccount() {
