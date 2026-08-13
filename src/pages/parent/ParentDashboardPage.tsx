@@ -26,6 +26,7 @@ import {
 } from '@/components/ui'
 import { BarChart, LineChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { formatNigeriaDate } from '@/lib/time'
 import { routes } from '@/routes'
 import {
@@ -34,9 +35,6 @@ import {
   recentActivity,
   aiRecommendations,
   initialAssignments,
-  mockStudents,
-  getMockStudents,
-  addMockStudent,
 } from '@/data/mockData'
 
 const statusVariant: Record<string, 'warning' | 'primary' | 'success'> = {
@@ -49,9 +47,9 @@ export function ParentDashboardPage() {
   const { user } = useAuth()
   const [isAddChildOpen, setIsAddChildOpen] = useState(false)
   const [childForm, setChildForm] = useState({ firstName: '', lastName: '', grade: '' })
-  const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; pin: string } | null>(null)
-  const [createdChildren, setCreatedChildren] = useState<typeof mockStudents>([])
-  const registeredChildren = getMockStudents().filter((child) => child.parentId === user?.id)
+  const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; credential: string } | null>(null)
+  const [createdChildren, setCreatedChildren] = useState<Array<{ id: string; studentId: string; firstName: string; lastName: string; grade: string; parentId: string; streakDays: number; progress: number }>>([])
+  const registeredChildren: typeof createdChildren = []
   const children = [...registeredChildren, ...createdChildren.filter((child) => !registeredChildren.some((registered) => registered.id === child.id))]
   const childrenNames = children.map((child) => child.firstName).join(' and ')
   const childrenVerb = children.length === 1 ? 'is' : 'are'
@@ -62,23 +60,29 @@ export function ParentDashboardPage() {
     setCreatedCredentials(null)
     setChildForm({ firstName: '', lastName: '', grade: '' })
   }
-  const createChild = () => {
+  const createChild = async () => {
     if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()) return
-    const nextNumber = Math.max(...mockStudents.map((student) => Number(student.studentId.replace('STU-', ''))), 1000) + 1
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    const fullName = `${childForm.firstName.trim()} ${childForm.lastName.trim()}`
+    const { data, error } = await supabase.functions.invoke('create-student', {
+      body: { full_name: fullName, grade: childForm.grade.trim() },
+    })
+    if (error || !data?.student || !data?.temporary_credential) return
+
     const newChild = {
-      id: `student-${nextNumber}`,
-      studentId: `STU-${nextNumber}`,
-      pin: String(1000 + Math.floor(Math.random() * 9000)),
+      id: data.student.id,
+      studentId: data.student.student_id,
       firstName: childForm.firstName.trim(),
       lastName: childForm.lastName.trim(),
-      grade: Number(childForm.grade),
-      parentId: user?.id ?? 'mock-user-1',
+      grade: data.student.grade,
+      parentId: user?.id ?? '',
       streakDays: 0,
       progress: 0,
     }
-    addMockStudent(newChild)
     setCreatedChildren((current) => [...current, newChild])
-    setCreatedCredentials({ studentId: newChild.studentId, pin: newChild.pin })
+    setCreatedCredentials({ studentId: newChild.studentId, credential: data.temporary_credential })
   }
 
   const completed = initialAssignments.filter(
@@ -328,7 +332,7 @@ export function ParentDashboardPage() {
           <div className="flex flex-col gap-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <Credential label="Student ID" value={createdCredentials.studentId} />
-              <Credential label="PIN" value={createdCredentials.pin} />
+              <Credential label="Temporary credential" value={createdCredentials.credential} />
             </div>
             <Button onClick={closeChildModal}>Done</Button>
           </div>
