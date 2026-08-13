@@ -34,7 +34,14 @@ async function mapUser(session: Session | null): Promise<User | null> {
     name: profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
     email: profile?.email ?? authUser.email ?? '',
     avatarUrl: profile?.avatar_url ?? undefined,
-    role: profile?.role === 'admin' ? 'admin' : profile?.role === 'child' ? 'child' : 'parent',
+    role:
+      profile?.role === 'admin'
+        ? 'admin'
+        : profile?.role === 'student'
+          ? 'student'
+          : profile?.role === 'child'
+            ? 'child'
+            : 'parent',
   }
 }
 

@@ -36,8 +36,7 @@ export function RoleSelectionPage() {
           </Link>
 
           <Link
-            to={routes.login}
-            state={{ role: 'student' }}
+            to={routes.studentLogin}
             className="group rounded-2xl border border-border bg-surface p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-secondary/50 hover:shadow-card focus-visible:outline-none"
           >
             <div className="flex items-start gap-4">
