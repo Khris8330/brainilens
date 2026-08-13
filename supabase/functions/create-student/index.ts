@@ -64,7 +64,9 @@ Deno.serve(async (request) => {
     if (!studentId) return json({ error: "Could not allocate student ID" }, 503)
 
     const temporaryCredential = randomToken(16)
+    const internalEmail = `${studentId.toLowerCase()}@auth.brainilens.internal`
     const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+      email: internalEmail,
       password: temporaryCredential,
       email_confirm: true,
       user_metadata: { role: "student", full_name: fullName },
@@ -81,7 +83,7 @@ Deno.serve(async (request) => {
     })
     if (studentError) throw studentError
 
-    return json({ student: { id: studentUserId, student_id: studentId, full_name: fullName, grade }, temporary_credential: temporaryCredential }, 201)
+    return json({ student: { student_id: studentId, full_name: fullName, grade }, temporary_credential: temporaryCredential }, 201)
   } catch (error) {
     if (studentUserId) await adminClient.auth.admin.deleteUser(studentUserId)
     console.error("create-student failed", error)

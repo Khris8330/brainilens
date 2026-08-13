@@ -72,7 +72,7 @@ export function ParentDashboardPage() {
     if (error || !data?.student || !data?.temporary_credential) return
 
     const newChild = {
-      id: data.student.id,
+      id: data.student.student_id,
       studentId: data.student.student_id,
       firstName: childForm.firstName.trim(),
       lastName: childForm.lastName.trim(),
