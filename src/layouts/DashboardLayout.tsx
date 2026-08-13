@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Header, Sidebar } from '@/components/common'
 import { parentNavItems, childNavItems } from '@/data/navigation'
@@ -7,7 +7,13 @@ import { useAuth } from '@/contexts/AuthContext'
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
   const { user, logout } = useAuth()
+
+  async function handleLogout() {
+    await logout()
+    navigate('/auth/role', { replace: true })
+  }
   const navItems = user?.role === 'child' || user?.role === 'student' ? childNavItems : parentNavItems
 
   return (
@@ -23,7 +29,7 @@ export function DashboardLayout() {
           variant="dashboard"
           user={user ?? undefined}
           onMenuClick={() => setSidebarOpen(true)}
-          onLogout={logout}
+          onLogout={handleLogout}
         />
 
         <motion.main

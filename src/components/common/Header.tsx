@@ -91,12 +91,12 @@ export function Header({
             </>
           ) : (
             <>
-              <Link to="/auth/login">
+              <Link to="/auth/role">
                 <Button variant="ghost" size="sm">
                   Log in
                 </Button>
               </Link>
-              <Link to="/auth/register">
+              <Link to="/auth/role">
                 <Button variant="primary" size="sm">
                   Get Started
                 </Button>

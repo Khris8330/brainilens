@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
+import { routes } from '@/routes'
 
 export function RegisterPage() {
   const { register } = useAuth()
@@ -113,7 +114,7 @@ export function RegisterPage() {
         <p className="mt-6 text-center text-sm text-text-muted">
           Already have an account?{' '}
           <Link
-            to="/auth/login"
+            to={routes.roleSelection}
             className="font-medium text-primary hover:underline"
           >
             Log in

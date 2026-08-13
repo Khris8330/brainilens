@@ -7,7 +7,7 @@ export function RequireAuth({ children, role }: { children: ReactNode; role?: 'p
   const { user, isLoading } = useAuth()
   const location = useLocation()
   if (isLoading) return <LoadingOverlay label="Loading your dashboard" />
-  if (!user) return <Navigate to="/auth/login" replace state={{ from: location }} />
+  if (!user) return <Navigate to="/auth/role" replace state={{ from: location }} />
   if (role && user.role !== role) return <Navigate to={user.role === 'student' || user.role === 'child' ? '/student' : '/parent'} replace />
   return <>{children}</>
 }

@@ -116,7 +116,7 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link to={routes.register} className="mt-8">
+              <Link to={routes.roleSelection} className="mt-8">
                 <Button
                   variant={plan.highlighted ? 'primary' : 'outline'}
                   className="w-full"
