@@ -343,7 +343,7 @@ export function ParentDashboardPage() {
               <Input label="Last name" value={childForm.lastName} onChange={(event) => updateChildForm('lastName', event.target.value)} />
             </div>
             <Input label="Grade" type="number" min="1" max="12" placeholder="6" value={childForm.grade} onChange={(event) => updateChildForm('grade', event.target.value)} />
-            <p className="text-xs leading-relaxed text-text-muted">Student ID and PIN will be generated automatically after you create the profile.</p>
+            <p className="text-xs leading-relaxed text-text-muted">A Student ID and temporary credential will be generated securely after you create the profile.</p>
             <Button onClick={createChild} disabled={!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()}>Create Child Profile</Button>
           </div>
         )}

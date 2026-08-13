@@ -64,9 +64,7 @@ Deno.serve(async (request) => {
     if (!studentId) return json({ error: "Could not allocate student ID" }, 503)
 
     const temporaryCredential = randomToken(16)
-    const internalEmail = `${studentId.toLowerCase()}@students.brainilens.internal`
     const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-      email: internalEmail,
       password: temporaryCredential,
       email_confirm: true,
       user_metadata: { role: "student", full_name: fullName },
