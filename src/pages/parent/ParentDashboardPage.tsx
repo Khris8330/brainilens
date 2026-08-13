@@ -48,6 +48,8 @@ export function ParentDashboardPage() {
   const [isAddChildOpen, setIsAddChildOpen] = useState(false)
   const [childForm, setChildForm] = useState({ firstName: '', lastName: '', grade: '' })
   const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; credential: string } | null>(null)
+  const [createChildError, setCreateChildError] = useState('')
+  const [isCreatingChild, setIsCreatingChild] = useState(false)
   const [createdChildren, setCreatedChildren] = useState<Array<{ id: string; studentId: string; firstName: string; lastName: string; grade: string; parentId: string; streakDays: number; progress: number }>>([])
   const registeredChildren: typeof createdChildren = []
   const children = [...registeredChildren, ...createdChildren.filter((child) => !registeredChildren.some((registered) => registered.id === child.id))]
@@ -58,31 +60,47 @@ export function ParentDashboardPage() {
   const closeChildModal = () => {
     setIsAddChildOpen(false)
     setCreatedCredentials(null)
+    setCreateChildError('')
     setChildForm({ firstName: '', lastName: '', grade: '' })
   }
   const createChild = async () => {
-    if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()) return
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-
-    const fullName = `${childForm.firstName.trim()} ${childForm.lastName.trim()}`
-    const { data, error } = await supabase.functions.invoke('create-student', {
-      body: { full_name: fullName, grade: childForm.grade.trim() },
-    })
-    if (error || !data?.student || !data?.temporary_credential) return
-
-    const newChild = {
-      id: data.student.student_id,
-      studentId: data.student.student_id,
-      firstName: childForm.firstName.trim(),
-      lastName: childForm.lastName.trim(),
-      grade: data.student.grade,
-      parentId: user?.id ?? '',
-      streakDays: 0,
-      progress: 0,
+    if (isCreatingChild) return
+    if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()) {
+      setCreateChildError('Enter your child\'s first name, last name, and grade.')
+      return
     }
-    setCreatedChildren((current) => [...current, newChild])
-    setCreatedCredentials({ studentId: newChild.studentId, credential: data.temporary_credential })
+
+    setCreateChildError('')
+    setIsCreatingChild(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Your session has expired. Please sign in again.')
+
+      const fullName = `${childForm.firstName.trim()} ${childForm.lastName.trim()}`
+      const { data, error } = await supabase.functions.invoke('create-student', {
+        body: { full_name: fullName, grade: childForm.grade.trim() },
+      })
+      if (error || !data?.student || !data?.temporary_credential) {
+        throw new Error(error?.message || 'We could not create the child profile.')
+      }
+
+      const newChild = {
+        id: data.student.student_id,
+        studentId: data.student.student_id,
+        firstName: childForm.firstName.trim(),
+        lastName: childForm.lastName.trim(),
+        grade: data.student.grade,
+        parentId: user?.id ?? '',
+        streakDays: 0,
+        progress: 0,
+      }
+      setCreatedChildren((current) => [...current, newChild])
+      setCreatedCredentials({ studentId: newChild.studentId, credential: data.temporary_credential })
+    } catch (error) {
+      setCreateChildError(error instanceof Error ? error.message : 'We could not create the child profile.')
+    } finally {
+      setIsCreatingChild(false)
+    }
   }
 
   const completed = initialAssignments.filter(
@@ -344,7 +362,8 @@ export function ParentDashboardPage() {
             </div>
             <Input label="Grade" type="number" min="1" max="12" placeholder="6" value={childForm.grade} onChange={(event) => updateChildForm('grade', event.target.value)} />
             <p className="text-xs leading-relaxed text-text-muted">A Student ID and temporary credential will be generated securely after you create the profile.</p>
-            <Button onClick={createChild} disabled={!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()}>Create Child Profile</Button>
+            {createChildError && <p className="text-sm text-destructive" role="alert">{createChildError}</p>}
+            <Button onClick={createChild} disabled={isCreatingChild || !childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.grade.trim()}>{isCreatingChild ? 'Creating profile…' : 'Create Child Profile'}</Button>
           </div>
         )}
       </Modal>
