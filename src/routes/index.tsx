@@ -7,6 +7,7 @@ import {
 import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { StudentLoginPage } from '@/pages/auth/StudentLoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { RoleSelectionPage } from '@/pages/auth/RoleSelectionPage'
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage'
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
       {
         path: '/auth/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/auth/student-login',
+        element: <StudentLoginPage />,
       },
       {
         path: '/auth/register',
@@ -131,6 +136,7 @@ export const routes = {
   landing: '/',
   roleSelection: '/auth/role',
   login: '/auth/login',
+  studentLogin: '/auth/student-login',
   register: '/auth/register',
   parent: '/parent',
   child: '/child',
