@@ -72,9 +72,17 @@ Deno.serve(async (request) => {
       user_metadata: { role: "student", full_name: fullName },
     })
     if (createError || !created.user) throw createError ?? new Error("Student user creation failed")
-    studentUserId = created.user.id
+studentUserId = created.user.id
 
-    const { error: studentError } = await adminClient.from("students").insert({
+  const { error: profileError } = await adminClient.from("profiles").upsert({
+    id: studentUserId,
+    full_name: fullName,
+    email: internalEmail,
+    role: "student",
+  })
+  if (profileError) throw profileError
+
+  const { error: studentError } = await adminClient.from("students").insert({
       parent_id: user.id,
       user_id: studentUserId,
       student_id: studentId,

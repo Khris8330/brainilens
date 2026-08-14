@@ -8,6 +8,7 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import type { User } from '@/types'
 import { supabase } from '@/lib/supabase'
+import { getStudentForUser } from '@/lib/students'
 
 interface AuthContextValue {
   user: User | null
@@ -29,9 +30,11 @@ async function mapUser(session: Session | null): Promise<User | null> {
     .eq('id', authUser.id)
     .maybeSingle()
 
+  const student = profile?.role === 'student' ? await getStudentForUser(authUser.id) : null
+
   return {
     id: authUser.id,
-    name: profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
+    name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
     email: profile?.email ?? authUser.email ?? '',
     avatarUrl: profile?.avatar_url ?? undefined,
     role:
@@ -42,6 +45,7 @@ async function mapUser(session: Session | null): Promise<User | null> {
           : profile?.role === 'child'
             ? 'child'
             : 'parent',
+    studentId: student?.studentId,
   }
 }
 

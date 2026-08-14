@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Download, Sparkles, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
 import {
   Card,
@@ -8,19 +9,21 @@ import {
 } from '@/components/ui'
 import { BarChart, LineChart, DonutChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
+import { getStudentsForParent, type StudentRecord } from '@/lib/students'
 import {
   subjectPerformanceChart,
   weeklyTrend,
   monthlyTrend,
   assignmentCompletionDonut,
   aiRecommendations,
-  getMockStudents,
   initialAssignments,
 } from '@/data/mockData'
 
 export function ReportsPage() {
   const { user } = useAuth()
-  const child = getMockStudents().find((student) => student.parentId === user?.id)
+  const [children, setChildren] = useState<StudentRecord[]>([])
+  useEffect(() => { if (user?.id) void getStudentsForParent(user.id).then(setChildren) }, [user?.id])
+  const child = children[0]
   const totalHours = child ? (child.progress / 10) * 4 : 0
   const completedCount = initialAssignments.filter(
     (a) => a.status === 'completed',

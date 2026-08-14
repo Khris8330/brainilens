@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Clock,
@@ -28,6 +28,7 @@ import { BarChart, LineChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { formatNigeriaDate } from '@/lib/time'
+import { getStudentsForParent, type StudentRecord } from '@/lib/students'
 import { routes } from '@/routes'
 import {
   subjectPerformanceChart,
@@ -50,9 +51,24 @@ export function ParentDashboardPage() {
   const [createdCredentials, setCreatedCredentials] = useState<{ studentId: string; credential: string } | null>(null)
   const [createChildError, setCreateChildError] = useState('')
   const [isCreatingChild, setIsCreatingChild] = useState(false)
-  const [createdChildren, setCreatedChildren] = useState<Array<{ id: string; studentId: string; firstName: string; lastName: string; grade: string; parentId: string; streakDays: number; progress: number }>>([])
-  const registeredChildren: typeof createdChildren = []
-  const children = [...registeredChildren, ...createdChildren.filter((child) => !registeredChildren.some((registered) => registered.id === child.id))]
+  const [children, setChildren] = useState<StudentRecord[]>([])
+  const [isLoadingChildren, setIsLoadingChildren] = useState(true)
+  const [childrenLoadError, setChildrenLoadError] = useState('')
+
+  const loadChildren = async () => {
+    if (!user?.id) return
+    setIsLoadingChildren(true)
+    setChildrenLoadError('')
+    try {
+      setChildren(await getStudentsForParent(user.id))
+    } catch {
+      setChildrenLoadError('We could not load your child profiles. Please refresh and try again.')
+    } finally {
+      setIsLoadingChildren(false)
+    }
+  }
+
+  useEffect(() => { void loadChildren() }, [user?.id])
   const childrenNames = children.map((child) => child.firstName).join(' and ')
   const childrenVerb = children.length === 1 ? 'is' : 'are'
   const updateChildForm = (field: keyof typeof childForm, value: string) =>
@@ -84,18 +100,8 @@ export function ParentDashboardPage() {
         throw new Error(error?.message || 'We could not create the child profile.')
       }
 
-      const newChild = {
-        id: data.student.student_id,
-        studentId: data.student.student_id,
-        firstName: childForm.firstName.trim(),
-        lastName: childForm.lastName.trim(),
-        grade: data.student.grade,
-        parentId: user?.id ?? '',
-        streakDays: 0,
-        progress: 0,
-      }
-      setCreatedChildren((current) => [...current, newChild])
-      setCreatedCredentials({ studentId: newChild.studentId, credential: data.temporary_credential })
+      await loadChildren()
+      setCreatedCredentials({ studentId: data.student.student_id, credential: data.temporary_credential })
     } catch (error) {
       setCreateChildError(error instanceof Error ? error.message : 'We could not create the child profile.')
     } finally {
@@ -150,7 +156,11 @@ export function ParentDashboardPage() {
           </Button>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
-          {children.length === 0 ? (
+          {isLoadingChildren ? (
+            <p className="text-sm text-text-muted sm:col-span-2">Loading child profiles…</p>
+          ) : childrenLoadError ? (
+            <p className="text-sm text-destructive sm:col-span-2" role="alert">{childrenLoadError}</p>
+          ) : children.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-6 text-center sm:col-span-2">
               <p className="text-sm font-medium text-text">No child profiles yet.</p>
               <p className="mt-1 text-sm text-text-muted">Create a profile for your child to get started.</p>

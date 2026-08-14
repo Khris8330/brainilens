@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, User, Bell, Sliders, Shield, Palette } from 'lucide-react'
 import {
   Card,
@@ -12,7 +12,7 @@ import {
   Select,
 } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
-import { getMockStudents } from '@/data/mockData'
+import { getStudentsForParent, type StudentRecord } from '@/lib/students'
 
 function useSavedFeedback() {
   const [saved, setSaved] = useState(false)
@@ -44,10 +44,18 @@ export function SettingsPage() {
   const [name, setName] = useState(user?.name ?? '')
   const [email, setEmail] = useState(user?.email ?? '')
   const profile = useSavedFeedback()
-  const child = getMockStudents().find((student) => student.parentId === user?.id)
+  const [children, setChildren] = useState<StudentRecord[]>([])
+  useEffect(() => { if (user?.id) void getStudentsForParent(user.id).then(setChildren) }, [user?.id])
+  const child = children[0]
 
-  const [childName, setChildName] = useState(child ? `${child.firstName} ${child.lastName}` : '')
-  const [grade, setGrade] = useState(child ? `Grade ${child.grade}` : '')
+  const [childName, setChildName] = useState('')
+  const [grade, setGrade] = useState('')
+  useEffect(() => {
+    if (child) {
+      setChildName(child.fullName)
+      setGrade(`Grade ${child.grade}`)
+    }
+  }, [child])
   const childInfo = useSavedFeedback()
 
   const [emailNotifs, setEmailNotifs] = useState(true)
