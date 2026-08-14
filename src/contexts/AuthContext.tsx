@@ -24,27 +24,33 @@ async function mapUser(session: Session | null): Promise<User | null> {
   const authUser = session?.user
   if (!authUser) return null
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, email, avatar_url, role')
-    .eq('id', authUser.id)
-    .maybeSingle()
+  const [{ data: profile }, student] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, email, avatar_url, role')
+      .eq('id', authUser.id)
+      .maybeSingle(),
+    getStudentForUser(authUser.id),
+  ])
 
-  const student = profile?.role === 'student' ? await getStudentForUser(authUser.id) : null
+  const role = student
+    ? 'student'
+    : profile?.role === 'admin'
+      ? 'admin'
+      : profile?.role === 'child'
+        ? 'child'
+        : profile?.role === 'parent'
+          ? 'parent'
+          : null
+
+  if (!role) return null
 
   return {
     id: authUser.id,
-    name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
+    name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'User',
     email: profile?.email ?? authUser.email ?? '',
     avatarUrl: profile?.avatar_url ?? undefined,
-    role:
-      profile?.role === 'admin'
-        ? 'admin'
-        : profile?.role === 'student'
-          ? 'student'
-          : profile?.role === 'child'
-            ? 'child'
-            : 'parent',
+    role,
     studentId: student?.studentId,
   }
 }
@@ -68,20 +74,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (mounted) {
-        setUser(await mapUser(data.session))
+    let latestUpdate = 0
+
+    const applySession = async (session: Session | null) => {
+      const update = ++latestUpdate
+      const nextUser = await mapUser(session)
+      if (mounted && update === latestUpdate) {
+        setUser(nextUser)
         setIsLoading(false)
       }
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      void applySession(data.session)
     })
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      void mapUser(session).then((nextUser) => {
-        if (mounted) {
-          setUser(nextUser)
-          setIsLoading(false)
-        }
-      })
+      void applySession(session)
     })
 
     return () => {

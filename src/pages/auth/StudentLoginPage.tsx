@@ -33,11 +33,29 @@ export function StudentLoginPage() {
         throw new Error(invalidCredentialsMessage)
       }
 
+      await supabase.auth.signOut()
+
       const { error: sessionError } = await supabase.auth.setSession({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       })
       if (sessionError) throw new Error(invalidCredentialsMessage)
+
+      const { data: sessionData } = await supabase.auth.getSession()
+      const authenticatedUserId = sessionData.session?.user.id
+      if (!authenticatedUserId) throw new Error(invalidCredentialsMessage)
+
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('student_id, full_name')
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      if (studentError || !student || student.student_id !== normalizedStudentId) {
+        await supabase.auth.signOut()
+        throw new Error(invalidCredentialsMessage)
+      }
+
       navigate(routes.student, { replace: true })
     } catch {
       setError(invalidCredentialsMessage)
