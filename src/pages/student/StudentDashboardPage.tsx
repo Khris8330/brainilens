@@ -1,14 +1,33 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Bot, CheckCircle2, Flame, Play } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, ProgressBar, Button } from '@/components/ui'
+import { Bot, BookOpen, LockKeyhole, UserRound } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { routes } from '@/routes'
-import { getMockStudents, subjects, initialAssignments } from '@/data/mockData'
 import { getNigeriaGreeting } from '@/lib/time'
 
 export function StudentDashboardPage() {
   const { user } = useAuth()
-  const student = getMockStudents().find((item) => item.id === user?.id) ?? { firstName: user?.name?.split(' ')[0] ?? 'Student', streakDays: 0, progress: 0 }
-  const pending = initialAssignments.filter((item) => item.status !== 'completed').slice(0, 3)
-  return <div className="space-y-6"><div><h1 className="text-2xl font-semibold text-text">{getNigeriaGreeting()}, {student.firstName}!</h1><p className="mt-1 text-sm text-text-muted">Ready to keep growing?</p></div><div className="grid gap-4 sm:grid-cols-3"><Card><CardContent className="flex items-center gap-3 p-5"><div className="flex size-11 items-center justify-center rounded-lg bg-accent-light"><Flame className="size-5 text-accent-hover" /></div><div><p className="text-xl font-semibold text-text">{student.streakDays} days</p><p className="text-xs text-text-muted">Current streak</p></div></CardContent></Card><Card><CardContent className="p-5"><ProgressBar label="Weekly progress" value={student.progress} showValue variant="secondary" /><p className="mt-2 text-xs text-text-muted">Keep going!</p></CardContent></Card><Card><CardContent className="p-5"><Link to={routes.studentAi} className="flex items-center gap-3"><div className="flex size-11 items-center justify-center rounded-lg bg-secondary-light"><Bot className="size-5 text-secondary" /></div><div><p className="text-sm font-semibold text-text">Need help?</p><p className="text-xs text-primary">Ask your AI companion</p></div></Link></CardContent></Card></div><div className="grid gap-4 lg:grid-cols-2"><Card><CardHeader className="flex flex-row items-center justify-between"><CardTitle>Today&apos;s learning</CardTitle><Link to={routes.studentLearning} className="text-sm font-medium text-primary hover:underline">View all</Link></CardHeader><CardContent className="flex flex-col gap-3">{[['Mathematics','Fractions','20 min'],['Science','The Solar System','15 min'],['English','Reading Practice','20 min']].map(([subject, topic, duration]) => <div key={topic} className="flex items-center justify-between rounded-lg border border-border p-3"><div><p className="text-sm font-medium text-text">{topic}</p><p className="text-xs text-text-muted">{subject} · {duration}</p></div><Button size="sm" variant="outline"><Play className="size-3.5" />Start</Button></div>)}</CardContent></Card><Card><CardHeader className="flex flex-row items-center justify-between"><CardTitle>Assignments</CardTitle><Link to={routes.studentAssignments} className="text-sm font-medium text-primary hover:underline">View all</Link></CardHeader><CardContent className="flex flex-col gap-3">{pending.map((assignment) => <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"><div className="min-w-0"><p className="truncate text-sm font-medium text-text">{assignment.title}</p><p className="text-xs text-text-muted">Due {assignment.dueDate}</p></div><Badge variant={assignment.status === 'in-progress' ? 'primary' : 'warning'}>{assignment.status === 'in-progress' ? 'Continue' : 'Start'}</Badge></div>)}<div className="flex items-center gap-2 text-xs text-secondary"><CheckCircle2 className="size-4" />Keep your learning streak going</div></CardContent></Card></div><Card><CardHeader><CardTitle>Subject progress</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">{subjects.slice(0, 3).map((subject) => <ProgressBar key={subject.name} label={subject.name} value={subject.mastery} showValue variant={subject.mastery >= 80 ? 'success' : 'primary'} />)}</CardContent></Card><Card className="bg-gradient-to-br from-primary to-secondary text-white"><CardContent className="flex flex-col items-center gap-3 p-8 text-center sm:flex-row sm:justify-between sm:text-left"><div><h3 className="text-lg font-semibold">AI Study Companion</h3><p className="mt-1 text-sm text-white/85">Need help understanding something?</p></div><Link to={routes.studentAi}><Button className="bg-white text-primary hover:bg-white/90"><Bot className="size-4" />Ask your AI Companion<ArrowRight className="size-4" /></Button></Link></CardContent></Card></div>
+  const firstName = user?.name.split(' ')[0] ?? 'Student'
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-text">{getNigeriaGreeting()}, {firstName}!</h1>
+        <p className="mt-1 text-sm text-text-muted">Your account is connected. Learning records will appear here as they are added.</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card><CardContent className="flex items-center gap-3 p-5"><UserRound className="size-5 text-primary" /><div><p className="text-sm font-semibold text-text">{user?.studentId ?? 'Student account'}</p><p className="text-xs text-text-muted">Student ID</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-5"><BookOpen className="size-5 text-secondary" /><div><p className="text-sm font-semibold text-text">No progress yet</p><p className="text-xs text-text-muted">No saved learning data</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-5"><Bot className="size-5 text-secondary" /><div><p className="text-sm font-semibold text-text">Need help?</p><Link to={routes.studentAi} className="text-xs text-primary hover:underline">Open Lens companion</Link></div></CardContent></Card>
+      </div>
+      <Card>
+        <CardHeader><CardTitle>Student overview</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2"><Badge variant="secondary">Authenticated student</Badge><span className="text-sm text-text-muted">Grade {user?.grade ?? 'Not assigned'}</span></div>
+          <div className="rounded-lg border border-border bg-background p-5"><LockKeyhole className="size-5 text-text-muted" /><p className="mt-3 font-medium text-text">Your dashboard is scoped to your account</p><p className="mt-1 text-sm text-text-muted">Assignments, weekly learning, and progress will be shown only when persisted records exist for your authenticated student profile.</p></div>
+          <Link to={routes.studentAssignments}><Button variant="outline">View assignments</Button></Link>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }

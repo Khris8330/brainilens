@@ -8,6 +8,7 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import type { User } from '@/types'
 import { supabase } from '@/lib/supabase'
+import { getAuthenticatedStudent } from '@/lib/student-profile'
 
 interface AuthContextValue {
   user: User | null
@@ -23,25 +24,35 @@ async function mapUser(session: Session | null): Promise<User | null> {
   const authUser = session?.user
   if (!authUser) return null
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, email, avatar_url, role')
-    .eq('id', authUser.id)
-    .maybeSingle()
+  const [{ data: profile }, student] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, email, avatar_url, role')
+      .eq('id', authUser.id)
+      .maybeSingle(),
+    getAuthenticatedStudent(authUser.id),
+  ])
+
+  const role = student
+    ? 'student'
+    : profile?.role === 'admin'
+      ? 'admin'
+      : profile?.role === 'child'
+        ? 'child'
+        : profile?.role === 'parent'
+          ? 'parent'
+          : null
+
+  if (!role) return null
 
   return {
     id: authUser.id,
-    name: profile?.full_name ?? authUser.user_metadata?.full_name ?? 'Parent',
+    name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'User',
     email: profile?.email ?? authUser.email ?? '',
     avatarUrl: profile?.avatar_url ?? undefined,
-    role:
-      profile?.role === 'admin'
-        ? 'admin'
-        : profile?.role === 'student'
-          ? 'student'
-          : profile?.role === 'child'
-            ? 'child'
-            : 'parent',
+    role,
+    studentId: student?.studentId,
+    grade: student?.grade,
   }
 }
 

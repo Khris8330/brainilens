@@ -32,6 +32,7 @@ export interface User {
   avatarUrl?: string
   role: 'parent' | 'student' | 'child' | 'admin'
   studentId?: string
+  grade?: string | null
   pin?: string
 }
 
