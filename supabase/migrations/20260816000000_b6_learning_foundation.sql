@@ -67,7 +67,8 @@ create table public.learning_activity (
   lessons_completed integer not null default 0 check (lessons_completed >= 0),
   assignments_completed integer not null default 0 check (assignments_completed >= 0),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (student_id, activity_date)
 );
 
 create index student_assignments_student_id_idx
@@ -123,35 +124,9 @@ create policy "Parents can view their childrens assignments"
     )
   );
 
-create policy "Students can create their assignment state"
-  on public.student_assignments for insert to authenticated
-  with check (
-    exists (
-      select 1
-      from public.students s
-      where s.id = student_assignments.student_id
-        and s.user_id = (select auth.uid())
-    )
-  );
-
-create policy "Students can update their assignment state"
-  on public.student_assignments for update to authenticated
-  using (
-    exists (
-      select 1
-      from public.students s
-      where s.id = student_assignments.student_id
-        and s.user_id = (select auth.uid())
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.students s
-      where s.id = student_assignments.student_id
-        and s.user_id = (select auth.uid())
-    )
-  );
+-- Assignment rows and scores are written by a future authorized assignment
+-- service, not by the student browser. No student INSERT or UPDATE policy is
+-- created here, so clients cannot fabricate assignments or scores.
 
 create policy "Students can view their progress"
   on public.student_progress for select to authenticated
@@ -227,35 +202,9 @@ create policy "Parents can view their childrens learning activity"
     )
   );
 
-create policy "Students can create their learning activity"
-  on public.learning_activity for insert to authenticated
-  with check (
-    exists (
-      select 1
-      from public.students s
-      where s.id = learning_activity.student_id
-        and s.user_id = (select auth.uid())
-    )
-  );
-
-create policy "Students can update their learning activity"
-  on public.learning_activity for update to authenticated
-  using (
-    exists (
-      select 1
-      from public.students s
-      where s.id = learning_activity.student_id
-        and s.user_id = (select auth.uid())
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.students s
-      where s.id = learning_activity.student_id
-        and s.user_id = (select auth.uid())
-    )
-  );
+-- Activity metrics are written by a future authorized learning/assessment
+-- flow, not by the student browser. No student INSERT or UPDATE policy is
+-- created here, so clients cannot fabricate activity totals.
 
 create or replace function public.set_learning_updated_at()
 returns trigger
