@@ -150,9 +150,35 @@ create policy "Parents can view their childrens progress"
     )
   );
 
--- Progress, completion status, and scores are written by a future trusted
--- learning/assessment flow, not by the student browser. No student INSERT or
--- UPDATE policy is created here.
+create policy "Students can create their progress"
+  on public.student_progress for insert to authenticated
+  with check (
+    exists (
+      select 1
+      from public.students s
+      where s.id = student_progress.student_id
+        and s.user_id = (select auth.uid())
+    )
+  );
+
+create policy "Students can update their progress"
+  on public.student_progress for update to authenticated
+  using (
+    exists (
+      select 1
+      from public.students s
+      where s.id = student_progress.student_id
+        and s.user_id = (select auth.uid())
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.students s
+      where s.id = student_progress.student_id
+        and s.user_id = (select auth.uid())
+    )
+  );
 
 create policy "Students can view their learning activity"
   on public.learning_activity for select to authenticated
