@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Clock,
@@ -29,6 +29,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { formatNigeriaDate } from '@/lib/time'
 import { routes } from '@/routes'
+import { getParentChildren } from '@/lib/learning-data'
 import {
   subjectPerformanceChart,
   weeklyTrend,
@@ -51,7 +52,21 @@ export function ParentDashboardPage() {
   const [createChildError, setCreateChildError] = useState('')
   const [isCreatingChild, setIsCreatingChild] = useState(false)
   const [createdChildren, setCreatedChildren] = useState<Array<{ id: string; studentId: string; firstName: string; lastName: string; grade: string; parentId: string; streakDays: number; progress: number }>>([])
-  const registeredChildren: typeof createdChildren = []
+  const [registeredChildren, setRegisteredChildren] = useState<typeof createdChildren>([])
+  const [childrenError, setChildrenError] = useState('')
+  useEffect(() => {
+    if (!user?.id) return
+    void getParentChildren(user.id).then(({ data, error }) => {
+      if (error) {
+        setChildrenError('Child profiles could not be loaded.')
+        return
+      }
+      setRegisteredChildren((data ?? []).map((child) => {
+        const [firstName, ...lastNameParts] = child.full_name.trim().split(/\s+/)
+        return { id: child.id, studentId: child.student_id, firstName, lastName: lastNameParts.join(' '), grade: child.grade ?? 'Not assigned', parentId: child.parent_id, streakDays: 0, progress: 0 }
+      }))
+    })
+  }, [user?.id])
   const children = [...registeredChildren, ...createdChildren.filter((child) => !registeredChildren.some((registered) => registered.id === child.id))]
   const childrenNames = children.map((child) => child.firstName).join(' and ')
   const childrenVerb = children.length === 1 ? 'is' : 'are'
@@ -138,6 +153,7 @@ export function ParentDashboardPage() {
         </p>
       </div>
 
+      {childrenError && <p className="text-sm text-destructive" role="alert">{childrenError}</p>}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
