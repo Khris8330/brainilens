@@ -22,6 +22,7 @@ import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { StudentLearningPage } from '@/pages/student/StudentLearningPage'
 import { StudentAssignmentsPage } from '@/pages/student/StudentAssignmentsPage'
 import { StudentAssignmentDetailPage } from '@/pages/student/StudentAssignmentDetailPage'
+import { StudentAssessmentPage } from '@/pages/student/StudentAssessmentPage'
 import { StudentProgressPage } from '@/pages/student/StudentProgressPage'
 import { StudentAIPage } from '@/pages/student/StudentAIPage'
 import { StudentProfilePage } from '@/pages/student/StudentProfilePage'
@@ -120,6 +121,10 @@ export const router = createBrowserRouter([
       {
         path: '/student/assignments/:assignmentId',
         element: <StudentAssignmentDetailPage />,
+      },
+      {
+        path: '/student/assignments/:assignmentId/assessment',
+        element: <StudentAssessmentPage />,
       },
       {
         path: '/student/progress',
