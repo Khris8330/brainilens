@@ -56,6 +56,37 @@ function normalizeAnswer(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function inferAssessmentType(section: Record<string, unknown>): string {
+  const assessment = section.assessment;
+  if (assessment && typeof assessment === "object" && !Array.isArray(assessment)) {
+    const type = (assessment as Record<string, unknown>).type;
+    if (typeof type === "string" && type.trim()) return type;
+  }
+
+  const correctAnswer = section.correct_answer;
+  if (Array.isArray(section.options)) return "multiple_choice";
+  if (typeof correctAnswer === "boolean" || ["true", "false"].includes(String(correctAnswer).toLowerCase())) return "true_false";
+  if (typeof correctAnswer === "number" || (typeof correctAnswer === "string" && correctAnswer.trim() !== "" && Number.isFinite(Number(correctAnswer)))) return "numeric";
+  return "short_answer";
+}
+
+function normalizeAssessmentSection(section: Record<string, unknown>): Record<string, unknown> | null {
+  const nested = section.assessment;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    return nested as Record<string, unknown>;
+  }
+
+  if (!("correct_answer" in section)) return null;
+
+  return {
+    type: inferAssessmentType(section),
+    correctAnswer: section.correct_answer,
+    acceptedAnswers: Array.isArray(section.accepted_answers)
+      ? section.accepted_answers
+      : [section.correct_answer],
+  };
+}
+
 function evaluateAssessment(
   assessment: Record<string, unknown>,
   answer: unknown,
@@ -445,11 +476,7 @@ export default {
         );
       }
 
-      const assessment =
-        section.assessment &&
-        typeof section.assessment === "object"
-          ? section.assessment as Record<string, unknown>
-          : null;
+      const assessment = normalizeAssessmentSection(section);
 
       if (!assessment) {
         return errorResponse(
@@ -496,9 +523,7 @@ export default {
           item &&
           typeof item === "object" &&
           (item as Record<string, unknown>).type === "practice" &&
-          (item as Record<string, unknown>).assessment &&
-          typeof (item as Record<string, unknown>).assessment ===
-            "object",
+          normalizeAssessmentSection(item as Record<string, unknown>) !== null,
       );
 
       const totalAssessmentSections =
