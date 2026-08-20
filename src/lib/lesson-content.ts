@@ -41,7 +41,36 @@ export function parseLessonContent(raw: string | null | undefined): { lesson: Pa
 }
 
 export function getAssessableSections(lesson: ParsedLessonContent) {
-  return lesson.sections.filter((section) => section.type === 'practice' && Boolean(section.assessment))
+  return lesson.sections
+    .filter((section) => section.type === 'practice')
+    .map(normalizePracticeSection)
+    .filter((section): section is LessonSection & { assessment: LessonAssessment } => Boolean(section.assessment))
+}
+
+/** Normalize the original practice-section contract and the newer assessment contract. */
+function normalizePracticeSection(section: LessonSection): LessonSection {
+  if (section.type !== 'practice' || section.assessment || section.correct_answer === undefined) return section
+
+  const correctAnswer = section.correct_answer
+  const normalizedCorrect = correctAnswer.trim().toLowerCase()
+  const isTrueFalse = normalizedCorrect === 'true' || normalizedCorrect === 'false'
+  const isNumeric = normalizedCorrect !== '' && Number.isFinite(Number(correctAnswer))
+  const type: AssessmentType = isTrueFalse
+    ? 'true_false'
+    : section.options?.length
+      ? 'multiple_choice'
+      : isNumeric
+        ? 'numeric'
+        : 'short_answer'
+
+  return {
+    ...section,
+    assessment: {
+      type,
+      correctAnswer: isNumeric ? Number(correctAnswer) : isTrueFalse ? normalizedCorrect === 'true' : correctAnswer,
+      ...(type === 'short_answer' ? { acceptedAnswers: [correctAnswer] } : {}),
+    },
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null }
