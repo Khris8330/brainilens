@@ -18,6 +18,12 @@ export function StudentAssignmentDetailPage() {
   useEffect(() => {
     if (!user?.id || !assignmentId) return
     void getStudentAssignment(user.id, assignmentId).then(({ data, error }) => {
+      console.debug('[v0] mapped assignment detail', {
+        assignmentId: data?.assignment?.id ?? null,
+        assignmentTitle: data?.assignment?.title ?? null,
+        hasLearningContent: Boolean(data?.assignment?.learningContent),
+        hasLearningContentContent: Boolean(data?.assignment?.learningContent?.content),
+      })
       setRecord(data)
       setState(error ? 'error' : data ? 'ready' : 'empty')
     })
@@ -29,7 +35,17 @@ export function StudentAssignmentDetailPage() {
 
   const { assignment } = record
   const parsedContent = parseLessonContent(assignment.learningContent?.content)
+  console.debug('[v0] parsed lesson content', {
+    hasLesson: parsedContent.lesson !== null,
+    error: parsedContent.error,
+  })
   const assessableSections = parsedContent.lesson ? getAssessableSections(parsedContent.lesson) : []
+  console.debug('[v0] assessable sections', {
+    count: assessableSections.length,
+    ids: assessableSections.map((section) => section.id),
+  })
+  const shouldShowStartAssessment = assessableSections.length > 0
+  console.debug('[v0] should show start assessment', shouldShowStartAssessment)
   return <div className="space-y-6">
     <button type="button" onClick={() => navigate(routes.studentAssignments)} className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text"><ArrowLeft className="size-4" />Back to assignments</button>
     <div><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-primary-light px-2.5 py-1 text-xs font-medium text-primary">{assignment.subject}</span><span className="text-xs text-text-muted">{formatAssignmentStatus(record.status)}</span></div><h1 className="mt-3 text-2xl font-semibold text-text">{assignment.title}</h1><p className="mt-1 text-sm text-text-muted">{assignment.description ?? 'No description provided.'}</p></div>

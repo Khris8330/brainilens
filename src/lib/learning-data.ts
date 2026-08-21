@@ -66,6 +66,18 @@ export async function getStudentAssignment(studentUserId: string, studentAssignm
     .eq('student_id', studentId)
     .maybeSingle()
 
+  const rawAssignment = data as Record<string, unknown> | null
+  const rawAssignmentDetails = rawAssignment?.assignments as Record<string, unknown> | null
+  const rawLearningContent = rawAssignmentDetails?.learning_content as Record<string, unknown> | null
+  console.debug('[v0] raw assignment detail', {
+    studentAssignmentId: rawAssignment?.id ?? null,
+    assignmentId: rawAssignmentDetails?.id ?? null,
+    assignmentTitle: rawAssignmentDetails?.title ?? null,
+    hasLearningContent: Boolean(rawLearningContent),
+    learningContentId: rawLearningContent?.id ?? null,
+    hasLearningContentContent: Boolean(rawLearningContent?.content),
+  })
+
   return { data: data ? mapAssignmentDetail(data as Record<string, unknown>) : null, error }
 }
 
@@ -107,7 +119,12 @@ export async function getChildActivity(studentId: string) {
 }
 
 async function getStudentId(userId: string) {
-  const { data } = await supabase.from('students').select('id').eq('user_id', userId).maybeSingle()
+  const { data, error } = await supabase.from('students').select('id').eq('user_id', userId).maybeSingle()
+  console.debug('[v0] resolved student', {
+    userId,
+    studentId: data?.id ?? null,
+    error,
+  })
   return data?.id ?? null
 }
 
