@@ -83,7 +83,9 @@ function isAssessment(value: unknown): value is LessonAssessment {
 function isLessonSection(value: unknown): value is LessonSection {
   if (!isRecord(value)) return false
   const types: LessonSectionType[] = ['introduction', 'explanation', 'example', 'practice', 'summary']
-  if (typeof value.id !== 'string' || !types.includes(value.type as LessonSectionType) || typeof value.title !== 'string' || typeof value.content !== 'string') return false
+  if (typeof value.id !== 'string' || !types.includes(value.type as LessonSectionType) || typeof value.title !== 'string') return false
+  if (value.content !== undefined && typeof value.content !== 'string') return false
+  if (value.type !== 'practice' && typeof value.content !== 'string') return false
   if (value.options !== undefined && (!Array.isArray(value.options) || !value.options.every((item) => typeof item === 'string'))) return false
   if (value.assessment !== undefined && !isAssessment(value.assessment)) return false
   return true

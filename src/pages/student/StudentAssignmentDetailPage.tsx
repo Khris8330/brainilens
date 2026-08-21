@@ -39,6 +39,16 @@ export function StudentAssignmentDetailPage() {
     hasLesson: parsedContent.lesson !== null,
     error: parsedContent.error,
   })
+  console.debug('[v0] parsed lesson sections', {
+    sections: parsedContent.lesson?.sections.map((section) => ({
+      id: section.id,
+      type: section.type,
+      title: section.title,
+      hasQuestion: 'question' in section,
+      hasOptions: 'options' in section,
+      hasCorrectAnswer: 'correct_answer' in section,
+    })) ?? [],
+  })
   const assessableSections = parsedContent.lesson ? getAssessableSections(parsedContent.lesson) : []
   console.debug('[v0] assessable sections', {
     count: assessableSections.length,
