@@ -709,7 +709,11 @@ export default {
 
       return jsonResponse({
         success: true,
-        data: persistenceResult,
-  });
+        data: {
+          persistenceResult,
+          isCorrect: result.isCorrect,
+          score: result.score,
+        },
+      });
   },
 };
