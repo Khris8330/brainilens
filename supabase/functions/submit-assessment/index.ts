@@ -21,11 +21,20 @@ function isUuid(value: unknown): value is string {
   );
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
 function jsonResponse(
   body: unknown,
   status = 200,
 ): Response {
-  return Response.json(body, { status });
+  return Response.json(body, {
+    status,
+    headers: corsHeaders,
+  });
 }
 
 function errorResponse(
@@ -210,6 +219,13 @@ function evaluateAssessment(
 
 export default {
   fetch: async (req) => {
+    if (req.method === "OPTIONS") {
+      return new Response("ok", {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
     const { data: ctx, error } = await createSupabaseContext(
       req,
       { auth: "user" },
