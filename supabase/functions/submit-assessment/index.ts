@@ -1,4 +1,4 @@
-import { withSupabase } from "npm:@supabase/server@^1";
+import { createSupabaseContext } from "npm:@supabase/server@^1";
 
 type SubmitAssessmentRequest = {
   assignmentId: string;
@@ -209,12 +209,24 @@ function evaluateAssessment(
 }
 
 export default {
-  fetch: withSupabase(
-    {
-      auth: "user",
-    },
-    async (req, ctx) => {
-      if (req.method !== "POST") {
+  fetch: async (req) => {
+    const { data: ctx, error } = await createSupabaseContext(
+      req,
+      { auth: "user" },
+    );
+
+    return jsonResponse({
+      contextError: Boolean(error),
+      errorCode: error?.code ?? null,
+      errorMessage: error?.message ?? null,
+      errorStatus: error?.status ?? null,
+      hasUserClaims: Boolean(ctx?.userClaims),
+      hasUserIdClaim: Boolean(ctx?.userClaims?.sub),
+      hasJwtClaims: Boolean(ctx?.jwtClaims),
+      authMode: ctx?.authMode ?? null,
+    });
+
+    if (req.method !== "POST") {
         return errorResponse(
           "METHOD_NOT_ALLOWED",
           "Only POST requests are allowed.",
@@ -682,7 +694,6 @@ export default {
       return jsonResponse({
         success: true,
         data: persistenceResult,
-      });
-    },
-  ),
+  });
+  },
 };
