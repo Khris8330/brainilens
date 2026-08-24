@@ -226,21 +226,10 @@ export default {
       });
     }
 
-    const { data: ctx, error } = await createSupabaseContext(
+    const { data: ctx } = await createSupabaseContext(
       req,
       { auth: "user" },
     );
-
-    return jsonResponse({
-      contextError: Boolean(error),
-      errorCode: error?.code ?? null,
-      errorMessage: error?.message ?? null,
-      errorStatus: error?.status ?? null,
-      hasUserClaims: Boolean(ctx?.userClaims),
-      hasUserIdClaim: Boolean(ctx?.userClaims?.sub),
-      hasJwtClaims: Boolean(ctx?.jwtClaims),
-      authMode: ctx?.authMode ?? null,
-    });
 
     if (req.method !== "POST") {
         return errorResponse(
