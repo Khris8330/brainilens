@@ -1,33 +1,15 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bot, BookOpen, LockKeyhole, UserRound } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui'
+import { Bot, BookOpen, UserRound, ClipboardList } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button, EmptyState } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { routes } from '@/routes'
 import { getNigeriaGreeting } from '@/lib/time'
+import { getStudentActivity, getStudentAssignments, getStudentProgress, formatLearningError, type StudentAssignmentRecord, type StudentProgressRecord, type LearningActivityRecord } from '@/lib/learning-data'
 
 export function StudentDashboardPage() {
-  const { user } = useAuth()
-  const firstName = user?.name.split(' ')[0] ?? 'Student'
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-text">{getNigeriaGreeting()}, {firstName}!</h1>
-        <p className="mt-1 text-sm text-text-muted">Your account is connected. Learning records will appear here as they are added.</p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card><CardContent className="flex items-center gap-3 p-5"><UserRound className="size-5 text-primary" /><div><p className="text-sm font-semibold text-text">{user?.studentId ?? 'Student account'}</p><p className="text-xs text-text-muted">Student ID</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-3 p-5"><BookOpen className="size-5 text-secondary" /><div><p className="text-sm font-semibold text-text">No progress yet</p><p className="text-xs text-text-muted">No saved learning data</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-3 p-5"><Bot className="size-5 text-secondary" /><div><p className="text-sm font-semibold text-text">Need help?</p><Link to={routes.studentAi} className="text-xs text-primary hover:underline">Open Lens companion</Link></div></CardContent></Card>
-      </div>
-      <Card>
-        <CardHeader><CardTitle>Student overview</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2"><Badge variant="secondary">Authenticated student</Badge><span className="text-sm text-text-muted">Grade {user?.grade ?? 'Not assigned'}</span></div>
-          <div className="rounded-lg border border-border bg-background p-5"><LockKeyhole className="size-5 text-text-muted" /><p className="mt-3 font-medium text-text">Your dashboard is scoped to your account</p><p className="mt-1 text-sm text-text-muted">Assignments, weekly learning, and progress will be shown only when persisted records exist for your authenticated student profile.</p></div>
-          <Link to={routes.studentAssignments}><Button variant="outline">View assignments</Button></Link>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  const { user } = useAuth(); const [progress, setProgress] = useState<StudentProgressRecord[]>([]); const [assignments, setAssignments] = useState<StudentAssignmentRecord[]>([]); const [activity, setActivity] = useState<LearningActivityRecord[]>([]); const [error, setError] = useState('')
+  useEffect(() => { if (!user?.id) return; void Promise.all([getStudentProgress(user.id), getStudentActivity(user.id), getStudentAssignments(user.id)]).then(([progressResult, activityResult, assignmentResult]) => { setProgress(progressResult.data ?? []); setActivity(activityResult.data ?? []); setAssignments(assignmentResult.data ?? []); setError(formatLearningError(progressResult.error || activityResult.error || assignmentResult.error)) }) }, [user?.id])
+  const completed = assignments.filter((item) => item.status === 'completed').length; const average = progress.length ? Math.round(progress.reduce((sum, item) => sum + item.progress, 0) / progress.length) : 0; const minutes = activity.reduce((sum, item) => sum + item.minutes, 0)
+  return <div className="space-y-6"><div><h1 className="text-2xl font-semibold text-text">{getNigeriaGreeting()}, {user?.name?.split(' ')[0] ?? 'Student'}!</h1><p className="mt-1 text-sm text-text-muted">Your live learning progress and assignments.</p></div>{error && <p className="text-sm text-destructive" role="alert">{error}</p>}<div className="grid gap-4 sm:grid-cols-3"><Card><CardContent className="flex items-center gap-3 p-5"><UserRound className="size-5 text-primary" /><div><p className="text-sm font-semibold text-text">{user?.studentId ?? 'Student account'}</p><p className="text-xs text-text-muted">Student ID</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-3 p-5"><BookOpen className="size-5 text-secondary" /><div><p className="text-xl font-semibold text-text">{average}%</p><p className="text-xs text-text-muted">Average progress</p></div></CardContent></Card><Card><CardContent className="flex items-center gap-3 p-5"><ClipboardList className="size-5 text-primary" /><div><p className="text-xl font-semibold text-text">{completed}</p><p className="text-xs text-text-muted">Completed assignments</p></div></CardContent></Card></div><Card><CardHeader><CardTitle>Student overview</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex flex-wrap gap-2"><Badge variant="secondary">{minutes} learning minutes</Badge><span className="text-sm text-text-muted">Grade {user?.grade ?? 'Not assigned'}</span></div>{progress.length === 0 && assignments.length === 0 ? <EmptyState icon={BookOpen} title="No progress yet" description="Your saved learning data will appear here after you complete lessons or assignments." /> : <div className="flex flex-col gap-2">{progress.slice(0, 5).map((item) => <div key={item.id} className="flex items-center justify-between rounded-lg border border-border p-3"><span className="text-sm text-text">{item.content?.title ?? 'Learning activity'}</span><span className="text-sm font-medium text-primary">{item.progress}%</span></div>)}</div>}<Link to={routes.studentAssignments}><Button variant="outline">View assignments</Button></Link><Link to={routes.studentAi} className="ml-3 inline-flex items-center gap-1 text-sm text-primary"><Bot className="size-4" />Open Lens companion</Link></CardContent></Card></div>
 }

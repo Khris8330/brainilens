@@ -118,6 +118,34 @@ export async function getChildActivity(studentId: string) {
   return { data: (data ?? []).map(mapActivity), error }
 }
 
+export interface ChildReportSummary {
+  assignmentCounts: { completed: number; inProgress: number; pending: number }
+  averageScore: number
+  subjectPerformance: Array<{ label: string; value: number; color?: string }>
+  weeklyActivity: Array<{ label: string; value: number }>
+  monthlyTrend: Array<{ label: string; value: number }>
+  recentActivity: Array<{ id: string; description: string; timestamp: string }>
+}
+
+export async function getChildReportSummary(studentId: string) {
+  const { data, error } = await supabase.rpc('get_child_report_summary', { p_student_id: studentId })
+  return { data: mapReportSummary(data), error }
+}
+
+export async function getParentAssignments(studentIds: string[]) {
+  if (studentIds.length === 0) return { data: [] as StudentAssignmentRecord[], error: null }
+  const { data, error } = await supabase.from('student_assignments').select('id,status,score,submitted_at,assignments(id,title,description,subject,grade,due_date,difficulty)').in('student_id', studentIds).order('created_at', { ascending: false })
+  return { data: (data ?? []).map(mapAssignment) as StudentAssignmentRecord[], error }
+}
+
+function mapReportSummary(value: unknown): ChildReportSummary {
+  const summary = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>
+  const counts = (summary.assignmentCounts && typeof summary.assignmentCounts === 'object' ? summary.assignmentCounts : {}) as Record<string, unknown>
+  const toChart = (items: unknown) => Array.isArray(items) ? items.map((item, index) => { const row = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>; return { label: String(row.label ?? row.subject ?? row.month ?? row.week ?? `Item ${index + 1}`), value: Number(row.value ?? row.score ?? row.average ?? 0), color: typeof row.color === 'string' ? row.color : undefined } }) : []
+  const recent = Array.isArray(summary.recentActivity) ? summary.recentActivity.map((item, index) => { const row = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>; return { id: String(row.id ?? index), description: String(row.description ?? row.activity ?? ''), timestamp: String(row.timestamp ?? row.created_at ?? '') } }) : []
+  return { assignmentCounts: { completed: Number(counts.completed ?? 0), inProgress: Number(counts.inProgress ?? counts.in_progress ?? 0), pending: Number(counts.pending ?? 0) }, averageScore: Number(summary.averageScore ?? summary.average_score ?? 0), subjectPerformance: toChart(summary.subjectPerformance), weeklyActivity: toChart(summary.weeklyActivity), monthlyTrend: toChart(summary.monthlyTrend), recentActivity: recent }
+}
+
 async function getStudentId(userId: string) {
   const { data, error } = await supabase.from('students').select('id').eq('user_id', userId).maybeSingle()
   console.debug('[v0] resolved student', {
