@@ -13,6 +13,7 @@ export interface StudentAssignmentRecord {
     grade: string | null
     dueDate: string | null
     difficulty: string | null
+    learningContent: LearningContentRecord | null
   } | null
 }
 
@@ -27,6 +28,22 @@ export interface StudentAssignmentDetail extends StudentAssignmentRecord {
       content: string | null
     } | null
   }
+}
+
+export interface LearningContentRecord {
+  id: string
+  title: string
+  subject: string
+  description: string | null
+  content: string | null
+}
+
+export async function getLearningContent() {
+  const { data, error } = await supabase
+    .from('learning_content')
+    .select('id,title,subject,description,content')
+    .order('title')
+  return { data: (data ?? []) as LearningContentRecord[], error }
 }
 
 export interface StudentProgressRecord {
@@ -49,7 +66,7 @@ export interface LearningActivityRecord {
 export async function getStudentAssignments(studentUserId: string) {
   const { data, error } = await supabase
     .from('student_assignments')
-    .select('id,status,score,submitted_at,assignments(id,title,description,subject,grade,due_date,difficulty)')
+    .select('id,status,score,submitted_at,assignments(id,title,description,subject,grade,due_date,difficulty,learning_content(id,title,description,subject,grade,content))')
     .eq('student_id', (await getStudentId(studentUserId)) ?? '')
     .order('created_at', { ascending: false })
   return { data: (data ?? []).map(mapAssignment) as StudentAssignmentRecord[], error }
@@ -158,7 +175,8 @@ async function getStudentId(userId: string) {
 
 function mapAssignment(row: Record<string, unknown>): StudentAssignmentRecord {
   const assignment = row.assignments as Record<string, unknown> | null
-  return { id: String(row.id), status: row.status as StudentAssignmentRecord['status'], score: row.score as number | null, submittedAt: row.submitted_at as string | null, assignment: assignment ? { id: String(assignment.id), title: String(assignment.title), description: assignment.description as string | null, subject: String(assignment.subject), grade: assignment.grade as string | null, dueDate: assignment.due_date as string | null, difficulty: assignment.difficulty as string | null } : null }
+  const content = assignment?.learning_content as Record<string, unknown> | null
+  return { id: String(row.id), status: row.status as StudentAssignmentRecord['status'], score: row.score as number | null, submittedAt: row.submitted_at as string | null, assignment: assignment ? { id: String(assignment.id), title: String(assignment.title), description: assignment.description as string | null, subject: String(assignment.subject), grade: assignment.grade as string | null, dueDate: assignment.due_date as string | null, difficulty: assignment.difficulty as string | null, learningContent: content ? { id: String(content.id), title: String(content.title), subject: String(content.subject), description: content.description as string | null, content: content.content as string | null } : null } : null }
 }
 
 function mapAssignmentDetail(row: Record<string, unknown>): StudentAssignmentDetail {
