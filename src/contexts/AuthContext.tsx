@@ -27,7 +27,7 @@ async function mapUser(session: Session | null): Promise<User | null> {
   const [{ data: profile }, student] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, email, avatar_url, role')
+      .select('full_name, email, role')
       .eq('id', authUser.id)
       .maybeSingle(),
     getAuthenticatedStudent(authUser.id),
@@ -49,7 +49,7 @@ async function mapUser(session: Session | null): Promise<User | null> {
     id: authUser.id,
     name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'User',
     email: profile?.email ?? authUser.email ?? '',
-    avatarUrl: profile?.avatar_url ?? undefined,
+    avatarUrl: undefined,
     role,
     studentId: student?.studentId,
     grade: student?.grade,
