@@ -149,6 +149,39 @@ export async function getChildReportSummary(studentId: string) {
   return { data: mapReportSummary(data), error }
 }
 
+export interface LearningPlanItemRecord {
+  id: string
+  studentId: string
+  subject: string
+  topic: string
+  description: string | null
+  weekStartDate: string
+}
+
+export async function getLearningPlanItems(studentId: string) {
+  const { data, error } = await supabase
+    .from('learning_plan_items')
+    .select('id,student_id,subject,topic,description,week_start_date')
+    .eq('student_id', studentId)
+    .order('week_start_date', { ascending: false })
+    .order('created_at', { ascending: false })
+  return { data: (data ?? []).map((row) => ({ id: String(row.id), studentId: String(row.student_id), subject: String(row.subject), topic: String(row.topic), description: row.description as string | null, weekStartDate: String(row.week_start_date) })) as LearningPlanItemRecord[], error }
+}
+
+export async function createLearningPlanItem(studentId: string, subject: string, topic: string, description: string) {
+  return supabase.rpc('create_learning_plan_item', {
+    p_student_id: studentId,
+    p_subject: subject,
+    p_topic: topic,
+    p_description: description || null,
+    p_week_start_date: new Date().toISOString().slice(0, 10),
+  })
+}
+
+export async function deleteLearningPlanItem(itemId: string) {
+  return supabase.rpc('delete_learning_plan_item', { p_item_id: itemId })
+}
+
 export async function getParentAssignments(studentIds: string[]) {
   if (studentIds.length === 0) return { data: [] as StudentAssignmentRecord[], error: null }
   const { data, error } = await supabase.from('student_assignments').select('id,status,score,submitted_at,assignments(id,title,description,subject,grade,due_date,difficulty)').in('student_id', studentIds).order('created_at', { ascending: false })
