@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { BookOpen, LockKeyhole, Plus, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent, EmptyState, Input, LoadingOverlay, Select, TextArea } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { createLearningPlanItem, deleteLearningPlanItem, getLearningPlanItems, getParentChildren, type LearningPlanItemRecord } from '@/lib/learning-data'
 
 interface Child { id: string; name: string }
@@ -14,6 +15,7 @@ export function WeeklyLearningPage() {
   const [form, setForm] = useState({ subject: '', topic: '', description: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [generatingItemId, setGeneratingItemId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   async function loadItems(studentId: string) {
@@ -57,13 +59,24 @@ export function WeeklyLearningPage() {
     else setItems((current) => current.filter((item) => item.id !== itemId))
   }
 
+  async function handleGenerate(itemId: string) {
+    setGeneratingItemId(itemId)
+    setError('')
+    const { error: generationError } = await supabase.functions.invoke('generate-learning-content', {
+      body: { learningPlanItemId: itemId },
+    })
+    if (generationError) setError(generationError.message)
+    else if (selectedChildId) await loadItems(selectedChildId)
+    setGeneratingItemId(null)
+  }
+
   return <div className="space-y-6">
     <div><h1 className="text-2xl font-semibold text-text">Weekly Learning</h1><p className="mt-1 text-sm text-text-muted">Plan focus areas for each child. These are guidance items, not assignments.</p></div>
     {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
     {children.length === 0 ? <EmptyState icon={BookOpen} title="No child profiles yet" description="Create a child profile to plan weekly learning." /> : <>
       <div className="max-w-sm"><Select value={selectedChildId} onChange={(event) => void handleChildChange(event.target.value)} options={children.map((child) => ({ value: child.id, label: child.name }))} /></div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
-        <Card><CardContent className="p-5">{loading ? <LoadingOverlay label="Loading weekly learning" /> : items.length === 0 ? <EmptyState icon={BookOpen} title="No focus areas yet" description="Add a learning focus for this child to get started." /> : <div className="flex flex-col gap-3">{items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 rounded-lg border border-border p-4"><div><p className="text-xs font-medium uppercase tracking-wide text-primary">{item.subject}</p><h2 className="mt-1 font-semibold text-text">{item.topic}</h2>{item.description && <p className="mt-2 text-sm leading-6 text-text-muted">{item.description}</p>}</div><Button variant="ghost" size="sm" onClick={() => void handleDelete(item.id)} aria-label={`Delete ${item.topic}`}><Trash2 className="size-4" aria-hidden="true" /></Button></div>)}</div>}</CardContent></Card>
+        <Card><CardContent className="p-5">{loading ? <LoadingOverlay label="Loading weekly learning" /> : items.length === 0 ? <EmptyState icon={BookOpen} title="No focus areas yet" description="Add a learning focus for this child to get started." /> : <div className="flex flex-col gap-3">{items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 rounded-lg border border-border p-4"><div><div className="flex items-center gap-2"><p className="text-xs font-medium uppercase tracking-wide text-primary">{item.subject}</p><span className="rounded-full bg-secondary-light px-2 py-0.5 text-xs font-medium capitalize text-secondary">{item.status}</span></div><h2 className="mt-1 font-semibold text-text">{item.topic}</h2>{item.description && <p className="mt-2 text-sm leading-6 text-text-muted">{item.description}</p>}{item.errorMessage && item.status === 'failed' && <p className="mt-2 text-sm text-destructive">{item.errorMessage}</p>}</div><div className="flex items-center gap-2"><Button variant="ghost" size="sm" onClick={() => void handleDelete(item.id)} aria-label={`Delete ${item.topic}`}><Trash2 className="size-4" aria-hidden="true" /></Button>{(item.status === 'pending' || item.status === 'failed') && <Button size="sm" onClick={() => void handleGenerate(item.id)} disabled={generatingItemId !== null}>{generatingItemId === item.id ? 'Generating…' : 'Generate lesson'}</Button>}</div></div>)}</div>}</CardContent></Card>
         <Card><CardContent className="p-5"><h2 className="font-semibold text-text">Add focus area</h2><form className="mt-4 flex flex-col gap-4" onSubmit={handleCreate}><label className="flex flex-col gap-1 text-sm font-medium text-text">Subject<Input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="e.g. Geography" required /></label><label className="flex flex-col gap-1 text-sm font-medium text-text">Topic<Input value={form.topic} onChange={(event) => setForm({ ...form, topic: event.target.value })} placeholder="What should they focus on?" required /></label><label className="flex flex-col gap-1 text-sm font-medium text-text">Description <span className="text-xs font-normal text-text-muted">Optional</span><TextArea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Add context or encouragement" /></label><Button type="submit" disabled={saving}>{saving ? 'Adding…' : <><Plus className="size-4" aria-hidden="true" />Add focus area</>}</Button></form></CardContent></Card>
       </div>
     </>}

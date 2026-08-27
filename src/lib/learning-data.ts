@@ -156,16 +156,19 @@ export interface LearningPlanItemRecord {
   topic: string
   description: string | null
   weekStartDate: string
+  status: 'pending' | 'generating' | 'ready' | 'failed'
+  generatedAssignmentId: string | null
+  errorMessage: string | null
 }
 
 export async function getLearningPlanItems(studentId: string) {
   const { data, error } = await supabase
     .from('learning_plan_items')
-    .select('id,student_id,subject,topic,description,week_start_date')
+    .select('id,student_id,subject,topic,description,week_start_date,status,generated_assignment_id,error_message')
     .eq('student_id', studentId)
     .order('week_start_date', { ascending: false })
     .order('created_at', { ascending: false })
-  return { data: (data ?? []).map((row) => ({ id: String(row.id), studentId: String(row.student_id), subject: String(row.subject), topic: String(row.topic), description: row.description as string | null, weekStartDate: String(row.week_start_date) })) as LearningPlanItemRecord[], error }
+  return { data: (data ?? []).map((row) => ({ id: String(row.id), studentId: String(row.student_id), subject: String(row.subject), topic: String(row.topic), description: row.description as string | null, weekStartDate: String(row.week_start_date), status: (row.status as LearningPlanItemRecord['status']) ?? 'pending', generatedAssignmentId: row.generated_assignment_id ? String(row.generated_assignment_id) : null, errorMessage: row.error_message as string | null })) as LearningPlanItemRecord[], error }
 }
 
 export async function createLearningPlanItem(studentId: string, subject: string, topic: string, description: string) {
