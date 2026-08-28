@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GraduationCap, LogIn } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { routes } from '@/routes'
 
@@ -9,6 +10,7 @@ const invalidCredentialsMessage = 'Invalid Student ID or password.'
 
 export function StudentLoginPage() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [studentId, setStudentId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -38,6 +40,13 @@ export function StudentLoginPage() {
         refresh_token: data.session.refresh_token,
       })
       if (sessionError) throw new Error(invalidCredentialsMessage)
+
+      // Ensure AuthContext has mapped the student before navigating
+      const mapped = await refreshUser()
+      if (!mapped || mapped.role !== 'student') {
+        throw new Error(invalidCredentialsMessage)
+      }
+
       navigate(routes.student, { replace: true })
     } catch {
       setError(invalidCredentialsMessage)
@@ -77,7 +86,11 @@ export function StudentLoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
 
-          {error && <p className="text-sm text-error" role="alert">{error}</p>}
+          {error && (
+            <p className="text-sm text-error" role="alert">
+              {error}
+            </p>
+          )}
 
           <Button type="submit" className="w-full" size="lg" isLoading={isSubmitting}>
             {!isSubmitting && <LogIn className="size-4" aria-hidden="true" />}
