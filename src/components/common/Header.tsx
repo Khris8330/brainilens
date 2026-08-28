@@ -1,7 +1,8 @@
-import { Bell, Menu, GraduationCap, LogOut } from 'lucide-react'
+import { Bell, Menu, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/utils'
 import { Avatar, Button } from '@/components/ui'
+import { BrandLogo } from './BrandLogo'
 import { NavigationMenu } from './NavigationMenu'
 import type { NavItem, User } from '@/types'
 
@@ -27,12 +28,12 @@ export function Header({
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md',
+        'sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-md',
         className,
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
           {isDashboard && onMenuClick && (
             <Button
               variant="ghost"
@@ -45,14 +46,7 @@ export function Header({
             </Button>
           )}
 
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary">
-              <GraduationCap className="size-5 text-white" aria-hidden="true" />
-            </div>
-            <span className="hidden text-sm font-semibold text-text sm:inline">
-              BrainiLens
-            </span>
-          </Link>
+          {!isDashboard && <BrandLogo to="/" size="sm" />}
         </div>
 
         {!isDashboard && navItems.length > 0 && (
@@ -63,28 +57,22 @@ export function Header({
           />
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {isDashboard && user ? (
             <>
               <Button variant="ghost" size="sm" aria-label="Notifications">
-                <Bell className="size-5" />
+                <Bell className="size-4.5" />
               </Button>
-              <div className="flex items-center gap-2.5 pl-2">
+              <div className="mx-1 hidden h-6 w-px bg-border sm:block" aria-hidden="true" />
+              <div className="flex items-center gap-2 pl-1">
                 <Avatar name={user.name} size="sm" />
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-text">{user.name}</p>
-                  <p className="text-xs text-text-muted capitalize">
-                    {user.role}
-                  </p>
+                  <p className="text-sm font-medium leading-tight text-text">{user.name}</p>
+                  <p className="text-[11px] capitalize leading-tight text-text-muted">{user.role}</p>
                 </div>
               </div>
               {onLogout && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onLogout}
-                  aria-label="Log out"
-                >
+                <Button variant="ghost" size="sm" onClick={onLogout} aria-label="Log out">
                   <LogOut className="size-4" aria-hidden="true" />
                 </Button>
               )}
