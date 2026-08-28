@@ -1,5 +1,4 @@
-import { GraduationCap } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { BrandLogo } from './BrandLogo'
 import { footerLinks } from '@/data/navigation'
 
 export function Footer() {
@@ -8,20 +7,9 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-primary">
-                <GraduationCap
-                  className="size-5 text-white"
-                  aria-hidden="true"
-                />
-              </div>
-              <span className="text-sm font-semibold text-text">
-                BrainiLens
-              </span>
-            </Link>
+            <BrandLogo to="/" size="sm" />
             <p className="mt-4 max-w-xs text-sm text-text-muted">
-              Empowering parents and children with AI-driven learning insights
-              and growth tracking.
+              Empowering parents and children with AI-driven learning insights and growth tracking.
             </p>
           </div>
 
@@ -33,8 +21,7 @@ export function Footer() {
 
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-text-muted">
-            &copy; {new Date().getFullYear()} BrainiLens. All
-            rights reserved.
+            &copy; {new Date().getFullYear()} BrainiLens. All rights reserved.
           </p>
         </div>
       </div>
