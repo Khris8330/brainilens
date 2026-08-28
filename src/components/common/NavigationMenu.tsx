@@ -22,7 +22,7 @@ export function NavigationMenu({
     <nav
       aria-label="Main navigation"
       className={cn(
-        isVertical ? 'flex flex-col gap-1' : 'flex items-center gap-1',
+        isVertical ? 'flex flex-col gap-0.5' : 'flex items-center gap-0.5',
         className,
       )}
     >
@@ -37,12 +37,12 @@ export function NavigationMenu({
               href={item.href}
               onClick={onItemClick}
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200',
+                'inline-flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors duration-150',
                 'text-text-muted hover:bg-background hover:text-text',
-                !isVertical && 'px-4',
+                !isVertical && 'px-3',
               )}
             >
-              {isVertical && <Icon className="size-4 shrink-0" aria-hidden="true" />}
+              {isVertical && <Icon className="size-4 shrink-0 opacity-70" aria-hidden="true" />}
               {item.label}
               {item.badge && (
                 <Badge variant="accent" className="ml-auto">
@@ -60,15 +60,15 @@ export function NavigationMenu({
             onClick={onItemClick}
             className={({ isActive }) =>
               cn(
-                'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200',
+                'inline-flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors duration-150',
                 isActive
                   ? 'bg-primary-light text-primary'
                   : 'text-text-muted hover:bg-background hover:text-text',
-                !isVertical && 'px-4',
+                !isVertical && 'px-3',
               )
             }
           >
-            {isVertical && <Icon className="size-4 shrink-0" aria-hidden="true" />}
+            {isVertical && <Icon className="size-4 shrink-0 opacity-70" aria-hidden="true" />}
             {item.label}
             {item.badge && (
               <Badge variant="accent" className={isVertical ? 'ml-auto' : ''}>
