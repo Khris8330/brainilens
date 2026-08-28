@@ -13,9 +13,11 @@ import { getAuthenticatedStudent } from '@/lib/student-profile'
 interface AuthContextValue {
   user: User | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
   register: (fullName: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  /** Call after student-login setSession so user is mapped before navigate */
+  refreshUser: () => Promise<User | null>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -97,9 +99,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  async function login(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+  async function login(email: string, password: string): Promise<User> {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
     if (error) throw new Error(authErrorMessage(error))
+
+    // Map user immediately so navigate does not race with onAuthStateChange
+    const mapped = await mapUser(data.session)
+    if (!mapped) {
+      throw new Error('We could not load your profile. Please try again.')
+    }
+    setUser(mapped)
+    setIsLoading(false)
+    return mapped
+  }
+
+  async function refreshUser(): Promise<User | null> {
+    const { data } = await supabase.auth.getSession()
+    const mapped = await mapUser(data.session)
+    setUser(mapped)
+    setIsLoading(false)
+    return mapped
   }
 
   async function register(fullName: string, email: string, password: string) {
@@ -114,15 +136,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     })
     if (error) throw new Error(authErrorMessage(error))
-    if (!data.session) throw new Error('Account created. Check your email to confirm your account before logging in.')
+    if (!data.session) {
+      throw new Error(
+        'Account created. Check your email to confirm your account before logging in.',
+      )
+    }
+    const mapped = await mapUser(data.session)
+    if (mapped) {
+      setUser(mapped)
+      setIsLoading(false)
+    }
   }
 
   async function logout() {
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error('We could not log you out. Please try again.')
+    setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
