@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Play, Sparkles } from 'lucide-react'
+import { ArrowRight, Play } from 'lucide-react'
 import { Button, Modal } from '@/components/ui'
 import { routes } from '@/routes'
 import { HeroCarousel } from '../components/HeroCarousel'
@@ -17,13 +17,12 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
         >
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary-light px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="size-3.5" aria-hidden="true" />
+          <span className="inline-flex items-center rounded-full border border-primary/15 bg-primary-light px-3 py-1 text-xs font-medium text-primary">
             Weekly insights for parents
           </span>
 
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-5xl lg:text-[3.15rem] lg:leading-[1.12]">
-            Know how your child is learning — every week
+            Know how your child is learning, every week
           </h1>
 
           <p className="mt-5 max-w-xl text-lg text-text-muted">

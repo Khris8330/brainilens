@@ -5,12 +5,12 @@ const points = [
   {
     title: 'Explains concepts in plain language',
     description:
-      'When something doesn’t click the first time, Lens breaks it down with grade-level examples.',
+      'When something does not click the first time, Lens breaks it down with grade-level examples.',
   },
   {
     title: 'Answers questions, patiently',
     description:
-      'Your child can ask follow-ups anytime — without feeling rushed or judged.',
+      'Your child can ask follow-ups anytime, without feeling rushed or judged.',
   },
   {
     title: 'Feeds the parent view',
@@ -51,7 +51,7 @@ export function AIHighlightSection() {
             A patient tutor that stays in the room
           </h2>
           <p className="mt-4 text-lg text-text-muted">
-            Lens works beside your child during study — not to do the work for them, but to help ideas stick.
+            Lens works beside your child during study, not to do the work for them, but to help ideas stick.
           </p>
 
           <ul className="mt-8 space-y-5">

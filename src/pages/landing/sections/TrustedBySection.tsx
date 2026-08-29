@@ -5,7 +5,7 @@ export function TrustedBySection() {
         <p className="text-center text-sm text-text-muted">
           Built for families who want{' '}
           <span className="font-medium text-text">weekly clarity</span>
-          {' '}— not year-end surprises
+          , not year-end surprises
         </p>
       </div>
     </section>

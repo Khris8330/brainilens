@@ -38,7 +38,7 @@ const features: Feature[] = [
     icon: FileText,
     title: 'Parent reports',
     description:
-      'Readable summaries of strengths, growth areas, and recommended next steps — ready to act on.',
+      'Readable summaries of strengths, growth areas, and recommended next steps, ready to act on.',
     span: 'md:col-span-2',
   },
 ]
@@ -52,7 +52,7 @@ export function FeaturesSection() {
             Everything you need to stay close to their learning
           </h2>
           <p className="mt-4 text-lg text-text-muted">
-            A focused toolkit — not another noisy dashboard.
+            A focused toolkit, not another noisy dashboard.
           </p>
         </div>
 
