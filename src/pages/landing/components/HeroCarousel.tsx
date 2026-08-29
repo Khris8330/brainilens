@@ -2,25 +2,26 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/utils'
+import { heroParentChild, heroChildLens, heroDashboard } from '@/assets/landing'
 
 const slides = [
   {
-    id: 'dashboard',
-    src: '/images/brainilens-hero.png',
-    alt: 'Parent dashboard showing weekly learning progress',
+    id: 'parent-child',
+    src: heroParentChild,
+    alt: 'Parent and child reviewing weekly learning progress together',
     caption: 'Weekly progress at a glance',
   },
   {
-    id: 'lens',
-    src: '/images/brainilens-lens.png',
-    alt: 'Lens AI companion helping with a lesson',
+    id: 'child-lens',
+    src: heroChildLens,
+    alt: 'Child learning with Lens, the AI companion',
     caption: 'Lens teaches alongside your child',
   },
   {
-    id: 'mascot',
-    src: '/images/lens-mascot.png',
-    alt: 'Lens, the BrainiLens learning companion',
-    caption: 'A calm companion for every study session',
+    id: 'dashboard',
+    src: heroDashboard,
+    alt: 'Parent dashboard showing weekly learning progress',
+    caption: 'Clear insights on every subject',
   },
 ] as const
 

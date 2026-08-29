@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
+import { lensMascot } from '@/assets/landing'
 
 const points = [
   {
@@ -31,7 +32,7 @@ export function AIHighlightSection() {
           className="order-2 flex justify-center lg:order-1"
         >
           <img
-            src="/images/brainilens-lens.png"
+            src={lensMascot}
             alt="Lens, the BrainiLens AI learning companion"
             className="h-auto w-full max-w-md rounded-2xl border border-border object-cover shadow-soft lg:max-w-none"
           />
