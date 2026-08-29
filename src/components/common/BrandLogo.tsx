@@ -16,14 +16,14 @@ const markSize = {
 } as const
 
 const wordSize = {
-  sm: 'text-sm',
+  sm: 'text-[13px]',
   md: 'text-sm',
   lg: 'text-lg',
 } as const
 
 /**
- * Approved primary mark: solid navy block letter B with amber lightning bolt.
- * Matches the designed logo (filled B glyph + bolt), not a plain square.
+ * Exact approved mark: solid navy block letter B with amber lightning bolt.
+ * Single compound path (evenodd) so counters are transparent, not painted white.
  */
 export function BrandMark({
   size = 'md',
@@ -34,35 +34,25 @@ export function BrandMark({
 }) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 56 56"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(markSize[size], 'shrink-0', className)}
       aria-hidden="true"
     >
-      {/* Outer B body */
+      {/* Solid B with transparent counters (matches approved logo silhouette) */
       }
       <path
         fill="#0B2140"
-        d="M10 8c0-2.2 1.8-4 4-4h22c8.8 0 15 5.8 15 14 0 4.5-2.1 8.3-5.6 10.7 4.6 2.2 7.6 6.8 7.6 12.3 0 8.8-7 14-16.8 14H14c-2.2 0-4-1.8-4-4V8z"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 6c0-1.66 1.34-3 3-3h18.5c7.4 0 12.5 4.55 12.5 11.2 0 3.7-1.7 6.75-4.55 8.7 3.85 1.85 6.3 5.55 6.3 10.15C44 42.9 38.1 48 29.2 48H11c-1.66 0-3-1.34-3-3V6zm11 8.5v8.2h8.4c2.85 0 4.55-1.55 4.55-4.1s-1.7-4.1-4.55-4.1H19zm0 13.1v9.4h9.5c3.2 0 5.15-1.8 5.15-4.7s-1.95-4.7-5.15-4.7H19z"
       />
-      {/* Upper bowl cutout */
-      }
-      <path
-        fill="#ffffff"
-        d="M24 16h10c3.6 0 5.8 2 5.8 5.1S37.6 26.2 34 26.2H24V16z"
-      />
-      {/* Lower bowl cutout */
-      }
-      <path
-        fill="#ffffff"
-        d="M24 32h11.5c4 0 6.5 2.3 6.5 5.8s-2.5 5.8-6.5 5.8H24V32z"
-      />
-      {/* Amber lightning bolt */
+      {/* Amber bolt — positioned like the approved mark */
       }
       <path
         fill="#E8A317"
-        d="M32 12 20 32h8.5l-3.2 18 19.5-25h-8.2L40 12H32z"
+        d="M27.2 11.2 16.5 28.8h7.1l-2.7 15.2 16.8-21.2h-7.1l2.9-11.6h-5.3z"
       />
     </svg>
   )
@@ -88,12 +78,12 @@ export function BrandLogo({
 
   if (to === null) {
     return (
-      <span className={cn('inline-flex items-center gap-1.5', className)}>{content}</span>
+      <span className={cn('inline-flex items-center gap-1', className)}>{content}</span>
     )
   }
 
   return (
-    <Link to={to} className={cn('inline-flex items-center gap-1.5', className)}>
+    <Link to={to} className={cn('inline-flex items-center gap-1', className)}>
       {content}
     </Link>
   )
