@@ -12,7 +12,7 @@ export function AuthLayout() {
         className="w-full max-w-md"
       >
         <div className="mb-8 flex flex-col items-center text-center">
-          <BrandLogo to="/" size="lg" />
+          <BrandLogo to="/" size="lg" variant="stacked" />
           <p className="mt-3 text-sm text-text-muted">
             Track progress. Accelerate growth.
           </p>
