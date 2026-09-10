@@ -28,9 +28,7 @@ const NAVY = '#14274E'
 const GOLD = '#DC9F42'
 
 /**
- * Parent + child embrace mark (vectorized from approved logo).
- * Gold heads + navy continuous body.
- * Path data lives in public/brand/logo-icon.svg — we inline for zero network dependency.
+ * Parent + child embrace mark (approved SVG).
  */
 export function BrandMark({
   size = 'md',
@@ -40,15 +38,13 @@ export function BrandMark({
   className?: string
 }) {
   return (
-    <svg
-      viewBox="0 0 100 157.42"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn(markSize[size], 'shrink-0', className)}
+    <img
+      src="/brand/logo-icon.svg"
+      alt=""
       aria-hidden="true"
-      fill="none"
-    >
-      <use href="/brand/logo-icon.svg#mark" />
-    </svg>
+      className={cn(markSize[size], 'shrink-0 object-contain', className)}
+      draggable={false}
+    />
   )
 }
 
