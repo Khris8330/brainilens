@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { cn } from '@/utils'
-import { MARK_PATH } from './markPath'
 
 export interface BrandLogoProps {
   /** Show the brainilens wordmark next to the icon */
@@ -29,7 +28,7 @@ const NAVY = '#14274E'
 const GOLD = '#DC9F42'
 
 /**
- * Parent + child embrace mark — inline SVG from the approved logo.
+ * Parent + child embrace mark from the approved logo.
  */
 export function BrandMark({
   size = 'md',
@@ -39,17 +38,13 @@ export function BrandMark({
   className?: string
 }) {
   return (
-    <svg
-      viewBox="0 0 100 157.42"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn(markSize[size], 'shrink-0', className)}
+    <img
+      src="/brand/logo-icon.svg?v=embrace3"
+      alt=""
       aria-hidden="true"
-      fill="none"
-    >
-      <path d={MARK_PATH} fill={NAVY} />
-      <circle cx="34.65" cy="16.38" r="11.31" fill={GOLD} />
-      <circle cx="51.00" cy="66.16" r="11.33" fill={GOLD} />
-    </svg>
+      className={cn(markSize[size], 'shrink-0 object-contain', className)}
+      draggable={false}
+    />
   )
 }
 
