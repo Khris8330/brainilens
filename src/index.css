@@ -46,6 +46,36 @@
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark appearance (html.dark from applyTheme) */
+html.dark {
+  --color-primary: #93c5fd;
+  --color-primary-hover: #bfdbfe;
+  --color-primary-light: #1e293b;
+  --color-secondary: #94a3b8;
+  --color-secondary-hover: #cbd5e1;
+  --color-secondary-light: #1e293b;
+  --color-accent: #f0b429;
+  --color-accent-hover: #f5c84c;
+  --color-accent-light: #3b2f14;
+
+  --color-background: #0b1220;
+  --color-surface: #111827;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #1f2937;
+  --color-border-light: #172033;
+
+  --color-success: #4ade80;
+  --color-warning: #f0b429;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-elevated: 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-modal: 0 24px 48px -12px rgb(0 0 0 / 0.6);
+}
+
 @layer base {
   *,
   *::before,
