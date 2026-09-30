@@ -61,7 +61,7 @@ export const footerLinks = {
     { label: 'Guides for Parents', href: '#' },
   ],
   legal: [
-    { label: 'Privacy Policy', href: '#' },
+    { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms', href: '#' },
     { label: 'Cookies', href: '#' },
   ],
