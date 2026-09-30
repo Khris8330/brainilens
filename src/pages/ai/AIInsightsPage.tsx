@@ -2,23 +2,15 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Bot, Send, Sparkles, User as UserIcon } from 'lucide-react'
 import { Card, CardContent, Button, Select } from '@/components/ui'
 import { subjects } from '@/data/mockData'
-import { suggestedQuestions, getMockAIResponse } from '@/data/aiResponses'
+import { suggestedQuestions } from '@/data/aiResponses'
 import type { ChatMessage } from '@/types'
 import { formatNigeriaTime } from '@/lib/time'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 
 const subjectOptions = [
   { value: 'all', label: 'All subjects' },
   ...subjects.map((s) => ({ value: s.name, label: s.name })),
-]
-
-const initialMessages: ChatMessage[] = [
-  {
-    id: 'welcome',
-    role: 'assistant',
-    content:
-      "Hi! I'm your Lens AI Companion. Ask me to explain a concept, help with homework, or just tell me what you're working on this week.",
-    timestamp: new Date().toISOString(),
-  },
 ]
 
 function timeNow() {
@@ -26,10 +18,20 @@ function timeNow() {
 }
 
 export function AIInsightsPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const { user } = useAuth()
+  const firstName = user?.name?.split(' ')[0] ?? 'there'
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: `Hi ${firstName}! I am Lens, your learning companion. Ask me to explain a concept, help with homework, or tell me what you are working on.`,
+      timestamp: timeNow(),
+    },
+  ])
   const [input, setInput] = useState('')
   const [subjectFocus, setSubjectFocus] = useState('all')
   const [isThinking, setIsThinking] = useState(false)
+  const [error, setError] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const messageIdRef = useRef(0)
 
@@ -40,7 +42,7 @@ export function AIInsightsPage() {
     })
   }, [messages, isThinking])
 
-  function sendMessage(text: string) {
+  async function sendMessage(text: string) {
     const trimmed = text.trim()
     if (!trimmed || isThinking) return
 
@@ -50,28 +52,70 @@ export function AIInsightsPage() {
       content: trimmed,
       timestamp: timeNow(),
     }
-    setMessages((prev) => [...prev, userMessage])
+    const nextMessages = [...messages, userMessage]
+    setMessages(nextMessages)
     setInput('')
     setIsThinking(true)
+    setError('')
 
-    setTimeout(
-      () => {
-        const aiMessage: ChatMessage = {
+    try {
+      const history = nextMessages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .slice(-6)
+        .map((m) => ({ role: m.role, content: m.content }))
+
+      const prompt =
+        subjectFocus !== 'all' ? `Subject focus: ${subjectFocus}. ${trimmed}` : trimmed
+
+      const { data, error: invokeError } = await supabase.functions.invoke('lens-chat', {
+        body: { message: prompt, history },
+      })
+
+      if (invokeError) throw invokeError
+
+      if (data?.error) {
+        const msg =
+          typeof data.error === 'object' && data.error?.message
+            ? String(data.error.message)
+            : 'Lens could not reply right now.'
+        throw new Error(msg)
+      }
+
+      const reply =
+        typeof data?.data?.reply === 'string' && data.data.reply.trim()
+          ? data.data.reply.trim()
+          : 'I am not sure how to answer that yet. Try asking in a different way.'
+
+      setMessages((prev) => [
+        ...prev,
+        {
           id: `msg-${++messageIdRef.current}-ai`,
           role: 'assistant',
-          content: getMockAIResponse(trimmed),
+          content: reply,
           timestamp: timeNow(),
-        }
-        setMessages((prev) => [...prev, aiMessage])
-        setIsThinking(false)
-      },
-      1100,
-    )
+        },
+      ])
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Lens could not reply right now. Please try again.'
+      setError(message)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `msg-${++messageIdRef.current}-ai`,
+          role: 'assistant',
+          content: 'Sorry, I could not answer just now. Please try again in a moment.',
+          timestamp: timeNow(),
+        },
+      ])
+    } finally {
+      setIsThinking(false)
+    }
   }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    sendMessage(input)
+    void sendMessage(input)
   }
 
   return (
@@ -83,7 +127,7 @@ export function AIInsightsPage() {
             Lens AI Companion
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            A patient tutor for questions, big or small.
+            Real AI answers for learning questions. Conversations are logged for safety review.
           </p>
         </div>
         <div className="w-full sm:w-56">
@@ -96,97 +140,78 @@ export function AIInsightsPage() {
         </div>
       </div>
 
-      <Card className="flex flex-1 flex-col overflow-hidden">
-        <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-            >
+      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+          <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+            {messages.map((message) => (
               <div
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
-                  message.role === 'assistant'
-                    ? 'bg-secondary-light text-secondary'
-                    : 'bg-primary-light text-primary'
-                }`}
+                key={message.id}
+                className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.role === 'assistant' ? (
-                  <Bot className="size-4" aria-hidden="true" />
-                ) : (
-                  <UserIcon className="size-4" aria-hidden="true" />
+                {message.role === 'assistant' && (
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary-light">
+                    <Sparkles className="size-4 text-secondary" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                    message.role === 'user' ? 'bg-primary text-white' : 'bg-background text-text'
+                  }`}
+                >
+                  <p>{message.content}</p>
+                  <p
+                    className={`mt-1 text-[10px] ${
+                      message.role === 'user' ? 'text-white/70' : 'text-text-muted'
+                    }`}
+                  >
+                    {formatNigeriaTime(message.timestamp)}
+                  </p>
+                </div>
+                {message.role === 'user' && (
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-light">
+                    <UserIcon className="size-4 text-primary" />
+                  </div>
                 )}
               </div>
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                  message.role === 'assistant'
-                    ? 'bg-background text-text'
-                    : 'bg-primary text-white'
-                }`}
-              >
-                {message.content}
-                <span className="mt-1 block text-[11px] opacity-70">{formatNigeriaTime(message.timestamp)}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+            {isThinking && (
+              <p className="text-sm text-text-muted" role="status">
+                Lens is thinking…
+              </p>
+            )}
+          </div>
 
-          {isThinking && (
-            <div className="flex gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary-light text-secondary">
-                <Bot className="size-4" aria-hidden="true" />
-              </div>
-              <div className="flex items-center gap-1.5 rounded-2xl bg-background px-4 py-3">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="size-1.5 animate-bounce rounded-full bg-text-muted"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <CardContent className="border-t border-border p-4">
-          {messages.length <= 1 && (
+          <div className="border-t border-border p-4">
             <div className="mb-3 flex flex-wrap gap-2">
-              {suggestedQuestions.map((q) => (
+              {suggestedQuestions.slice(0, 4).map((q) => (
                 <button
                   key={q}
                   type="button"
-                  onClick={() => sendMessage(q)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-primary/30 hover:text-primary"
+                  onClick={() => void sendMessage(q)}
+                  className="rounded-full border border-border px-3 py-1 text-xs text-text-muted hover:border-primary hover:text-text"
                 >
-                  <Sparkles className="size-3" aria-hidden="true" />
                   {q}
                 </button>
               ))}
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex items-end gap-2">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  sendMessage(input)
-                }
-              }}
-              placeholder="Ask a question..."
-              rows={1}
-              className="h-11 max-h-32 flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-            />
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!input.trim() || isThinking}
-              aria-label="Send message"
-            >
-              <Send className="size-4" aria-hidden="true" />
-            </Button>
-          </form>
+            {error && (
+              <p className="mb-2 text-sm text-error" role="alert">
+                {error}
+              </p>
+            )}
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask Lens a learning question…"
+                className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm text-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                disabled={isThinking}
+              />
+              <Button type="submit" disabled={isThinking || !input.trim()} aria-label="Send">
+                <Send className="size-4" />
+              </Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>
