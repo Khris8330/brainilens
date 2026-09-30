@@ -3,9 +3,50 @@ import { BookOpen, LockKeyhole, Plus, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent, EmptyState, Input, LoadingOverlay, Select, TextArea } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { createLearningPlanItem, deleteLearningPlanItem, getLearningPlanItems, getParentChildren, type LearningPlanItemRecord } from '@/lib/learning-data'
+import {
+  createLearningPlanItem,
+  deleteLearningPlanItem,
+  getLearningPlanItems,
+  getParentChildren,
+  type LearningPlanItemRecord,
+} from '@/lib/learning-data'
 
-interface Child { id: string; name: string }
+interface Child {
+  id: string
+  name: string
+}
+
+function StatusBadge({ status }: { status: LearningPlanItemRecord['status'] }) {
+  const styles: Record<LearningPlanItemRecord['status'], string> = {
+    pending: 'bg-background text-text-muted border border-border',
+    generating: 'bg-primary-light text-primary',
+    ready: 'bg-secondary-light text-secondary',
+    failed: 'bg-error/10 text-error',
+  }
+  const labels: Record<LearningPlanItemRecord['status'], string> = {
+    pending: 'Pending',
+    generating: 'Generating…',
+    ready: 'Ready',
+    failed: 'Failed',
+  }
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles[status]}`}>
+      {labels[status]}
+    </span>
+  )
+}
+
+function plainGenerationError(code: string | null) {
+  if (!code) return 'Generation failed. You can try again.'
+  const map: Record<string, string> = {
+    AI_NOT_CONFIGURED: 'AI is not configured. Please try again later.',
+    AI_TIMEOUT: 'The AI took too long. Please try again.',
+    AI_OUTPUT_INVALID: 'The AI returned an unexpected format. Please try again.',
+    ALREADY_GENERATING: 'Generation is already in progress.',
+    PERSIST_FAILED: 'Could not save the lesson. Please try again.',
+  }
+  return map[code] ?? 'Generation failed. You can try again.'
+}
 
 export function WeeklyLearningPage() {
   const { user } = useAuth()
@@ -38,7 +79,6 @@ export function WeeklyLearningPage() {
       const initialChildId = next[0]?.id ?? ''
       setSelectedChildId(initialChildId)
 
-      // Load items for the initially selected child (this was missing before)
       if (initialChildId) {
         await loadItems(initialChildId)
       } else {
@@ -85,11 +125,14 @@ export function WeeklyLearningPage() {
   async function handleGenerate(itemId: string) {
     setGeneratingItemId(itemId)
     setError('')
+    setItems((current) =>
+      current.map((item) => (item.id === itemId ? { ...item, status: 'generating' } : item)),
+    )
     const { error: generationError } = await supabase.functions.invoke('generate-learning-content', {
       body: { learningPlanItemId: itemId },
     })
     if (generationError) setError(generationError.message)
-    else if (selectedChildId) await loadItems(selectedChildId)
+    if (selectedChildId) await loadItems(selectedChildId)
     setGeneratingItemId(null)
   }
 
@@ -98,12 +141,12 @@ export function WeeklyLearningPage() {
       <div>
         <h1 className="text-2xl font-semibold text-text">Weekly Learning</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Plan focus areas for each child. These are guidance items, not assignments.
+          Plan focus areas for each child. Generate lessons when ready.
         </p>
       </div>
 
       {error && (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-error" role="alert">
           {error}
         </p>
       )}
@@ -112,7 +155,7 @@ export function WeeklyLearningPage() {
         <EmptyState
           icon={BookOpen}
           title="No child profiles yet"
-          description="Create a child profile to plan weekly learning."
+          description="Create a child profile on the parent dashboard to plan weekly learning."
         />
       ) : (
         <>
@@ -147,16 +190,26 @@ export function WeeklyLearningPage() {
                             <p className="text-xs font-medium uppercase tracking-wide text-primary">
                               {item.subject}
                             </p>
-                            <span className="rounded-full bg-secondary-light px-2 py-0.5 text-xs font-medium capitalize text-secondary">
-                              {item.status}
-                            </span>
+                            <StatusBadge status={item.status} />
                           </div>
                           <h2 className="mt-1 font-semibold text-text">{item.topic}</h2>
                           {item.description && (
                             <p className="mt-2 text-sm leading-6 text-text-muted">{item.description}</p>
                           )}
-                          {item.errorMessage && item.status === 'failed' && (
-                            <p className="mt-2 text-sm text-destructive">{item.errorMessage}</p>
+                          {item.status === 'generating' && (
+                            <p className="mt-2 text-sm text-primary">
+                              Lens is writing the lesson. This can take a minute.
+                            </p>
+                          )}
+                          {item.status === 'ready' && item.generatedAssignmentId && (
+                            <p className="mt-2 text-sm text-secondary">
+                              Lesson is ready for your child on Assignments.
+                            </p>
+                          )}
+                          {item.status === 'failed' && (
+                            <p className="mt-2 text-sm text-error">
+                              {plainGenerationError(item.errorMessage)}
+                            </p>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
@@ -165,6 +218,7 @@ export function WeeklyLearningPage() {
                             size="sm"
                             onClick={() => void handleDelete(item.id)}
                             aria-label={`Delete ${item.topic}`}
+                            disabled={item.status === 'generating'}
                           >
                             <Trash2 className="size-4" aria-hidden="true" />
                           </Button>
@@ -174,7 +228,11 @@ export function WeeklyLearningPage() {
                               onClick={() => void handleGenerate(item.id)}
                               disabled={generatingItemId !== null}
                             >
-                              {generatingItemId === item.id ? 'Generating…' : 'Generate lesson'}
+                              {generatingItemId === item.id
+                                ? 'Generating…'
+                                : item.status === 'failed'
+                                  ? 'Retry'
+                                  : 'Generate lesson'}
                             </Button>
                           )}
                         </div>
@@ -208,7 +266,8 @@ export function WeeklyLearningPage() {
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-sm font-medium text-text">
-                    Description <span className="text-xs font-normal text-text-muted">Optional</span>
+                    Description{' '}
+                    <span className="text-xs font-normal text-text-muted">Optional</span>
                     <TextArea
                       value={form.description}
                       onChange={(event) => setForm({ ...form, description: event.target.value })}
