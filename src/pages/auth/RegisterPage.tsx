@@ -5,6 +5,8 @@ import { Button, Card, CardContent, Input } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { routes } from '@/routes'
 
+const CONSENT_VERSION = '2026-09'
+
 export function RegisterPage() {
   const { register } = useAuth()
   const navigate = useNavigate()
@@ -13,6 +15,7 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [parentalConsent, setParentalConsent] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -36,13 +39,21 @@ export function RegisterPage() {
       setError('Passwords do not match.')
       return
     }
+    if (!parentalConsent) {
+      setError('Please confirm parental consent before creating an account.')
+      return
+    }
 
     setIsSubmitting(true)
     try {
-      await register(fullName, email, password)
+      await register(fullName, email, password, true)
       navigate('/parent', { replace: true })
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : 'We could not create your account. Please try again.')
+      setError(
+        authError instanceof Error
+          ? authError.message
+          : 'We could not create your account. Please try again.',
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -51,11 +62,9 @@ export function RegisterPage() {
   return (
     <Card>
       <CardContent className="p-6 sm:p-8">
-        <h2 className="text-xl font-semibold text-text">
-          Create your account
-        </h2>
+        <h2 className="text-xl font-semibold text-text">Create your account</h2>
         <p className="mt-1 text-sm text-text-muted">
-          Free for your first child&apos;s profile , no credit card required.
+          Free for your first child&apos;s profile. No credit card required.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
@@ -92,31 +101,40 @@ export function RegisterPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
 
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3">
+            <input
+              type="checkbox"
+              className="mt-1 size-4 rounded border-border text-primary focus:ring-primary/30"
+              checked={parentalConsent}
+              onChange={(e) => setParentalConsent(e.target.checked)}
+              required
+            />
+            <span className="text-sm leading-6 text-text">
+              I am a parent or legal guardian. I consent to brainilens collecting and processing
+              learning data for my child under 13 solely to provide educational features, progress
+              tracking, and parental insights, as described in the{' '}
+              <Link to={routes.privacy} className="font-medium text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              . Consent version {CONSENT_VERSION}.
+            </span>
+          </label>
+
           {error && (
             <p className="text-sm text-error" role="alert">
               {error}
             </p>
           )}
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            isLoading={isSubmitting}
-          >
-            {!isSubmitting && (
-              <UserPlus className="size-4" aria-hidden="true" />
-            )}
+          <Button type="submit" className="w-full" size="lg" isLoading={isSubmitting}>
+            {!isSubmitting && <UserPlus className="size-4" aria-hidden="true" />}
             Create account
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-text-muted">
           Already have an account?{' '}
-          <Link
-            to={routes.roleSelection}
-            className="font-medium text-primary hover:underline"
-          >
+          <Link to={routes.roleSelection} className="font-medium text-primary hover:underline">
             Log in
           </Link>
         </p>
