@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { Check, User, Bell, Sliders, Shield, Palette, Loader2, Trash2 } from 'lucide-react'
 import {
@@ -96,6 +97,9 @@ export function SettingsPage() {
   const profileSave = useSectionSave()
 
   const [studentRowId, setStudentRowId] = useState<string | null>(null)
+  const [allChildren, setAllChildren] = useState<
+    Array<{ id: string; full_name: string; student_id: string; grade: string | null }>
+  >([])
   const [childName, setChildName] = useState('')
   const [grade, setGrade] = useState('2nd Grade')
   const childSave = useSectionSave()
@@ -150,8 +154,10 @@ export function SettingsPage() {
       const children = (childrenResult.data ?? []) as Array<{
         id: string
         full_name: string
+        student_id: string
         grade: string | null
       }>
+      setAllChildren(children)
       if (children.length > 0) {
         const first = children[0]
         setStudentRowId(first.id)
@@ -226,8 +232,40 @@ export function SettingsPage() {
           <CardHeader className="flex flex-row items-center gap-2">
             <User className="size-4 text-secondary" aria-hidden="true" />
             <div>
-              <CardTitle>Child information</CardTitle>
-              <CardDescription>Details used across the dashboard.</CardDescription>
+              <CardTitle>Children</CardTitle>
+              <CardDescription>
+                Open each child's settings for profile edits and password regeneration.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {allChildren.length === 0 ? (
+              <p className="text-sm text-text-muted">
+                No children yet. Create one from the parent dashboard.
+              </p>
+            ) : (
+              allChildren.map((child) => (
+                <Link
+                  key={child.id}
+                  to={`/settings/children/${child.id}`}
+                  className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm hover:border-primary"
+                >
+                  <span className="font-medium text-text">{child.full_name}</span>
+                  <span className="text-xs text-text-muted">{child.student_id}</span>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {user?.role === 'parent' && (
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <User className="size-4 text-secondary" aria-hidden="true" />
+            <div>
+              <CardTitle>Quick child edit</CardTitle>
+              <CardDescription>Update the first linked child without leaving Settings.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -252,8 +290,7 @@ export function SettingsPage() {
             />
             {!studentRowId && (
               <p className="text-sm text-text-muted">
-                No child profile found yet. Create one from Weekly Learning or the parent
-                dashboard first.
+                No child profile found yet. Create one from the parent dashboard first.
               </p>
             )}
             <SectionError message={childSave.error} />
@@ -285,11 +322,7 @@ export function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <ToggleRow
-            label="Email notifications"
-            checked={emailNotifs}
-            onChange={setEmailNotifs}
-          />
+          <ToggleRow label="Email notifications" checked={emailNotifs} onChange={setEmailNotifs} />
           <ToggleRow
             label="Weekly progress digest"
             checked={weeklyDigest}
@@ -465,7 +498,7 @@ export function SettingsPage() {
         <CardHeader className="flex flex-row items-center gap-2">
           <Trash2 className="size-4 text-error" aria-hidden="true" />
           <div>
-            <CardTitle>Account &amp; data</CardTitle>
+            <CardTitle>Account & data</CardTitle>
             <CardDescription>
               Request deletion of your parent account and linked child learning data.
             </CardDescription>
