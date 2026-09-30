@@ -6,6 +6,7 @@ import {
 } from '@/layouts'
 import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
+import { PrivacyPolicyPage } from '@/pages/legal/PrivacyPolicyPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { StudentLoginPage } from '@/pages/auth/StudentLoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: '/',
         element: <LandingPage />,
+      },
+      {
+        path: '/privacy',
+        element: <PrivacyPolicyPage />,
       },
     ],
   },
@@ -149,6 +154,7 @@ export const router = createBrowserRouter([
 
 export const routes = {
   landing: '/',
+  privacy: '/privacy',
   roleSelection: '/auth/role',
   login: '/auth/login',
   studentLogin: '/auth/student-login',
