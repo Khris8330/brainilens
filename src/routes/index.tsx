@@ -29,6 +29,8 @@ import { StudentProgressPage } from '@/pages/student/StudentProgressPage'
 import { StudentProgressReviewPage } from '@/pages/student/StudentProgressReviewPage'
 import { StudentAIPage } from '@/pages/student/StudentAIPage'
 import { StudentProfilePage } from '@/pages/student/StudentProfilePage'
+import { GamesHubPage } from '@/pages/student/games/GamesHubPage'
+import { WordRushPage } from '@/pages/student/games/WordRushPage'
 
 export const router = createBrowserRouter([
   {
@@ -81,6 +83,8 @@ export const router = createBrowserRouter([
       { path: '/student/progress/:learningContentId', element: <StudentProgressReviewPage /> },
       { path: '/student/ai', element: <StudentAIPage /> },
       { path: '/student/profile', element: <StudentProfilePage /> },
+      { path: '/student/games', element: <GamesHubPage /> },
+      { path: '/student/games/word-rush', element: <WordRushPage /> },
     ],
   },
 ])
@@ -105,4 +109,6 @@ export const routes = {
   studentProgress: '/student/progress',
   studentAi: '/student/ai',
   studentProfile: '/student/profile',
+  studentGames: '/student/games',
+  studentWordRush: '/student/games/word-rush',
 } as const
