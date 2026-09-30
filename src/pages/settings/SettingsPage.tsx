@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Check, User, Bell, Sliders, Shield, Palette, Loader2 } from 'lucide-react'
+import { Check, User, Bell, Sliders, Shield, Palette, Loader2, Trash2 } from 'lucide-react'
 import {
   Card,
   CardHeader,
@@ -458,6 +458,50 @@ export function SettingsPage() {
               })
             }
           />
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <Trash2 className="size-4 text-error" aria-hidden="true" />
+          <div>
+            <CardTitle>Account &amp; data</CardTitle>
+            <CardDescription>
+              Request deletion of your parent account and linked child learning data.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm leading-6 text-text-muted">
+          <p>
+            Under our retention policy, a verified deletion request removes your profile, linked
+            student profiles, assignments, progress, and assessment history for children under this
+            account. Processing is completed within 30 days.
+          </p>
+          <p>
+            To request deletion, email{' '}
+            <a
+              className="font-medium text-primary hover:underline"
+              href="mailto:privacy@brainilens.app?subject=Account%20deletion%20request"
+            >
+              privacy@brainilens.app
+            </a>{' '}
+            from the same address on your account, or use the button below to open a pre-filled
+            message.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              const subject = encodeURIComponent('brainilens account deletion request')
+              const body = encodeURIComponent(
+                `Please delete my brainilens parent account and all linked child learning data.\n\nAccount email: ${user?.email ?? ''}\nFull name: ${user?.name ?? ''}\n\nI confirm I am the account owner.`,
+              )
+              window.location.href = `mailto:privacy@brainilens.app?subject=${subject}&body=${body}`
+            }}
+          >
+            Request account deletion
+          </Button>
         </CardFooter>
       </Card>
     </div>
