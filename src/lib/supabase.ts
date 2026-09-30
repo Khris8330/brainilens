@@ -7,4 +7,11 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+/** Real Supabase Auth client. Session is persisted and refreshed by the SDK (not app-managed localStorage). */
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+})

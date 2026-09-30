@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import { homePathForRole } from '@/lib/auth-roles'
 import { supabase } from '@/lib/supabase'
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
 
   useEffect(() => {
     let cancelled = false
@@ -13,17 +16,23 @@ export function AuthCallbackPage() {
       if (code) {
         await supabase.auth.exchangeCodeForSession(code)
       }
-      const { data } = await supabase.auth.getSession()
-      if (!cancelled) {
-        navigate(data.session ? '/parent' : '/auth/login', { replace: true })
+
+      const mapped = await refreshUser()
+      if (cancelled) return
+
+      if (!mapped) {
+        navigate('/auth/login', { replace: true })
+        return
       }
+
+      navigate(homePathForRole(mapped.role), { replace: true })
     }
 
     void completeAuth()
     return () => {
       cancelled = true
     }
-  }, [navigate])
+  }, [navigate, refreshUser])
 
   return <p className="p-8 text-center text-text-muted">Completing sign-in…</p>
 }
