@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { BookOpen, LockKeyhole, Plus, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent, EmptyState, Input, LoadingOverlay, Select, TextArea } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
@@ -59,11 +59,17 @@ export function WeeklyLearningPage() {
   const [generatingItemId, setGeneratingItemId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
-  async function loadItems(studentId: string) {
+  const selectedChildIdRef = useRef(selectedChildId)
+  selectedChildIdRef.current = selectedChildId
+
+  const loadItems = useCallback(async (studentId: string, opts?: { quiet?: boolean }) => {
     const result = await getLearningPlanItems(studentId)
-    if (result.error) setError('Weekly learning items could not be loaded.')
+    if (result.error && !opts?.quiet) {
+      setError('Weekly learning items could not be loaded.')
+    }
     setItems(result.data)
-  }
+    return result.data
+  }, [])
 
   useEffect(() => {
     if (!user?.id) return
@@ -87,7 +93,56 @@ export function WeeklyLearningPage() {
 
       setLoading(false)
     })()
-  }, [user?.id])
+  }, [user?.id, loadItems])
+
+  // Poll while any item is generating so the UI moves to ready/failed without a manual refresh.
+  // Trigger path: parent clicks Generate → frontend invokes generate-learning-content edge function
+  // (not a background job). The function sets status=generating, then ready or failed when done.
+  // Client polls because the HTTP call can time out before the function finishes.
+  useEffect(() => {
+    if (!selectedChildId) return
+    const hasGenerating = items.some((item) => item.status === 'generating') || generatingItemId
+    if (!hasGenerating) return
+
+    const interval = window.setInterval(() => {
+      void loadItems(selectedChildId, { quiet: true }).then((data) => {
+        const stillGenerating = data.some((item) => item.status === 'generating')
+        if (!stillGenerating) {
+          setGeneratingItemId(null)
+        }
+      })
+    }, 2500)
+
+    return () => window.clearInterval(interval)
+  }, [selectedChildId, items, generatingItemId, loadItems])
+
+  // Prefer Realtime when available so status flips as soon as the row updates.
+  useEffect(() => {
+    if (!selectedChildId) return
+
+    const channel = supabase
+      .channel(`learning-plan-${selectedChildId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'learning_plan_items',
+          filter: `student_id=eq.${selectedChildId}`,
+        },
+        () => {
+          void loadItems(selectedChildId, { quiet: true }).then((data) => {
+            const stillGenerating = data.some((item) => item.status === 'generating')
+            if (!stillGenerating) setGeneratingItemId(null)
+          })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [selectedChildId, loadItems])
 
   async function handleChildChange(studentId: string) {
     setSelectedChildId(studentId)
@@ -126,14 +181,39 @@ export function WeeklyLearningPage() {
     setGeneratingItemId(itemId)
     setError('')
     setItems((current) =>
-      current.map((item) => (item.id === itemId ? { ...item, status: 'generating' } : item)),
+      current.map((item) =>
+        item.id === itemId ? { ...item, status: 'generating', errorMessage: null } : item,
+      ),
     )
-    const { error: generationError } = await supabase.functions.invoke('generate-learning-content', {
-      body: { learningPlanItemId: itemId },
-    })
-    if (generationError) setError(generationError.message)
-    if (selectedChildId) await loadItems(selectedChildId)
-    setGeneratingItemId(null)
+
+    // Fire the edge function; do not block the UI on the full generation time.
+    // Polling + Realtime above will move status from generating → ready/failed.
+    void supabase.functions
+      .invoke('generate-learning-content', {
+        body: { learningPlanItemId: itemId },
+      })
+      .then(async ({ data, error: generationError }) => {
+        if (selectedChildIdRef.current) {
+          await loadItems(selectedChildIdRef.current, { quiet: true })
+        }
+        if (generationError) {
+          const msg = generationError.message || ''
+          if (!/timeout|Failed to fetch|network/i.test(msg)) {
+            setError(msg)
+          }
+        } else if (data?.error) {
+          const code =
+            typeof data.error === 'object' && data.error?.code
+              ? String(data.error.code)
+              : typeof data.error === 'string'
+                ? data.error
+                : 'Generation failed'
+          if (code !== 'ALREADY_GENERATING' && code !== 'ALREADY_GENERATED') {
+            setError(plainGenerationError(code))
+          }
+        }
+        setGeneratingItemId(null)
+      })
   }
 
   return (
@@ -198,7 +278,8 @@ export function WeeklyLearningPage() {
                           )}
                           {item.status === 'generating' && (
                             <p className="mt-2 text-sm text-primary">
-                              Lens is writing the lesson. This can take a minute.
+                              Lens is writing the lesson. This can take a minute. Status updates
+                              automatically when it finishes.
                             </p>
                           )}
                           {item.status === 'ready' && item.generatedAssignmentId && (
