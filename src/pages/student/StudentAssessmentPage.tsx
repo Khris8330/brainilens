@@ -17,7 +17,14 @@ import {
   parseLessonContent,
   type LessonSection,
 } from '@/lib/lesson-content'
-import { submitAssessment, getSubmissionSummary } from '@/lib/assessment'
+import {
+  submitAssessment,
+  getSubmissionSummary,
+  getAssessmentAttemptSummary,
+  formatAssessmentSubmitError,
+  MAX_ASSESSMENT_ATTEMPTS,
+  type AssessmentAttemptSummary,
+} from '@/lib/assessment'
 import { routes } from '@/routes'
 import { supabase } from '@/lib/supabase'
 
@@ -31,7 +38,6 @@ function isAnswerCorrect(
   const assessment = section.assessment
   if (!assessment) return false
 
-  // Open-ended answers are reviewed later; treat as not auto-scored
   if (assessment.type === 'open_ended') return false
 
   const normalized = answer.trim().toLowerCase()
@@ -85,12 +91,20 @@ export function StudentAssessmentPage() {
     correct: number
     total: number
   } | null>(null)
+  const [attemptSummary, setAttemptSummary] = useState<AssessmentAttemptSummary | null>(null)
 
   useEffect(() => {
     if (!user?.id || !assignmentId) return
-    void getStudentAssignment(user.id, assignmentId).then(({ data, error }) => {
+    void getStudentAssignment(user.id, assignmentId).then(async ({ data, error }) => {
       setRecord(data)
       setState(error ? 'error' : data ? 'ready' : 'empty')
+      const contentId = data?.assignment?.learningContent?.id
+      if (data && contentId && user.id) {
+        const { data: summary } = await getAssessmentAttemptSummary(user.id, contentId)
+        setAttemptSummary(summary)
+      } else {
+        setAttemptSummary(null)
+      }
     })
   }, [assignmentId, user?.id])
 
@@ -154,6 +168,12 @@ export function StudentAssessmentPage() {
 
   async function handleSubmit() {
     if (isSubmitting || !assignmentId) return
+    if (attemptSummary?.locked) {
+      setSubmissionError(
+        `You have used all ${MAX_ASSESSMENT_ATTEMPTS} attempts for this assessment. No more submissions are allowed.`,
+      )
+      return
+    }
     const missing = sections.find((section) => !answers[section.id]?.trim())
     if (missing) {
       setSubmissionError(
@@ -172,12 +192,30 @@ export function StudentAssessmentPage() {
     try {
       const responses: unknown[] = []
       for (const section of sections) {
+        const sectionAttempts = attemptSummary?.bySection[section.id] ?? 0
+        if (sectionAttempts >= MAX_ASSESSMENT_ATTEMPTS) {
+          throw new Error(
+            `You have used all ${MAX_ASSESSMENT_ATTEMPTS} attempts for this assessment. No more submissions are allowed.`,
+          )
+        }
         const { data, error } = await submitAssessment({
           assignmentId: assignment.id,
           sectionId: section.id,
           answer: answers[section.id],
         })
         if (error) throw error
+        if (
+          data &&
+          typeof data === 'object' &&
+          'error' in data &&
+          (data as { error?: string }).error
+        ) {
+          const code = String((data as { error?: string }).error)
+          if (code === 'MAX_ATTEMPTS_REACHED') {
+            throw new Error('MAX_ATTEMPTS_REACHED')
+          }
+          throw new Error(code)
+        }
         responses.push(data)
       }
       const summaries = responses.map(getSubmissionSummary)
@@ -190,13 +228,17 @@ export function StudentAssessmentPage() {
         0,
       )
       setResult({ responses, correct: knownCorrect, total: sections.length })
+      if (lesson?.id && user?.id) {
+        const { data: summary } = await getAssessmentAttemptSummary(user.id, lesson.id)
+        setAttemptSummary(summary)
+      }
     } catch (error) {
       if (import.meta.env.DEV) console.error('[v0] Assessment submission failed', error)
-      setSubmissionError(
-        error instanceof Error
-          ? error.message
-          : 'We could not submit the assessment. Your answers are still here; please try again.',
-      )
+      setSubmissionError(formatAssessmentSubmitError(error))
+      if (lesson?.id && user?.id) {
+        const { data: summary } = await getAssessmentAttemptSummary(user.id, lesson.id)
+        setAttemptSummary(summary)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -220,6 +262,7 @@ export function StudentAssessmentPage() {
         lessonTitle={lesson.title}
         questionCount={sections.length}
         estimatedMinutes={parsed.lesson?.estimated_minutes ?? null}
+        attemptSummary={attemptSummary}
         onStart={() => setStarted(true)}
       />
     )
@@ -234,6 +277,12 @@ export function StudentAssessmentPage() {
         </div>
         <p className="text-sm text-text-muted">
           {answeredCount} of {sections.length} answered
+          {' · '}
+          {attemptSummary
+            ? attemptSummary.locked
+              ? `No attempts left (${MAX_ASSESSMENT_ATTEMPTS} of ${MAX_ASSESSMENT_ATTEMPTS} used)`
+              : `${attemptSummary.remaining} of ${MAX_ASSESSMENT_ATTEMPTS} attempts left`
+            : `Up to ${MAX_ASSESSMENT_ATTEMPTS} attempts`}
         </p>
       </div>
 
@@ -279,9 +328,10 @@ export function StudentAssessmentPage() {
               <Button
                 onClick={() => void handleSubmit()}
                 isLoading={isSubmitting}
+                disabled={attemptSummary?.locked}
                 leftIcon={<Send className="size-4" />}
               >
-                Submit Assessment
+                {attemptSummary?.locked ? 'No attempts left' : 'Submit Assessment'}
               </Button>
             )}
           </div>
@@ -371,14 +421,20 @@ function StartScreen({
   lessonTitle,
   questionCount,
   estimatedMinutes,
+  attemptSummary,
   onStart,
 }: {
   assignment: NonNullable<StudentAssignmentDetail['assignment']>
   lessonTitle: string
   questionCount: number
   estimatedMinutes: number | null
+  attemptSummary: AssessmentAttemptSummary | null
   onStart: () => void
 }) {
+  const locked = attemptSummary?.locked ?? false
+  const remaining = attemptSummary?.remaining ?? MAX_ASSESSMENT_ATTEMPTS
+  const used = attemptSummary?.maxAttemptUsed ?? 0
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Link
@@ -395,7 +451,7 @@ function StartScreen({
             <h1 className="mt-2 text-3xl font-semibold text-text">{assignment.title}</h1>
             <p className="mt-2 text-text-muted">{lessonTitle}</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-lg bg-background p-4">
               <p className="text-xs text-text-muted">Questions</p>
               <p className="mt-1 font-semibold text-text">{questionCount}</p>
@@ -406,17 +462,44 @@ function StartScreen({
                 {estimatedMinutes ? `${estimatedMinutes} minutes` : 'Not provided'}
               </p>
             </div>
+            <div className="rounded-lg bg-background p-4">
+              <p className="text-xs text-text-muted">Attempts</p>
+              <p className="mt-1 font-semibold text-text">
+                {locked
+                  ? `None left (${used}/${MAX_ASSESSMENT_ATTEMPTS})`
+                  : `${remaining} left (${used}/${MAX_ASSESSMENT_ATTEMPTS} used)`}
+              </p>
+            </div>
           </div>
           <div className="space-y-2">
             <h2 className="font-semibold text-text">Instructions</h2>
             <p className="text-sm leading-6 text-text-muted">
               Answer every question, use the question navigator to review your work, then submit
-              when you are ready. Your results will be evaluated and saved securely.
+              when you are ready. You can submit this assessment up to {MAX_ASSESSMENT_ATTEMPTS}{' '}
+              times. After that, further submissions are blocked.
             </p>
           </div>
-          <Button size="lg" onClick={onStart} className="w-full">
-            Start Assessment
-          </Button>
+          {locked ? (
+            <div className="space-y-3">
+              <div
+                className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-text"
+                role="alert"
+              >
+                You have used all {MAX_ASSESSMENT_ATTEMPTS} attempts for this assessment. You can
+                still review past results from My Progress, but you cannot submit again.
+              </div>
+              <Link
+                to={routes.studentAssignments}
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-border text-sm font-medium text-text hover:bg-background"
+              >
+                Back to Assignments
+              </Link>
+            </div>
+          ) : (
+            <Button size="lg" onClick={onStart} className="w-full">
+              {used > 0 ? 'Retake Assessment' : 'Start Assessment'}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>
