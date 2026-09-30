@@ -7,6 +7,7 @@ import {
   NotebookPen,
   ClipboardList,
   TrendingUp,
+  Gamepad2,
 } from 'lucide-react'
 import type { NavItem, User } from '@/types'
 
@@ -32,6 +33,7 @@ export const childNavItems: NavItem[] = [
   { label: 'Assignments', href: '/student/assignments', icon: ClipboardList },
   { label: 'Lens AI', href: '/student/ai', icon: Bot, badge: 'New' },
   { label: 'Progress', href: '/student/progress', icon: TrendingUp },
+  { label: 'Games', href: '/student/games', icon: Gamepad2 },
   { label: 'Profile', href: '/student/profile', icon: Settings },
 ]
 
