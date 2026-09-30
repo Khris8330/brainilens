@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CheckCircle2,
   ClipboardList,
-  Plus,
   TrendingUp,
   UserPlus,
 } from 'lucide-react'
