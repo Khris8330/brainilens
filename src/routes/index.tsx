@@ -18,6 +18,7 @@ import { WeeklyLearningPage } from '@/pages/weekly-learning/WeeklyLearningPage'
 import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage'
 import { ReportsPage } from '@/pages/reports/ReportsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
+import { ChildSettingsPage } from '@/pages/settings/ChildSettingsPage'
 import { AIInsightsPage } from '@/pages/ai/AIInsightsPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { StudentLearningPage } from '@/pages/student/StudentLearningPage'
@@ -33,39 +34,18 @@ export const router = createBrowserRouter([
   {
     element: <LandingLayout />,
     children: [
-      {
-        path: '/',
-        element: <LandingPage />,
-      },
-      {
-        path: '/privacy',
-        element: <PrivacyPolicyPage />,
-      },
+      { path: '/', element: <LandingPage /> },
+      { path: '/privacy', element: <PrivacyPolicyPage /> },
     ],
   },
   {
     element: <AuthLayout />,
     children: [
-      {
-        path: '/auth/role',
-        element: <RoleSelectionPage />,
-      },
-      {
-        path: '/auth/login',
-        element: <LoginPage />,
-      },
-      {
-        path: '/auth/student-login',
-        element: <StudentLoginPage />,
-      },
-      {
-        path: '/auth/register',
-        element: <RegisterPage />,
-      },
-      {
-        path: '/auth/callback',
-        element: <AuthCallbackPage />,
-      },
+      { path: '/auth/role', element: <RoleSelectionPage /> },
+      { path: '/auth/login', element: <LoginPage /> },
+      { path: '/auth/student-login', element: <StudentLoginPage /> },
+      { path: '/auth/register', element: <RegisterPage /> },
+      { path: '/auth/callback', element: <AuthCallbackPage /> },
     ],
   },
   {
@@ -75,34 +55,14 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      {
-        path: '/parent',
-        element: <ParentDashboardPage />,
-      },
-      {
-        path: '/child',
-        element: <ChildProgressPage />,
-      },
-      {
-        path: '/weekly-learning',
-        element: <WeeklyLearningPage />,
-      },
-      {
-        path: '/assignments',
-        element: <AssignmentsPage />,
-      },
-      {
-        path: '/reports',
-        element: <ReportsPage />,
-      },
-      {
-        path: '/settings',
-        element: <SettingsPage />,
-      },
-      {
-        path: '/ai',
-        element: <AIInsightsPage />,
-      },
+      { path: '/parent', element: <ParentDashboardPage /> },
+      { path: '/child', element: <ChildProgressPage /> },
+      { path: '/weekly-learning', element: <WeeklyLearningPage /> },
+      { path: '/assignments', element: <AssignmentsPage /> },
+      { path: '/reports', element: <ReportsPage /> },
+      { path: '/settings', element: <SettingsPage /> },
+      { path: '/settings/children/:studentId', element: <ChildSettingsPage /> },
+      { path: '/ai', element: <AIInsightsPage /> },
     ],
   },
   {
@@ -112,42 +72,15 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      {
-        path: '/student',
-        element: <StudentDashboardPage />,
-      },
-      {
-        path: '/student/learning',
-        element: <StudentLearningPage />,
-      },
-      {
-        path: '/student/assignments',
-        element: <StudentAssignmentsPage />,
-      },
-      {
-        path: '/student/assignments/:assignmentId',
-        element: <StudentAssignmentDetailPage />,
-      },
-      {
-        path: '/student/assignments/:assignmentId/assessment',
-        element: <StudentAssessmentPage />,
-      },
-      {
-        path: '/student/progress',
-        element: <StudentProgressPage />,
-      },
-      {
-        path: '/student/progress/:learningContentId',
-        element: <StudentProgressReviewPage />,
-      },
-      {
-        path: '/student/ai',
-        element: <StudentAIPage />,
-      },
-      {
-        path: '/student/profile',
-        element: <StudentProfilePage />,
-      },
+      { path: '/student', element: <StudentDashboardPage /> },
+      { path: '/student/learning', element: <StudentLearningPage /> },
+      { path: '/student/assignments', element: <StudentAssignmentsPage /> },
+      { path: '/student/assignments/:assignmentId', element: <StudentAssignmentDetailPage /> },
+      { path: '/student/assignments/:assignmentId/assessment', element: <StudentAssessmentPage /> },
+      { path: '/student/progress', element: <StudentProgressPage /> },
+      { path: '/student/progress/:learningContentId', element: <StudentProgressReviewPage /> },
+      { path: '/student/ai', element: <StudentAIPage /> },
+      { path: '/student/profile', element: <StudentProfilePage /> },
     ],
   },
 ])
