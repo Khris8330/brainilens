@@ -105,15 +105,14 @@ export function ChildSettingsPage() {
 
   if (error && !name) {
     return (
-      <EmptyState
-        title="Child settings unavailable"
-        description={error}
-        action={
+      <div className="mx-auto max-w-2xl space-y-4">
+        <EmptyState title="Child settings unavailable" description={error} />
+        <div className="text-center">
           <Link to={routes.settings} className="text-sm font-medium text-primary hover:underline">
             Back to Settings
           </Link>
-        }
-      />
+        </div>
+      </div>
     )
   }
 
