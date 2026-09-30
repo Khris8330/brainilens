@@ -20,8 +20,6 @@ export function StudentAIPage() {
     },
   ])
   const [isSending, setIsSending] = useState(false)
-  const [healthCheckResult, setHealthCheckResult] = useState<string | null>(null)
-  const [isCheckingHealth, setIsCheckingHealth] = useState(false)
   const [chatError, setChatError] = useState('')
 
   const suggestions = [
@@ -31,17 +29,9 @@ export function StudentAIPage() {
     'Give me a math practice question',
   ]
 
-  async function testAIConnection() {
-    setIsCheckingHealth(true)
-    setHealthCheckResult(null)
-    const { data, error } = await supabase.functions.invoke('ai-health-check', { method: 'POST' })
-    setHealthCheckResult(error ? error.message : data?.data?.reply ?? 'No reply returned.')
-    setIsCheckingHealth(false)
-  }
-
-  async function sendMessage(event?: FormEvent) {
+  async function sendMessage(event?: FormEvent, preset?: string) {
     event?.preventDefault()
-    const trimmed = question.trim()
+    const trimmed = (preset ?? question).trim()
     if (!trimmed || isSending) return
 
     setChatError('')
@@ -57,28 +47,32 @@ export function StudentAIPage() {
       })
 
       if (error) {
-        setChatError(error.message || 'Lens could not reply right now.')
-        setMessages((items) => [
-          ...items,
-          {
-            role: 'assistant',
-            content: 'Sorry, I could not answer just now. Please try again in a moment.',
-          },
-        ])
-      } else {
-        const reply =
-          typeof data?.data?.reply === 'string' && data.data.reply.trim()
-            ? data.data.reply.trim()
-            : 'I am here to help. Could you ask that another way?'
-        setMessages((items) => [...items, { role: 'assistant', content: reply }])
+        throw error
       }
-    } catch {
-      setChatError('Lens could not reply right now.')
+
+      if (data?.error) {
+        const msg =
+          typeof data.error === 'object' && data.error?.message
+            ? String(data.error.message)
+            : 'Lens could not reply right now.'
+        throw new Error(msg)
+      }
+
+      const reply =
+        typeof data?.data?.reply === 'string' && data.data.reply.trim()
+          ? data.data.reply.trim()
+          : 'I am not sure how to answer that yet. Try asking in a different way.'
+
+      setMessages((items) => [...items, { role: 'assistant', content: reply }])
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Lens could not reply right now. Please try again.'
+      setChatError(message)
       setMessages((items) => [
         ...items,
         {
           role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again.',
+          content: 'Sorry, I could not answer just now. Please try again in a moment.',
         },
       ])
     } finally {
@@ -87,75 +81,68 @@ export function StudentAIPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-text">Lens AI Companion</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          Your learning companion for {user?.name ?? 'your student account'}.
-        </p>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-semibold text-text">
+            <Bot className="size-6 text-secondary" aria-hidden="true" />
+            Ask Lens
+          </h1>
+          <p className="mt-1 text-sm text-text-muted">
+            Your AI study companion. Questions are logged so a trusted adult can review them if
+            needed.
+          </p>
+        </div>
+        <Badge variant="secondary">Live AI</Badge>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-secondary-light">
-            <Bot className="size-5 text-secondary" />
-          </div>
-          <div>
-            <CardTitle>Study chat</CardTitle>
-            <Badge variant="secondary" className="mt-1">
-              Live AI
-            </Badge>
-          </div>
+        <CardHeader>
+          <CardTitle>Conversation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex min-h-72 flex-col gap-3 rounded-lg bg-background p-4">
+          <div className="max-h-[28rem] space-y-3 overflow-y-auto rounded-xl bg-background p-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`max-w-[85%] rounded-lg p-3 text-sm ${
-                  message.role === 'user'
-                    ? 'self-end bg-primary text-white'
-                    : 'self-start border border-border bg-surface text-text'
-                }`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.content}
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-white'
+                      : 'border border-border bg-surface text-text'
+                  }`}
+                >
+                  {message.content}
+                </div>
               </div>
             ))}
             {isSending && (
-              <div className="self-start rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-muted">
+              <p className="text-sm text-text-muted" role="status">
                 Lens is thinking…
-              </div>
+              </p>
             )}
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {suggestions.map((suggestion) => (
+            {suggestions.map((item) => (
               <button
-                key={suggestion}
+                key={item}
                 type="button"
-                onClick={() => setQuestion(suggestion)}
-                className="rounded-full border border-border px-3 py-1.5 text-xs text-text-muted hover:border-primary hover:text-primary"
+                onClick={() => void sendMessage(undefined, item)}
+                className="rounded-full border border-border px-3 py-1 text-xs text-text-muted hover:border-primary hover:text-text"
               >
-                {suggestion}
+                {item}
               </button>
             ))}
           </div>
 
-          <div className="mt-4">
-            <Button type="button" variant="outline" onClick={testAIConnection} disabled={isCheckingHealth}>
-              {isCheckingHealth ? 'Testing...' : 'Test AI Connection'}
-            </Button>
-            {healthCheckResult && (
-              <p role="status" className="mt-2 text-sm text-text-muted">
-                {healthCheckResult}
-              </p>
-            )}
-            {chatError && (
-              <p role="alert" className="mt-2 text-sm text-destructive">
-                {chatError}
-              </p>
-            )}
-          </div>
+          {chatError && (
+            <p role="alert" className="mt-3 text-sm text-error">
+              {chatError}
+            </p>
+          )}
 
           <form onSubmit={(event) => void sendMessage(event)} className="mt-4 flex items-end gap-3">
             <TextArea
