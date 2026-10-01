@@ -1,7 +1,10 @@
-/** Lightweight Web Audio feedback for Word Rush. No external audio files. */
+/** Lightweight Web Audio feedback + soft background loop for Word Rush. */
 
 let ctx: AudioContext | null = null
 let muted = false
+let musicMuted = false
+let musicTimer: number | null = null
+let musicStep = 0
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -30,11 +33,29 @@ export function setSoundMuted(value: boolean): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem('brainilens_word_rush_mute', value ? '1' : '0')
   }
+  if (value) stopMusic()
+  else if (!musicMuted) startMusic()
 }
 
-export function initSoundMuteFromStorage(): boolean {
+export function isMusicMuted(): boolean {
+  if (typeof window === 'undefined') return true
+  return musicMuted || localStorage.getItem('brainilens_word_rush_music_mute') === '1'
+}
+
+export function setMusicMuted(value: boolean): void {
+  musicMuted = value
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('brainilens_word_rush_music_mute', value ? '1' : '0')
+  }
+  if (value) stopMusic()
+  else if (!isSoundMuted()) startMusic()
+}
+
+export function initSoundMuteFromStorage(): { sfx: boolean; music: boolean } {
   muted = typeof window !== 'undefined' && localStorage.getItem('brainilens_word_rush_mute') === '1'
-  return muted
+  musicMuted =
+    typeof window !== 'undefined' && localStorage.getItem('brainilens_word_rush_music_mute') === '1'
+  return { sfx: muted, music: musicMuted }
 }
 
 function tone(
@@ -80,4 +101,45 @@ export function playRoundEnd() {
   tone(392, 100, 'sine', 0.07)
   tone(523.25, 100, 'sine', 0.07, 0.1)
   tone(659.25, 160, 'sine', 0.08, 0.2)
+}
+
+/** Soft looping arpeggio (C major feel) - very low volume. */
+const MUSIC_NOTES = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63]
+
+function playMusicNote(frequency: number) {
+  if (isSoundMuted() || isMusicMuted()) return
+  const audio = getCtx()
+  if (!audio) return
+  const now = audio.currentTime
+  const osc = audio.createOscillator()
+  const gain = audio.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(frequency, now)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.018, now + 0.05)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45)
+  osc.connect(gain)
+  gain.connect(audio.destination)
+  osc.start(now)
+  osc.stop(now + 0.5)
+}
+
+export function startMusic() {
+  if (typeof window === 'undefined') return
+  if (isSoundMuted() || isMusicMuted()) return
+  if (musicTimer !== null) return
+  getCtx()
+  musicStep = 0
+  musicTimer = window.setInterval(() => {
+    if (isSoundMuted() || isMusicMuted()) return
+    playMusicNote(MUSIC_NOTES[musicStep % MUSIC_NOTES.length])
+    musicStep += 1
+  }, 420)
+}
+
+export function stopMusic() {
+  if (musicTimer !== null && typeof window !== 'undefined') {
+    window.clearInterval(musicTimer)
+    musicTimer = null
+  }
 }
