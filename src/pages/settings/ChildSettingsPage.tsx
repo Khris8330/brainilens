@@ -164,7 +164,7 @@ export function ChildSettingsPage() {
           />
           <div className="rounded-lg border border-border bg-background p-3 text-sm">
             <p className="text-xs text-text-muted">Student ID</p>
-            <p className="mt-1 font-semibold text-text">{studentLoginId || '—'}</p>
+            <p className="mt-1 font-semibold text-text">{studentLoginId || '-'}</p>
             <p className="mt-1 text-xs text-text-muted">
               Student ID does not change. Only the password can be regenerated.
             </p>
