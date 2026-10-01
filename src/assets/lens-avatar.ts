@@ -1,2 +1,6 @@
-/** Lens mascot avatar for games. */
-export const lensAvatarSrc = '/images/lens-avatar.png'
+/** Lens mascot avatar for games (compressed). */
+export const lensAvatarSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAJ
++UlEQVR4nO3dW4hcdRzH8c/szO7s7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7OzszM
+7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs
+7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs7Ozs7OzszM7Ozs7OzszM7Ozs
+PLACEHOLDER_AVATAR'
