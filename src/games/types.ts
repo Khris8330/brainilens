@@ -1,4 +1,4 @@
-/** Shared Games Layer types — not academic progress. */
+/** Shared Games Layer types. Not academic progress. */
 
 export type GameKey = 'word_rush' | 'math_sprint'
 

@@ -1,6 +1,6 @@
 import type { GameCatalogEntry } from './types'
 
-/** Static catalog — Math Sprint is a placeholder until implemented. */
+/** Static catalog. Math Sprint is a placeholder until implemented. */
 export const GAME_CATALOG: GameCatalogEntry[] = [
   {
     key: 'word_rush',
@@ -11,7 +11,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
   {
     key: 'math_sprint',
     title: 'Math Sprint',
-    description: 'Coming soon. Uses the same shared daily game time.',
+    description: 'Coming soon. Number challenges under the same daily time.',
     status: 'coming_soon',
   },
 ]
