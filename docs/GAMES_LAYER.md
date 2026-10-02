@@ -3,7 +3,7 @@
 ## Boundaries
 
 - Academic learning, assessments, and parent reports are unchanged.
-- Games (Word Rush, future Math Sprint, etc.) share one **120-minute daily** allowance.
+- Games (Word Rush, Math Sprint, etc.) share one **120-minute daily** allowance.
 - Game scores do **not** feed academic reports.
 
 ## Timezone / daily reset
@@ -40,3 +40,6 @@
 - `game_sessions`
 - `game_daily_usage`
 - `word_rush_progress`
+- `math_sprint_progress`
+
+Migration: `supabase/migrations/20261002000000_games_layer_math_sprint.sql`
