@@ -22,6 +22,7 @@ export interface GameStatusPayload {
   timezone: string
   activeSession: null
   wordRush: WordRushProgress | null
+  mathSprint: MathSprintProgress | null
   games: GameCatalogEntry[]
 }
 
@@ -44,6 +45,18 @@ export interface GameSessionEndPayload {
   alreadyEnded?: boolean
 }
 
+export interface MathSprintProgress {
+  current_tier: string
+  current_level: number
+  xp: number
+  best_score: number
+  best_streak: number
+  total_rounds: number
+  total_questions: number
+  total_correct: number
+  last_played_at: string | null
+}
+
 export interface WordRushProgress {
   current_tier: string
   current_level: number
@@ -58,3 +71,4 @@ export interface WordRushProgress {
 
 export const DAILY_GAME_LIMIT_SECONDS = 120 * 60
 export const WORD_RUSH_ROUND_TARGET_MS = 5 * 60 * 1000
+export const MATH_SPRINT_ROUND_TARGET_MS = 5 * 60 * 1000
