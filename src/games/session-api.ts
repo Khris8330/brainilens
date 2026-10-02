@@ -48,6 +48,13 @@ export interface EndSessionInput {
     round_score?: number
     round_best_streak?: number
   }
+  mathSprint?: {
+    current_tier?: string
+    current_level?: number
+    xp_gained?: number
+    round_score?: number
+    round_best_streak?: number
+  }
 }
 
 export async function endGameSession(input: EndSessionInput) {
@@ -60,6 +67,7 @@ export async function endGameSession(input: EndSessionInput) {
       questions_answered: input.questionsAnswered,
       correct_answers: input.correctAnswers,
       word_rush: input.wordRush,
+      math_sprint: input.mathSprint,
     },
   })
   if (error) return { data: null as GameSessionEndPayload | null, error: error.message }

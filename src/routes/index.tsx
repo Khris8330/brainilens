@@ -31,6 +31,7 @@ import { StudentAIPage } from '@/pages/student/StudentAIPage'
 import { StudentProfilePage } from '@/pages/student/StudentProfilePage'
 import { GamesHubPage } from '@/pages/student/games/GamesHubPage'
 import { WordRushPage } from '@/pages/student/games/WordRushPage'
+import { MathSprintPage } from '@/pages/student/games/MathSprintPage'
 
 export const router = createBrowserRouter([
   {
@@ -85,6 +86,7 @@ export const router = createBrowserRouter([
       { path: '/student/profile', element: <StudentProfilePage /> },
       { path: '/student/games', element: <GamesHubPage /> },
       { path: '/student/games/word-rush', element: <WordRushPage /> },
+      { path: '/student/games/math-sprint', element: <MathSprintPage /> },
     ],
   },
 ])
@@ -111,4 +113,5 @@ export const routes = {
   studentProfile: '/student/profile',
   studentGames: '/student/games',
   studentWordRush: '/student/games/word-rush',
+  studentMathSprint: '/student/games/math-sprint',
 } as const
