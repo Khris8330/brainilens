@@ -1,7 +1,8 @@
 import type { Challenge } from './types'
+import { CHALLENGE_BANK_BATCH2 } from './content-batch2'
 
 /** Multi-mode Word Rush bank - expanded to reduce repeats. */
-export const CHALLENGE_BANK: Challenge[] = [
+const CHALLENGE_BANK_CORE: Challenge[] = [
   {
     id: 'wc01',
     tier: 'starter',
@@ -799,4 +800,9 @@ export const CHALLENGE_BANK: Challenge[] = [
     options: ['happy', 'pahpy', 'yppah', 'hppay'],
     word: 'happy',
   },
+]
+
+export const CHALLENGE_BANK: Challenge[] = [
+  ...CHALLENGE_BANK_CORE,
+  ...CHALLENGE_BANK_BATCH2,
 ]
