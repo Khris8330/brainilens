@@ -1,5 +1,5 @@
 import { createSupabaseContext } from "npm:@supabase/server@^1";
-import { callGemini, GeminiError } from "./gemini.ts";
+import { callGroq, GroqError } from "./groq.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,13 +13,6 @@ function jsonResponse(body: unknown, status = 200): Response {
 function errorResponse(code: string, message: string, status: number): Response {
   return jsonResponse({ error: { code, message } }, status);
 }
-
-// ------------------------------------------------------
-// Phase 1 infrastructure check.
-//
-// Proves the full chain: authenticated request -> Edge
-// Function -> Gemini -> validated response.
-// ------------------------------------------------------
 
 export default {
   fetch: async (req: Request) => {
@@ -44,20 +37,23 @@ export default {
     }
 
     try {
-      const result = await callGemini({
+      const result = await callGroq({
         userPrompt: "Reply with exactly this sentence and nothing else: BrainiLens AI connection successful.",
-        thinkingLevel: "low",
+        timeoutMs: 30_000,
+        maxRetries: 1,
       });
 
       return jsonResponse({
         success: true,
         data: {
           reply: result.text,
+          provider: "groq",
+          model: result.model,
         },
       });
     } catch (error) {
-      if (error instanceof GeminiError) {
-        console.error("ai-health-check GeminiError", { code: error.code, message: error.message });
+      if (error instanceof GroqError) {
+        console.error("ai-health-check GroqError", { code: error.code, message: error.message });
         return errorResponse(error.code, error.message, 502);
       }
       console.error("Unexpected error in ai-health-check", {
