@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Bot, Send, Sparkles, User as UserIcon } from 'lucide-react'
 import { Card, CardContent, Button, Select } from '@/components/ui'
-import { subjects } from '@/data/mockData'
+import { SUBJECT_NAMES } from '@/lib/subjects'
 import { suggestedQuestions } from '@/data/aiResponses'
 import type { ChatMessage } from '@/types'
 import { formatNigeriaTime } from '@/lib/time'
@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 const subjectOptions = [
   { value: 'all', label: 'All subjects' },
-  ...subjects.map((s) => ({ value: s.name, label: s.name })),
+  ...SUBJECT_NAMES.map((name) => ({ value: name, label: name })),
 ]
 
 function timeNow() {
