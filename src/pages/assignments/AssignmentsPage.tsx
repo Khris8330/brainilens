@@ -13,7 +13,7 @@ import {
 } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
 import { getParentAssignments, getParentChildren } from "@/lib/learning-data";
-import { subjects } from "@/data/mockData";
+import { SUBJECT_SELECT_OPTIONS, subjectFilterOptions } from "@/lib/subjects";
 import { useAuth } from "@/contexts/AuthContext";
 import type {
   Assignment,
@@ -209,10 +209,9 @@ export function AssignmentsPage() {
         <Select
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          options={[
-            { value: "all", label: "All subjects" },
-            ...subjects.map((s) => ({ value: s.name, label: s.name })),
-          ]}
+          options={subjectFilterOptions(
+            assignments.map((a) => a.subject).filter(Boolean),
+          )}
         />
         <Select
           value={statusFilter}
@@ -265,10 +264,14 @@ export function AssignmentsPage() {
         title="Create assignment"
       >
         <form onSubmit={handleCreate} className="space-y-4">
-          <Input
+          <Select
             label="Subject"
             value={form.subject}
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
+            options={[
+              { value: "", label: "Select subject" },
+              ...SUBJECT_SELECT_OPTIONS,
+            ]}
             required
           />
           <Input
