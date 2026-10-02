@@ -36,7 +36,7 @@ export function GamesHubPage() {
             Games Hub
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            Play after you finish today&apos;s learning assessment. All games share one daily time
+            Play after you finish today's learning assessment. All games share one daily time
             limit.
           </p>
         </div>
@@ -106,12 +106,31 @@ export function GamesHubPage() {
                     Level {status.wordRush.current_level} ({status.wordRush.current_tier})
                   </p>
                 )}
+                {game.key === 'math_sprint' && status?.mathSprint && (
+                  <p className="text-xs text-text-muted">
+                    Best score {status.mathSprint.best_score} · Streak {status.mathSprint.best_streak} ·
+                    Level {status.mathSprint.current_level} ({status.mathSprint.current_tier})
+                  </p>
+                )}
                 {game.key === 'word_rush' ? (
                   isAvailable ? (
                     <Link to={routes.studentWordRush}>
                       <Button className="w-full sm:w-auto">
                         <Sparkles className="size-4" aria-hidden="true" />
                         Play Word Rush
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button disabled className="w-full sm:w-auto">
+                      {lockedByTime ? 'Come back tomorrow' : 'Locked'}
+                    </Button>
+                  )
+                ) : game.key === 'math_sprint' ? (
+                  isAvailable ? (
+                    <Link to={routes.studentMathSprint}>
+                      <Button className="w-full sm:w-auto">
+                        <Sparkles className="size-4" aria-hidden="true" />
+                        Play Math Sprint
                       </Button>
                     </Link>
                   ) : (
