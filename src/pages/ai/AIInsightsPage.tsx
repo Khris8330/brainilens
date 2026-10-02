@@ -4,7 +4,7 @@ import { Card, CardContent, Button, Select } from '@/components/ui'
 import { SUBJECT_NAMES } from '@/lib/subjects'
 import { suggestedQuestions } from '@/data/aiResponses'
 import type { ChatMessage } from '@/types'
-import { formatNigeriaTime } from '@/lib/time'
+import { formatAppTime } from '@/lib/time'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -164,7 +164,7 @@ export function AIInsightsPage() {
                       message.role === 'user' ? 'text-white/70' : 'text-text-muted'
                     }`}
                   >
-                    {formatNigeriaTime(message.timestamp)}
+                    {formatAppTime(message.timestamp)}
                   </p>
                 </div>
                 {message.role === 'user' && (
