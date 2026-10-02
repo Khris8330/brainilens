@@ -8,9 +8,9 @@
 
 ## Timezone / daily reset
 
-- Calendar day for the allowance: **Africa/Lagos** (same as BrainiLens greetings/time helpers).
+- Calendar day for the allowance: **UTC+1** (fixed offset; same as BrainiLens greetings/time helpers).
 - `game_daily_usage.usage_date` is that calendar date.
-- At a new Lagos day, a new row starts at 0 seconds used (previous days kept for history).
+- At a new UTC+1 calendar day, a new row starts at 0 seconds used (previous days kept for history).
 - Device clock is never used to grant extra time.
 
 ## Session model
@@ -26,7 +26,7 @@
 
 ## Unlock
 
-- Games unlock when the student has at least one `student_assignments` row with `status = completed` and `submitted_at` on the current Africa/Lagos date.
+- Games unlock when the student has at least one `student_assignments` row with `status = completed` and `submitted_at` on the current UTC+1 calendar date.
 - Enforced in edge functions, not only in the UI.
 
 ## Edge functions
