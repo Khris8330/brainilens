@@ -332,11 +332,47 @@ export default {
       return await fail("PERSIST_FAILED", "Unable to save the generated content.");
     }
 
+    // Create assignment + student link so the lesson appears on Assignments.
+    // learning_plan_items stores generated_assignment_id (not content_id).
+    const { data: assignment, error: assignmentError } = await ctx.supabaseAdmin
+      .from("assignments")
+      .insert({
+        learning_content_id: learningContent.id,
+        title: item.topic,
+        description: item.description,
+        subject: item.subject,
+        grade: student?.grade ?? null,
+        difficulty: "medium",
+      })
+      .select("id")
+      .single();
+
+    if (assignmentError || !assignment) {
+      console.error("assignments insert failed", { message: assignmentError?.message });
+      return await fail("PERSIST_FAILED", "Unable to create the assignment for this lesson.");
+    }
+
+    const { error: studentAssignError } = await ctx.supabaseAdmin
+      .from("student_assignments")
+      .insert({
+        student_id: item.student_id,
+        assignment_id: assignment.id,
+        status: "assigned",
+      });
+
+    if (studentAssignError) {
+      if (!/duplicate|unique/i.test(studentAssignError.message ?? "")) {
+        console.error("student_assignments insert failed", { message: studentAssignError.message });
+        return await fail("PERSIST_FAILED", "Unable to assign the lesson to the student.");
+      }
+    }
+
     const { error: linkError } = await ctx.supabaseAdmin
       .from("learning_plan_items")
       .update({
         status: "ready",
-        content_id: learningContent.id,
+        generated_assignment_id: assignment.id,
+        generated_at: new Date().toISOString(),
         error_message: null,
       })
       .eq("id", item.id);
@@ -351,6 +387,7 @@ export default {
       data: {
         learningPlanItemId: item.id,
         learningContentId: learningContent.id,
+        assignmentId: assignment.id,
       },
     });
   },
