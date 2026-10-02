@@ -49,7 +49,7 @@ export function GamesHubPage() {
             {formatRemainingTime(remaining)} left of {formatRemainingTime(limit)}
           </p>
           <p className="mt-0.5 text-xs text-text-muted">
-            Resets at midnight ({status?.timezone ?? 'Africa/Lagos'})
+            Resets at midnight ({status?.timezone ?? 'UTC+1'})
           </p>
         </div>
       </div>
