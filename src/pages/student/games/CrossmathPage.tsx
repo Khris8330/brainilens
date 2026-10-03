@@ -133,7 +133,7 @@ export function CrossmathPage() {
             {[1, 2, 3].map((lvl) => (
               <Button
                 key={lvl}
-                variant={level === lvl ? 'default' : 'outline'}
+                variant={level === lvl ? 'primary' : 'outline'}
                 onClick={() => setLevel(lvl)}
               >
                 Level {lvl}
