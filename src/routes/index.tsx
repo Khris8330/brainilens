@@ -34,6 +34,7 @@ import { WordRushPage } from '@/pages/student/games/WordRushPage'
 import { MathSprintPage } from '@/pages/student/games/MathSprintPage'
 import { ColorBlockPage } from '@/pages/student/games/ColorBlockPage'
 import { CrossmathPage } from '@/pages/student/games/CrossmathPage'
+import { SudokuPage } from '@/pages/student/games/SudokuPage'
 
 export const router = createBrowserRouter([
   {
@@ -91,6 +92,7 @@ export const router = createBrowserRouter([
       { path: '/student/games/math-sprint', element: <MathSprintPage /> },
       { path: '/student/games/color-block', element: <ColorBlockPage /> },
       { path: '/student/games/crossmath', element: <CrossmathPage /> },
+      { path: '/student/games/sudoku', element: <SudokuPage /> },
     ],
   },
 ])
@@ -120,4 +122,5 @@ export const routes = {
   studentMathSprint: '/student/games/math-sprint',
   studentColorBlock: '/student/games/color-block',
   studentCrossmath: '/student/games/crossmath',
+  studentSudoku: '/student/games/sudoku',
 } as const
