@@ -26,4 +26,10 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     description: 'Fill blanks so every equation is true. Number crossword puzzles.',
     status: 'available',
   },
+  {
+    key: 'sudoku',
+    title: 'Sudoku',
+    description: 'Classic number puzzles. Multiple difficulties, notes, hints, and streaks.',
+    status: 'available',
+  },
 ]
