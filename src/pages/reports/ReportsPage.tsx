@@ -119,27 +119,20 @@ export function ReportsPage() {
           <h1 className="text-2xl font-semibold text-text">Reports</h1>
           <p className="mt-1 text-sm text-text-muted">Live progress reports from completed learning.</p>
         </div>
-        <div className="flex items-center gap-3">
-          {children.length > 0 && (
-            <Select
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-              className="min-w-[160px]"
-              aria-label="Select child"
-            >
-              {children.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          )}
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Download className="size-4" aria-hidden="true" />
-            Export
-          </Button>
-        </div>
+        <Button onClick={() => window.print()}>
+          <Download className="size-4" aria-hidden="true" />
+          Download report
+        </Button>
       </div>
+
+      {children.length > 0 && (
+        <Select
+          aria-label="Select child"
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          options={children.map((child) => ({ value: child.id, label: child.name }))}
+        />
+      )}
 
       {error && (
         <p className="text-sm text-destructive" role="alert">
