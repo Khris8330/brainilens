@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom'
 import { Gamepad2, Lock, Clock, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge, LoadingOverlay } from '@/components/ui'
 import { fetchGameStatus, formatRemainingTime } from '@/games/session-api'
+import { GAME_CATALOG } from '@/games/catalog'
 import type { GameStatusPayload } from '@/games/types'
 import { routes } from '@/routes'
+import { loadBestScore as loadColorBest } from '@/games/color-block/engine/board'
+import { loadCrossmathBest } from '@/games/crossmath/engine/generator'
 
 export function GamesHubPage() {
   const [status, setStatus] = useState<GameStatusPayload | null>(null)
@@ -26,6 +29,13 @@ export function GamesHubPage() {
   const unlocked = status?.gamesUnlocked ?? false
   const remaining = status?.remainingSeconds ?? 0
   const limit = status?.dailyLimitSeconds ?? 7200
+
+  const fromApi = status?.games ?? []
+  const byKey = new Map(fromApi.map((g) => [g.key, g]))
+  for (const g of GAME_CATALOG) {
+    if (!byKey.has(g.key)) byKey.set(g.key, g)
+  }
+  const games = Array.from(byKey.values())
 
   return (
     <div className="space-y-6">
@@ -79,9 +89,19 @@ export function GamesHubPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {(status?.games ?? []).map((game) => {
+        {games.map((game) => {
           const isAvailable = game.status === 'available' && unlocked && remaining > 0
           const lockedByTime = unlocked && remaining <= 0
+          const playPath =
+            game.key === 'word_rush'
+              ? routes.studentWordRush
+              : game.key === 'math_sprint'
+                ? routes.studentMathSprint
+                : game.key === 'color_block'
+                  ? routes.studentColorBlock
+                  : game.key === 'crossmath'
+                    ? routes.studentCrossmath
+                    : null
           return (
             <Card key={game.key} className={!isAvailable ? 'opacity-90' : undefined}>
               <CardHeader className="pb-2">
@@ -108,29 +128,23 @@ export function GamesHubPage() {
                 )}
                 {game.key === 'math_sprint' && status?.mathSprint && (
                   <p className="text-xs text-text-muted">
-                    Best score {status.mathSprint.best_score} · Streak {status.mathSprint.best_streak} ·
-                    Level {status.mathSprint.current_level} ({status.mathSprint.current_tier})
+                    Best score {status.mathSprint.best_score} · Streak{' '}
+                    {status.mathSprint.best_streak} · Level {status.mathSprint.current_level} (
+                    {status.mathSprint.current_tier})
                   </p>
                 )}
-                {game.key === 'word_rush' ? (
+                {game.key === 'color_block' && (
+                  <p className="text-xs text-text-muted">Best score {loadColorBest()}</p>
+                )}
+                {game.key === 'crossmath' && (
+                  <p className="text-xs text-text-muted">Best score {loadCrossmathBest()}</p>
+                )}
+                {playPath ? (
                   isAvailable ? (
-                    <Link to={routes.studentWordRush}>
+                    <Link to={playPath}>
                       <Button className="w-full sm:w-auto">
                         <Sparkles className="size-4" aria-hidden="true" />
-                        Play Word Rush
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button disabled className="w-full sm:w-auto">
-                      {lockedByTime ? 'Come back tomorrow' : 'Locked'}
-                    </Button>
-                  )
-                ) : game.key === 'math_sprint' ? (
-                  isAvailable ? (
-                    <Link to={routes.studentMathSprint}>
-                      <Button className="w-full sm:w-auto">
-                        <Sparkles className="size-4" aria-hidden="true" />
-                        Play Math Sprint
+                        Play {game.title}
                       </Button>
                     </Link>
                   ) : (
