@@ -14,4 +14,16 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     description: 'Fast number challenges. Shares the same daily game time.',
     status: 'available',
   },
+  {
+    key: 'color_block',
+    title: 'Color Block',
+    description: 'Place colorful blocks. Clear full rows and columns. Classic puzzle fun.',
+    status: 'available',
+  },
+  {
+    key: 'crossmath',
+    title: 'Crossmath',
+    description: 'Fill blanks so every equation is true. Number crossword puzzles.',
+    status: 'available',
+  },
 ]
