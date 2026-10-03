@@ -111,6 +111,9 @@ export function ReportsPage() {
   )
 
   const counts = report.assignmentCounts
+  const totalAssignments = counts.completed + counts.inProgress + counts.pending
+  const completedPct =
+    totalAssignments > 0 ? Math.round((counts.completed / totalAssignments) * 100) : 0
 
   return (
     <div className="space-y-6">
@@ -204,6 +207,9 @@ export function ReportsPage() {
                   { label: 'In progress', value: counts.inProgress, color: '#f59e0b' },
                   { label: 'Pending', value: counts.pending, color: '#e2e8f0' },
                 ]}
+                centerValue={completedPct}
+                centerLabel="Complete"
+                legendFormat="both"
               />
             </ChartCard>
           </div>
