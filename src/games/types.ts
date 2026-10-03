@@ -1,6 +1,12 @@
 /** Shared Games Layer types. Not academic progress. */
 
-export type GameKey = 'word_rush' | 'math_sprint' | 'color_block' | 'crossmath' | 'sudoku'
+export type GameKey =
+  | 'word_rush'
+  | 'math_sprint'
+  | 'color_block'
+  | 'crossmath'
+  | 'sudoku'
+  | 'chess'
 
 export type GameCatalogStatus = 'available' | 'coming_soon'
 

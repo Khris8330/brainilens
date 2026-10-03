@@ -32,4 +32,10 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     description: 'Classic number puzzles. Multiple difficulties, notes, hints, and streaks.',
     status: 'available',
   },
+  {
+    key: 'chess',
+    title: 'Chess',
+    description: 'Classic chess vs AI. Standard rules, tiers, and levels.',
+    status: 'available',
+  },
 ]
