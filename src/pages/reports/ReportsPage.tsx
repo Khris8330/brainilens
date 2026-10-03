@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Download, Clock, CheckCircle2, TrendingUp, Sparkles } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, EmptyState, Select } from '@/components/ui'
-import { BarChart, LineChart, DonutChart } from '@/components/charts'
+import { BarChart, DonutChart } from '@/components/charts'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChildReportSummary, getParentChildren, type ChildReportSummary } from '@/lib/learning-data'
 
@@ -23,33 +23,29 @@ function buildRecommendations(report: ChildReportSummary, childName: string): st
   const weakest = subjects[0]
   const strongest = subjects[subjects.length - 1]
   const pending = report.assignmentCounts.pending + report.assignmentCounts.inProgress
+  const avg = report.averageScore ?? 0
 
-  if (report.averageScore > 0 && report.averageScore < 60) {
+  if (avg >= 80) {
     tips.push(
-      `${name}'s average score is ${report.averageScore}%. Focus on shorter daily practice sessions and review missed questions together.`,
+      `Strong overall score (${avg}%). Keep momentum with slightly harder topics in Weekly Learning.`,
     )
-  } else if (report.averageScore >= 85) {
+  } else if (avg >= 60) {
     tips.push(
-      `Strong overall score (${report.averageScore}%). Keep momentum with slightly harder topics in Weekly Learning.`,
+      `${name}'s overall score is ${avg}%. A short daily practice block can push this higher.`,
     )
-  } else if (report.averageScore > 0) {
+  } else if (avg > 0) {
     tips.push(
-      `Solid progress at ${report.averageScore}% average. A few targeted review sessions can push scores higher.`,
+      `Overall score is ${avg}%. Focus on fewer subjects this week and celebrate small wins.`,
     )
   }
 
-  if (weakest && typeof weakest.value === 'number' && weakest.label) {
+  if (weakest && weakest.value < 75) {
     tips.push(
       `${weakest.label} is currently the weakest subject (${weakest.value}%). Add a Weekly Learning focus area there this week.`,
     )
   }
 
-  if (
-    strongest &&
-    weakest &&
-    strongest.label !== weakest.label &&
-    typeof strongest.value === 'number'
-  ) {
+  if (strongest && strongest.value >= 90 && strongest.label !== weakest?.label) {
     tips.push(
       `${strongest.label} looks strong (${strongest.value}%). Use that confidence to coach peers or explore a related challenge topic.`,
     )
@@ -61,78 +57,120 @@ function buildRecommendations(report: ChildReportSummary, childName: string): st
     )
   }
 
-  if (report.assignmentCounts.completed === 0) {
-    tips.push(
-      'No completed assignments yet. Generate a Weekly Learning topic and have the student finish the lesson plus assessment to unlock richer insights.',
-    )
-  }
-
   if (tips.length === 0) {
-    tips.push(
-      'Keep assigning Weekly Learning topics. Recommendations improve as more assessments are completed.',
-    )
+    tips.push('Complete a few assessments to unlock personalized recommendations.')
   }
 
   return tips.slice(0, 4)
 }
 
-export function ReportsPage() {
+export default function ReportsPage() {
   const { user } = useAuth()
   const [children, setChildren] = useState<Array<{ id: string; name: string }>>([])
-  const [selected, setSelected] = useState('')
-  const [report, setReport] = useState(emptyReport)
-  const [error, setError] = useState('')
+  const [selectedChildId, setSelectedChildId] = useState('')
+  const [report, setReport] = useState<ChildReportSummary>(emptyReport)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user?.id) return
-    void getParentChildren(user.id).then(({ data, error: childError }) => {
-      if (childError) {
-        setError('Children could not be loaded.')
+    let cancelled = false
+    async function load() {
+      if (!user?.id) {
+        setLoading(false)
         return
       }
-      const next = (data ?? []).map((child) => ({ id: child.id, name: child.full_name }))
-      setChildren(next)
-      setSelected(next[0]?.id ?? '')
-    })
+      setLoading(true)
+      setError(null)
+      try {
+        const kids = await getParentChildren(user.id)
+        if (cancelled) return
+        setChildren(kids.map((k) => ({ id: k.id, name: k.name })))
+        const firstId = kids[0]?.id ?? ''
+        setSelectedChildId((prev) => prev || firstId)
+        const childId = selectedChildId || firstId
+        if (childId) {
+          const summary = await getChildReportSummary(childId)
+          if (!cancelled) setReport(summary)
+        }
+      } catch {
+        if (!cancelled) setError('Could not load report data.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id])
 
   useEffect(() => {
-    if (!selected) return
-    void getChildReportSummary(selected).then(({ data, error: reportError }) => {
-      if (reportError) setError('Report data could not be loaded.')
-      setReport(data ?? emptyReport)
-    })
-  }, [selected])
-
-  const selectedName = children.find((c) => c.id === selected)?.name ?? 'Your child'
-  const recommendations = useMemo(
-    () => buildRecommendations(report, selectedName),
-    [report, selectedName],
-  )
+    let cancelled = false
+    async function loadChild() {
+      if (!selectedChildId) return
+      setLoading(true)
+      setError(null)
+      try {
+        const summary = await getChildReportSummary(selectedChildId)
+        if (!cancelled) setReport(summary)
+      } catch {
+        if (!cancelled) setError('Could not load report data.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    void loadChild()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedChildId])
 
   const counts = report.assignmentCounts
+  const childName = children.find((c) => c.id === selectedChildId)?.name ?? ''
+  const recommendations = useMemo(
+    () => buildRecommendations(report, childName),
+    [report, childName],
+  )
+
+  if (loading && children.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-text">Reports</h1>
+        <p className="text-sm text-text-muted">Loading report…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-text">Reports</h1>
-          <p className="mt-1 text-sm text-text-muted">Live progress reports from completed learning.</p>
+          <p className="mt-1 text-sm text-text-muted">
+            Scores, completion, and focus tips for each child.
+          </p>
         </div>
-        <Button onClick={() => window.print()}>
-          <Download className="size-4" aria-hidden="true" />
-          Download report
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {children.length > 0 && (
+            <Select
+              value={selectedChildId}
+              onChange={(e) => setSelectedChildId(e.target.value)}
+              aria-label="Select child"
+            >
+              {children.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          )}
+          <Button variant="outline" type="button" disabled>
+            <Download className="size-4" aria-hidden="true" />
+            Export
+          </Button>
+        </div>
       </div>
-
-      {children.length > 0 && (
-        <Select
-          aria-label="Select child"
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          options={children.map((child) => ({ value: child.id, label: child.name }))}
-        />
-      )}
 
       {error && (
         <p className="text-sm text-destructive" role="alert">
@@ -161,7 +199,12 @@ export function ReportsPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <ChartCard title="Monthly performance">
               {report.monthlyTrend.length ? (
-                <LineChart data={report.monthlyTrend} color="#2563eb" />
+                <BarChart
+                  data={report.monthlyTrend}
+                  maxValue={100}
+                  color="#2563eb"
+                  height={200}
+                />
               ) : (
                 <EmptyState
                   title="No monthly performance yet"
@@ -171,7 +214,12 @@ export function ReportsPage() {
             </ChartCard>
             <ChartCard title="Weekly performance">
               {report.weeklyActivity.length ? (
-                <LineChart data={report.weeklyActivity} color="#14b8a6" />
+                <BarChart
+                  data={report.weeklyActivity}
+                  maxValue={100}
+                  color="#14b8a6"
+                  height={200}
+                />
               ) : (
                 <EmptyState
                   title="No weekly activity yet"
@@ -180,7 +228,12 @@ export function ReportsPage() {
               )}
             </ChartCard>
             <ChartCard title="Subject performance">
-              <BarChart data={report.subjectPerformance} />
+              <BarChart
+                data={report.subjectPerformance}
+                maxValue={100}
+                color="#6366f1"
+                height={200}
+              />
             </ChartCard>
             <ChartCard title="Assignment completion">
               <DonutChart
