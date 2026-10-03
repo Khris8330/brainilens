@@ -23,29 +23,33 @@ function buildRecommendations(report: ChildReportSummary, childName: string): st
   const weakest = subjects[0]
   const strongest = subjects[subjects.length - 1]
   const pending = report.assignmentCounts.pending + report.assignmentCounts.inProgress
-  const avg = report.averageScore ?? 0
 
-  if (avg >= 80) {
+  if (report.averageScore > 0 && report.averageScore < 60) {
     tips.push(
-      `Strong overall score (${avg}%). Keep momentum with slightly harder topics in Weekly Learning.`,
+      `${name}'s average score is ${report.averageScore}%. Focus on shorter daily practice sessions and review missed questions together.`,
     )
-  } else if (avg >= 60) {
+  } else if (report.averageScore >= 85) {
     tips.push(
-      `${name}'s overall score is ${avg}%. A short daily practice block can push this higher.`,
+      `Strong overall score (${report.averageScore}%). Keep momentum with slightly harder topics in Weekly Learning.`,
     )
-  } else if (avg > 0) {
+  } else if (report.averageScore > 0) {
     tips.push(
-      `Overall score is ${avg}%. Focus on fewer subjects this week and celebrate small wins.`,
+      `Solid progress at ${report.averageScore}% average. A few targeted review sessions can push scores higher.`,
     )
   }
 
-  if (weakest && weakest.value < 75) {
+  if (weakest && typeof weakest.value === 'number' && weakest.label) {
     tips.push(
       `${weakest.label} is currently the weakest subject (${weakest.value}%). Add a Weekly Learning focus area there this week.`,
     )
   }
 
-  if (strongest && strongest.value >= 90 && strongest.label !== weakest?.label) {
+  if (
+    strongest &&
+    weakest &&
+    strongest.label !== weakest.label &&
+    typeof strongest.value === 'number'
+  ) {
     tips.push(
       `${strongest.label} looks strong (${strongest.value}%). Use that confidence to coach peers or explore a related challenge topic.`,
     )
@@ -57,105 +61,70 @@ function buildRecommendations(report: ChildReportSummary, childName: string): st
     )
   }
 
+  if (report.assignmentCounts.completed === 0) {
+    tips.push(
+      'No completed assignments yet. Generate a Weekly Learning topic and have the student finish the lesson plus assessment to unlock richer insights.',
+    )
+  }
+
   if (tips.length === 0) {
-    tips.push('Complete a few assessments to unlock personalized recommendations.')
+    tips.push(
+      'Keep assigning Weekly Learning topics. Recommendations improve as more assessments are completed.',
+    )
   }
 
   return tips.slice(0, 4)
 }
 
-export default function ReportsPage() {
+export function ReportsPage() {
   const { user } = useAuth()
   const [children, setChildren] = useState<Array<{ id: string; name: string }>>([])
-  const [selectedChildId, setSelectedChildId] = useState('')
-  const [report, setReport] = useState<ChildReportSummary>(emptyReport)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState('')
+  const [report, setReport] = useState(emptyReport)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    let cancelled = false
-    async function load() {
-      if (!user?.id) {
-        setLoading(false)
+    if (!user?.id) return
+    void getParentChildren(user.id).then(({ data, error: childError }) => {
+      if (childError) {
+        setError('Children could not be loaded.')
         return
       }
-      setLoading(true)
-      setError(null)
-      try {
-        const kids = await getParentChildren(user.id)
-        if (cancelled) return
-        setChildren(kids.map((k) => ({ id: k.id, name: k.name })))
-        const firstId = kids[0]?.id ?? ''
-        setSelectedChildId((prev) => prev || firstId)
-        const childId = selectedChildId || firstId
-        if (childId) {
-          const summary = await getChildReportSummary(childId)
-          if (!cancelled) setReport(summary)
-        }
-      } catch {
-        if (!cancelled) setError('Could not load report data.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      const next = (data ?? []).map((child) => ({ id: child.id, name: child.full_name }))
+      setChildren(next)
+      setSelected(next[0]?.id ?? '')
+    })
   }, [user?.id])
 
   useEffect(() => {
-    let cancelled = false
-    async function loadChild() {
-      if (!selectedChildId) return
-      setLoading(true)
-      setError(null)
-      try {
-        const summary = await getChildReportSummary(selectedChildId)
-        if (!cancelled) setReport(summary)
-      } catch {
-        if (!cancelled) setError('Could not load report data.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    void loadChild()
-    return () => {
-      cancelled = true
-    }
-  }, [selectedChildId])
+    if (!selected) return
+    void getChildReportSummary(selected).then(({ data, error: reportError }) => {
+      if (reportError) setError('Report data could not be loaded.')
+      setReport(data ?? emptyReport)
+    })
+  }, [selected])
 
-  const counts = report.assignmentCounts
-  const childName = children.find((c) => c.id === selectedChildId)?.name ?? ''
+  const selectedName = children.find((c) => c.id === selected)?.name ?? 'Your child'
   const recommendations = useMemo(
-    () => buildRecommendations(report, childName),
-    [report, childName],
+    () => buildRecommendations(report, selectedName),
+    [report, selectedName],
   )
 
-  if (loading && children.length === 0) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-text">Reports</h1>
-        <p className="text-sm text-text-muted">Loading report…</p>
-      </div>
-    )
-  }
+  const counts = report.assignmentCounts
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-semibold text-text">Reports</h1>
-          <p className="mt-1 text-sm text-text-muted">
-            Scores, completion, and focus tips for each child.
-          </p>
+          <p className="mt-1 text-sm text-text-muted">Live progress reports from completed learning.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-3">
           {children.length > 0 && (
             <Select
-              value={selectedChildId}
-              onChange={(e) => setSelectedChildId(e.target.value)}
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="min-w-[160px]"
               aria-label="Select child"
             >
               {children.map((c) => (
@@ -165,7 +134,7 @@ export default function ReportsPage() {
               ))}
             </Select>
           )}
-          <Button variant="outline" type="button" disabled>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Download className="size-4" aria-hidden="true" />
             Export
           </Button>
