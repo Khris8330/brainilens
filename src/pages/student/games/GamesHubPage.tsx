@@ -9,6 +9,7 @@ import { routes } from '@/routes'
 import { loadBestScore as loadColorBest } from '@/games/color-block/engine/board'
 import { loadCrossmathBest } from '@/games/crossmath/engine/generator'
 import { loadBestScore as loadSudokuBest } from '@/games/sudoku/engine/generator'
+import { loadBestScore as loadChessBest } from '@/games/chess/engine/board'
 
 export function GamesHubPage() {
   const [status, setStatus] = useState<GameStatusPayload | null>(null)
@@ -104,7 +105,9 @@ export function GamesHubPage() {
                     ? routes.studentCrossmath
                     : game.key === 'sudoku'
                       ? routes.studentSudoku
-                      : null
+                      : game.key === 'chess'
+                        ? routes.studentChess
+                        : null
           return (
             <Card key={game.key} className={!isAvailable ? 'opacity-90' : undefined}>
               <CardHeader className="pb-2">
@@ -144,6 +147,9 @@ export function GamesHubPage() {
                 )}
                 {game.key === 'sudoku' && (
                   <p className="text-xs text-text-muted">Best score {loadSudokuBest()}</p>
+                )}
+                {game.key === 'chess' && (
+                  <p className="text-xs text-text-muted">Best score {loadChessBest()}</p>
                 )}
                 {playPath ? (
                   isAvailable ? (
