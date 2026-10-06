@@ -78,3 +78,16 @@ export interface ChatMessage {
   content: string
   timestamp: string
 }
+
+export interface Achievement {
+  title: string
+  description: string
+  earned: boolean
+  date?: string
+}
+
+export interface ActivityItem {
+  id: string
+  description: string
+  timestamp: string
+}
