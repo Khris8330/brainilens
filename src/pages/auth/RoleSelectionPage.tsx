@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, GraduationCap, ShieldCheck } from 'lucide-react'
+import { ArrowRight, GraduationCap, School, ShieldCheck } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 import { routes } from '@/routes'
 
@@ -32,6 +32,25 @@ export function RoleSelectionPage() {
                 </p>
               </div>
               <ArrowRight className="mt-1 size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </div>
+          </Link>
+
+          <Link
+            to={routes.register}
+            state={{ role: 'teacher' }}
+            className="group rounded-2xl border border-border bg-surface p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card focus-visible:outline-none"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary-light text-secondary">
+                <School className="size-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold text-text">Teacher / School</h3>
+                <p className="mt-1 text-sm leading-6 text-text-muted">
+                  Register up to 30 students, assign class learning, and track progress.
+                </p>
+              </div>
+              <ArrowRight className="mt-1 size-5 shrink-0 text-secondary transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </div>
           </Link>
 
