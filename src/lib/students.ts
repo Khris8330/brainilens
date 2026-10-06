@@ -32,6 +32,7 @@ export async function createStudent(fullName: string, grade: string) {
 
   return {
     data: {
+      studentRowId: student.id ? String(student.id) : undefined,
       studentId: String(student.student_id),
       fullName: String(student.full_name ?? fullName),
       grade: String(student.grade ?? grade),
