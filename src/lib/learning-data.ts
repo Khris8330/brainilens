@@ -108,6 +108,20 @@ export async function getParentChildren(parentId: string) {
   return supabase.from('students').select('id,student_id,full_name,grade,user_id,parent_id').eq('parent_id', parentId).order('full_name')
 }
 
+export async function getTeacherChildren(teacherId: string) {
+  return supabase
+    .from('students')
+    .select('id,student_id,full_name,grade,user_id,teacher_id')
+    .eq('teacher_id', teacherId)
+    .order('full_name')
+}
+
+/** Load children for parent or teacher account. */
+export async function getOwnedChildren(ownerId: string, role: string | null | undefined) {
+  if (role === 'teacher') return getTeacherChildren(ownerId)
+  return getParentChildren(ownerId)
+}
+
 export async function getChildAssignments(studentId: string) {
   const { data, error } = await supabase.from('student_assignments').select('id,status,score,submitted_at,assignments(id,title,description,subject,grade,due_date,difficulty)').eq('student_id', studentId).order('created_at', { ascending: false })
   return { data: (data ?? []).map(mapAssignment) as StudentAssignmentRecord[], error }
