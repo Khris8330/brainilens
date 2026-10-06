@@ -7,7 +7,7 @@ import {
   createLearningPlanItem,
   deleteLearningPlanItem,
   getLearningPlanItems,
-  getParentChildren,
+  getOwnedChildren,
   type LearningPlanItemRecord,
 } from '@/lib/learning-data'
 
@@ -76,7 +76,7 @@ export function WeeklyLearningPage() {
 
     void (async () => {
       setLoading(true)
-      const { data, error: childError } = await getParentChildren(user.id)
+      const { data, error: childError } = await getOwnedChildren(user.id, user.role)
       if (childError) setError('Child profiles could not be loaded.')
 
       const next = (data ?? []).map((child) => ({ id: child.id, name: child.full_name }))
@@ -93,12 +93,8 @@ export function WeeklyLearningPage() {
 
       setLoading(false)
     })()
-  }, [user?.id, loadItems])
+  }, [user?.id, user?.role, loadItems])
 
-  // Poll while any item is generating so the UI moves to ready/failed without a manual refresh.
-  // Trigger path: parent clicks Generate → frontend invokes generate-learning-content edge function
-  // (not a background job). The function sets status=generating, then ready or failed when done.
-  // Client polls because the HTTP call can time out before the function finishes.
   useEffect(() => {
     if (!selectedChildId) return
     const hasGenerating = items.some((item) => item.status === 'generating') || generatingItemId
@@ -116,7 +112,6 @@ export function WeeklyLearningPage() {
     return () => window.clearInterval(interval)
   }, [selectedChildId, items, generatingItemId, loadItems])
 
-  // Prefer Realtime when available so status flips as soon as the row updates.
   useEffect(() => {
     if (!selectedChildId) return
 
@@ -154,19 +149,31 @@ export function WeeklyLearningPage() {
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault()
-    if (!selectedChildId || !form.subject.trim() || !form.topic.trim()) return
+    const isTeacher = user?.role === 'teacher'
+    if (!form.subject.trim() || !form.topic.trim()) return
+    if (!isTeacher && !selectedChildId) return
+    if (isTeacher && children.length === 0) {
+      setError('Register students before assigning class learning.')
+      return
+    }
     setSaving(true)
     setError('')
-    const result = await createLearningPlanItem(
-      selectedChildId,
-      form.subject.trim(),
-      form.topic.trim(),
-      form.description.trim(),
-    )
-    if (result.error) setError('Weekly learning item could not be added.')
+    const targets = isTeacher ? children.map((c) => c.id) : [selectedChildId]
+    let failed = 0
+    for (const studentId of targets) {
+      const result = await createLearningPlanItem(
+        studentId,
+        form.subject.trim(),
+        form.topic.trim(),
+        form.description.trim(),
+      )
+      if (result.error) failed += 1
+    }
+    if (failed === targets.length) setError('Weekly learning item could not be added.')
+    else if (failed > 0) setError(`Assigned to class with ${failed} error(s).`)
     else {
       setForm({ subject: '', topic: '', description: '' })
-      await loadItems(selectedChildId)
+      if (selectedChildId) await loadItems(selectedChildId)
     }
     setSaving(false)
   }
@@ -186,8 +193,6 @@ export function WeeklyLearningPage() {
       ),
     )
 
-    // Fire the edge function; do not block the UI on the full generation time.
-    // Polling + Realtime above will move status from generating → ready/failed.
     void supabase.functions
       .invoke('generate-learning-content', {
         body: { learningPlanItemId: itemId },
@@ -361,7 +366,7 @@ export function WeeklyLearningPage() {
                     ) : (
                       <>
                         <Plus className="size-4" aria-hidden="true" />
-                        Add focus area
+                        {user?.role === 'teacher' ? 'Assign to whole class' : 'Add focus area'}
                       </>
                     )}
                   </Button>
@@ -374,7 +379,7 @@ export function WeeklyLearningPage() {
 
       <div className="flex items-center gap-2 text-xs text-text-muted">
         <LockKeyhole className="size-4" aria-hidden="true" />
-        Weekly learning is scoped to your authenticated parent account.
+        Weekly learning is scoped to your authenticated account.
       </div>
     </div>
   )
