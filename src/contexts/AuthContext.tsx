@@ -14,7 +14,13 @@ interface AuthContextValue {
   user: User | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<User>
-  register: (name: string, email: string, password: string, parentalConsent: boolean) => Promise<void>
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    parentalConsent: boolean,
+    accountRole?: 'parent' | 'teacher',
+  ) => Promise<void>
   logout: () => Promise<void>
   /** Call after student-login setSession so user is mapped before navigate */
   refreshUser: () => Promise<User | null>
@@ -41,9 +47,11 @@ async function mapUser(session: Session | null): Promise<User | null> {
       ? 'admin'
       : profile?.role === 'child'
         ? 'child'
-        : profile?.role === 'parent'
-          ? 'parent'
-          : null
+        : profile?.role === 'teacher'
+          ? 'teacher'
+          : profile?.role === 'parent'
+            ? 'parent'
+            : null
 
   if (!role) return null
 
@@ -106,7 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     if (error) throw new Error(authErrorMessage(error))
 
-    // Map user immediately so navigate does not race with onAuthStateChange
     const mapped = await mapUser(data.session)
     if (!mapped) {
       throw new Error('We could not load your profile. Please try again.')
@@ -129,8 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     parentalConsent: boolean,
+    accountRole: 'parent' | 'teacher' = 'parent',
   ) {
-    if (!parentalConsent) {
+    if (accountRole === 'parent' && !parentalConsent) {
       throw new Error('Parental consent is required to create an account.')
     }
     const { data, error } = await supabase.auth.signUp({
@@ -139,8 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           full_name: fullName.trim(),
-          role: 'parent',
-          parental_consent: 'true',
+          role: accountRole,
+          parental_consent: accountRole === 'parent' ? 'true' : 'n/a',
           consent_version: '2026-09',
         },
         emailRedirectTo:
@@ -153,6 +161,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(
         'Account created. Check your email to confirm your account before logging in.',
       )
+    }
+    // Ensure profile role is set (trigger may default to parent)
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName.trim(),
+        email: email.trim(),
+        role: accountRole,
+      })
     }
     const mapped = await mapUser(data.session)
     if (mapped) {
