@@ -13,6 +13,7 @@ import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { RoleSelectionPage } from '@/pages/auth/RoleSelectionPage'
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage'
 import { ParentDashboardPage } from '@/pages/parent/ParentDashboardPage'
+import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 import { ChildProgressPage } from '@/pages/child/ChildProgressPage'
 import { WeeklyLearningPage } from '@/pages/weekly-learning/WeeklyLearningPage'
 import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage'
@@ -64,11 +65,28 @@ export const router = createBrowserRouter([
     children: [
       { path: '/parent', element: <ParentDashboardPage /> },
       { path: '/child', element: <ChildProgressPage /> },
+      { path: '/settings/children/:studentId', element: <ChildSettingsPage /> },
+    ],
+  },
+  {
+    element: (
+      <RequireAuth role="teacher">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [{ path: '/teacher', element: <TeacherDashboardPage /> }],
+  },
+  {
+    element: (
+      <RequireAuth role="adult">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [
       { path: '/weekly-learning', element: <WeeklyLearningPage /> },
       { path: '/assignments', element: <AssignmentsPage /> },
       { path: '/reports', element: <ReportsPage /> },
       { path: '/settings', element: <SettingsPage /> },
-      { path: '/settings/children/:studentId', element: <ChildSettingsPage /> },
       { path: '/ai', element: <AIInsightsPage /> },
     ],
   },
@@ -107,6 +125,7 @@ export const routes = {
   studentLogin: '/auth/student-login',
   register: '/auth/register',
   parent: '/parent',
+  teacher: '/teacher',
   child: '/child',
   weeklyLearning: '/weekly-learning',
   assignments: '/assignments',
