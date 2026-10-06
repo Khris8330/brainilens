@@ -34,7 +34,7 @@ export function AIHighlightSection() {
           <img
             src={lensMascot}
             alt="Lens, the BrainiLens AI learning companion"
-            className="h-auto w-full max-w-md rounded-2xl border border-border object-cover shadow-soft lg:max-w-none"
+            className="h-auto w-full max-w-md object-contain drop-shadow-md lg:max-w-none"
           />
         </motion.div>
 
