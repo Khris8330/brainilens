@@ -27,6 +27,15 @@ export const parentNavItems: NavItem[] = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
+export const teacherNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/teacher', icon: Home },
+  { label: 'Weekly Learning', href: '/weekly-learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
+  { label: 'Lens AI', href: '/ai', icon: Bot, badge: 'New' },
+  { label: 'Reports', href: '/reports', icon: BarChart3 },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
 export const childNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/student', icon: Home },
   { label: "Today's Learning", href: '/student/learning', icon: NotebookPen },
@@ -36,7 +45,6 @@ export const childNavItems: NavItem[] = [
   { label: 'Games', href: '/student/games', icon: Gamepad2 },
   { label: 'Profile', href: '/student/profile', icon: Settings },
 ]
-
 
 export const landingNavItems: NavItem[] = [
   { label: 'Features', href: '/#features', icon: Home },

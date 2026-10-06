@@ -30,7 +30,7 @@ export interface User {
   name: string
   email: string
   avatarUrl?: string
-  role: 'parent' | 'student' | 'child' | 'admin'
+  role: 'parent' | 'teacher' | 'student' | 'child' | 'admin'
   studentId?: string
   grade?: string | null
   pin?: string
@@ -76,18 +76,5 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
-  timestamp: string
-}
-
-export interface Achievement {
-  title: string
-  description: string
-  earned: boolean
-  date?: string
-}
-
-export interface ActivityItem {
-  id: string
-  description: string
   timestamp: string
 }
