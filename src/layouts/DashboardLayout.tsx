@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Header, Sidebar } from '@/components/common'
-import { parentNavItems, childNavItems } from '@/data/navigation'
+import { parentNavItems, teacherNavItems, childNavItems } from '@/data/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function DashboardLayout() {
@@ -14,7 +14,12 @@ export function DashboardLayout() {
     await logout()
     navigate('/auth/role', { replace: true })
   }
-  const navItems = user?.role === 'child' || user?.role === 'student' ? childNavItems : parentNavItems
+  const navItems =
+    user?.role === 'child' || user?.role === 'student'
+      ? childNavItems
+      : user?.role === 'teacher'
+        ? teacherNavItems
+        : parentNavItems
 
   return (
     <div className="flex min-h-screen bg-background">

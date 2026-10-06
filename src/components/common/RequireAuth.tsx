@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { LoadingOverlay } from '@/components/ui'
-import { homePathForRole, isParentRole, isStudentRole } from '@/lib/auth-roles'
+import { homePathForRole, isAdultRole, isParentRole, isStudentRole, isTeacherRole } from '@/lib/auth-roles'
 
 /**
  * Protects routes using the real Supabase session via AuthContext.
@@ -13,7 +13,7 @@ export function RequireAuth({
   role,
 }: {
   children: ReactNode
-  role?: 'parent' | 'student'
+  role?: 'parent' | 'teacher' | 'student' | 'adult'
 }) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
@@ -25,6 +25,14 @@ export function RequireAuth({
   }
 
   if (role === 'parent' && !isParentRole(user.role)) {
+    return <Navigate to={homePathForRole(user.role)} replace />
+  }
+
+  if (role === 'teacher' && !isTeacherRole(user.role)) {
+    return <Navigate to={homePathForRole(user.role)} replace />
+  }
+
+  if (role === 'adult' && !isAdultRole(user.role)) {
     return <Navigate to={homePathForRole(user.role)} replace />
   }
 
