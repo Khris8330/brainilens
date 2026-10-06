@@ -7,7 +7,6 @@ import {
   TrendingUp,
   UserRound,
   Flame,
-  Sparkles,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/common/BrandLogo'
 import { useAuth } from '@/contexts/AuthContext'
@@ -58,14 +57,36 @@ export function StudentDashboardPage() {
     [assignments],
   )
 
+  // Real streak: consecutive days ending today (or most recent activity day)
   const streakDays = useMemo(() => {
     if (activity.length === 0) return 0
-    const days = new Set(
-      activity
-        .map((item) => (item.activityDate ? new Date(item.activityDate).toDateString() : null))
-        .filter(Boolean),
-    )
-    return Math.min(days.size, 30)
+    const daySet = new Set<
+      string
+    >()
+    for (const item of activity) {
+      if (item.activityDate) {
+        daySet.add(new Date(item.activityDate).toDateString())
+      }
+    }
+    if (daySet.size === 0) return 0
+
+    // Sort unique days descending
+    const sorted = Array.from(daySet)
+      .map((d) => new Date(d))
+      .sort((a, b) => b.getTime() - a.getTime())
+
+    let streak = 1
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1]
+      const curr = sorted[i]
+      const diffDays = Math.round((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24))
+      if (diffDays === 1) {
+        streak += 1
+      } else {
+        break
+      }
+    }
+    return streak
   }, [activity])
 
   const firstName = user?.name?.split(' ')[0] ?? 'Student'
@@ -133,19 +154,18 @@ export function StudentDashboardPage() {
             {getAppGreeting().replace(/!$/, '')}, {firstName}!
           </h1>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-text-muted sm:text-base">
-            Ready to learn something cool today?
-            <Sparkles className="size-4 text-amber-400" aria-hidden />
+            Ready to learn something cool today? 💡
           </p>
         </div>
-        {streakDays > 0 && (
-          <div className="shrink-0 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center shadow-sm">
-            <p className="flex items-center justify-center gap-1 text-sm font-bold text-amber-700">
-              <Flame className="size-4 text-orange-500" aria-hidden />
-              {streakDays}-day streak
-            </p>
-            <p className="text-[11px] font-medium text-amber-600/80">Keep it up!</p>
-          </div>
-        )}
+        <div className="shrink-0 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center shadow-sm">
+          <p className="flex items-center justify-center gap-1 text-sm font-bold text-amber-700">
+            <Flame className="size-4 text-orange-500" aria-hidden />
+            {streakDays}-day streak
+          </p>
+          <p className="text-[11px] font-medium text-amber-600/80">
+            {streakDays > 0 ? 'Keep it up!' : 'Start today!'}
+          </p>
+        </div>
       </div>
 
       {/* Card grid */}
