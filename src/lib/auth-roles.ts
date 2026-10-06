@@ -9,8 +9,17 @@ export function isParentRole(role: User['role'] | null | undefined): boolean {
   return role === 'parent' || role === 'admin'
 }
 
+export function isTeacherRole(role: User['role'] | null | undefined): boolean {
+  return role === 'teacher'
+}
+
+export function isAdultRole(role: User['role'] | null | undefined): boolean {
+  return isParentRole(role) || isTeacherRole(role)
+}
+
 export function homePathForRole(role: User['role'] | null | undefined): string {
   if (isStudentRole(role)) return routes.student
+  if (isTeacherRole(role)) return routes.teacher
   if (isParentRole(role)) return routes.parent
   return routes.roleSelection
 }
