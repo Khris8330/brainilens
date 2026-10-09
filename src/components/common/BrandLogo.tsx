@@ -12,15 +12,15 @@ export interface BrandLogoProps {
 }
 
 const markSize = {
-  sm: 'h-7 w-auto',
-  md: 'h-8 w-auto',
-  lg: 'h-12 w-auto',
+  sm: 'h-9 w-auto',
+  md: 'h-11 w-auto',
+  lg: 'h-14 w-auto',
 } as const
 
 const wordSize = {
-  sm: 'text-[13px]',
-  md: 'text-sm',
-  lg: 'text-xl',
+  sm: 'text-[15px]',
+  md: 'text-base',
+  lg: 'text-2xl',
 } as const
 
 /** Brand colors from the approved mark */
@@ -79,7 +79,7 @@ export function BrandLogo({
   const layoutClass =
     variant === 'stacked'
       ? 'inline-flex flex-col items-center gap-2'
-      : 'inline-flex items-center gap-1.5'
+      : 'inline-flex items-center gap-2'
 
   if (to === null) {
     return <span className={cn(layoutClass, className)}>{content}</span>
