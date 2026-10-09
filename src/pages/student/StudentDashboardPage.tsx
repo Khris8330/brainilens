@@ -8,7 +8,7 @@ import {
   UserRound,
   Flame,
   ArrowRight,
-  Search,
+  Sparkles,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/common/BrandLogo'
 import { useAuth } from '@/contexts/AuthContext'
@@ -33,7 +33,6 @@ type DashCard = {
   iconBg: string
   icon: ReactNode
   arrowColor: string
-  imageSrc?: string
   count?: number
 }
 
@@ -156,9 +155,8 @@ export function StudentDashboardPage() {
       bg: 'bg-cyan-50',
       text: 'text-cyan-900',
       iconBg: 'bg-cyan-500',
-      icon: <span className="text-white text-sm font-bold">AI</span>,
+      icon: <Sparkles className="size-5 text-white" strokeWidth={2} />,
       arrowColor: 'text-cyan-500',
-      imageSrc: lensMascot,
     },
     {
       to: routes.studentProgress,
@@ -206,12 +204,12 @@ export function StudentDashboardPage() {
         </div>
       </div>
 
-      {/* Continue Learning card */}
+      {/* Continue Learning card — mascot on the right */}
       <Link
         to={continueItem.to}
         className="mb-5 block overflow-hidden rounded-3xl bg-sky-50 p-4 shadow-sm ring-1 ring-sky-100 transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 sm:p-5"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex items-center gap-2">
               <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-amber-400">
@@ -243,10 +241,15 @@ export function StudentDashboardPage() {
               </span>
             </div>
           </div>
-          <div className="hidden shrink-0 sm:block">
-            <div className="flex size-20 items-center justify-center rounded-full bg-sky-100/80">
-              <Search className="size-10 text-sky-400" strokeWidth={1.5} />
-            </div>
+
+          {/* Official BrainiLens mascot — right side */}
+          <div className="shrink-0">
+            <img
+              src={lensMascot}
+              alt="Lens"
+              className="h-24 w-24 object-contain drop-shadow-md sm:h-28 sm:w-28"
+              draggable={false}
+            />
           </div>
         </div>
       </Link>
@@ -265,20 +268,10 @@ export function StudentDashboardPage() {
               </span>
             )}
 
-            <div className="flex items-start justify-between gap-2">
-              <div
-                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${card.iconBg}`}
-              >
-                {card.icon}
-              </div>
-              {card.imageSrc && (
-                <img
-                  src={card.imageSrc}
-                  alt=""
-                  className="h-14 w-14 object-contain drop-shadow-md transition group-hover:scale-105 sm:h-16 sm:w-16"
-                  draggable={false}
-                />
-              )}
+            <div
+              className={`flex size-9 shrink-0 items-center justify-center rounded-full ${card.iconBg}`}
+            >
+              {card.icon}
             </div>
 
             <div className={`mt-3 ${card.text}`}>
