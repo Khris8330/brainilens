@@ -7,6 +7,8 @@ import {
   TrendingUp,
   UserRound,
   Flame,
+  ArrowRight,
+  Search,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/common/BrandLogo'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,8 +17,10 @@ import { getAppGreeting } from '@/lib/time'
 import {
   getStudentAssignments,
   getStudentActivity,
+  getStudentProgress,
   type StudentAssignmentRecord,
   type LearningActivityRecord,
+  type StudentProgressRecord,
 } from '@/lib/learning-data'
 import { lensMascot } from '@/assets/landing'
 
@@ -26,9 +30,9 @@ type DashCard = {
   subtitle: string
   bg: string
   text: string
-  badge?: string
-  badgeTone?: string
-  icon?: ReactNode
+  iconBg: string
+  icon: ReactNode
+  arrowColor: string
   imageSrc?: string
   count?: number
 }
@@ -37,22 +41,28 @@ export function StudentDashboardPage() {
   const { user } = useAuth()
   const [assignments, setAssignments] = useState<StudentAssignmentRecord[]>([])
   const [activity, setActivity] = useState<LearningActivityRecord[]>([])
+  const [progress, setProgress] = useState<StudentProgressRecord[]>([])
 
   useEffect(() => {
     if (!user?.id) return
     void Promise.all([
       getStudentAssignments(user.id),
       getStudentActivity(user.id),
-    ]).then(([assignmentResult, activityResult]) => {
+      getStudentProgress(user.id),
+    ]).then(([assignmentResult, activityResult, progressResult]) => {
       setAssignments(assignmentResult.data ?? [])
       setActivity(activityResult.data ?? [])
+      setProgress(progressResult.data ?? [])
     })
   }, [user?.id])
 
   const pendingCount = useMemo(
     () =>
       assignments.filter(
-        (item) => item.status === 'assigned' || item.status === 'in_progress' || item.status === 'overdue',
+        (item) =>
+          item.status === 'assigned' ||
+          item.status === 'in_progress' ||
+          item.status === 'overdue',
       ).length,
     [assignments],
   )
@@ -60,9 +70,7 @@ export function StudentDashboardPage() {
   // Real streak: consecutive days ending today (or most recent activity day)
   const streakDays = useMemo(() => {
     if (activity.length === 0) return 0
-    const daySet = new Set<
-      string
-    >()
+    const daySet = new Set<string>()
     for (const item of activity) {
       if (item.activityDate) {
         daySet.add(new Date(item.activityDate).toDateString())
@@ -70,7 +78,6 @@ export function StudentDashboardPage() {
     }
     if (daySet.size === 0) return 0
 
-    // Sort unique days descending
     const sorted = Array.from(daySet)
       .map((d) => new Date(d))
       .sort((a, b) => b.getTime() - a.getTime())
@@ -79,7 +86,9 @@ export function StudentDashboardPage() {
     for (let i = 1; i < sorted.length; i++) {
       const prev = sorted[i - 1]
       const curr = sorted[i]
-      const diffDays = Math.round((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24))
+      const diffDays = Math.round(
+        (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24),
+      )
       if (diffDays === 1) {
         streak += 1
       } else {
@@ -89,72 +98,101 @@ export function StudentDashboardPage() {
     return streak
   }, [activity])
 
+  // Continue Learning: first incomplete progress item, or fallback
+  const continueItem = useMemo(() => {
+    const incomplete = progress.find((p) => !p.completed && p.progress < 100)
+    if (incomplete?.content) {
+      return {
+        title: incomplete.content.title,
+        progress: Math.round(incomplete.progress),
+        to: routes.studentLearning,
+      }
+    }
+    return {
+      title: 'Start your next lesson',
+      progress: 0,
+      to: routes.studentLearning,
+    }
+  }, [progress])
+
   const firstName = user?.name?.split(' ')[0] ?? 'Student'
 
   const cards: DashCard[] = [
     {
       to: routes.studentLearning,
       title: "Today's Learning",
-      subtitle: "Let's explore and discover!",
-      bg: 'bg-sky-100',
+      subtitle: 'Your daily lesson plan.',
+      bg: 'bg-sky-50',
       text: 'text-sky-900',
-      icon: <BookOpen className="size-14 text-sky-500 drop-shadow-sm" strokeWidth={1.5} />,
+      iconBg: 'bg-sky-500',
+      icon: <BookOpen className="size-5 text-white" strokeWidth={2} />,
+      arrowColor: 'text-sky-500',
     },
     {
       to: routes.studentAssignments,
       title: 'Assignments',
-      subtitle: pendingCount > 0 ? 'You have pending work' : 'All caught up for now',
-      bg: 'bg-rose-100',
+      subtitle: pendingCount > 0 ? `Due soon, ${pendingCount}` : 'All caught up',
+      bg: 'bg-rose-50',
       text: 'text-rose-900',
+      iconBg: 'bg-rose-400',
+      icon: <ClipboardList className="size-5 text-white" strokeWidth={2} />,
+      arrowColor: 'text-rose-400',
       count: pendingCount > 0 ? pendingCount : undefined,
-      icon: <ClipboardList className="size-14 text-rose-400 drop-shadow-sm" strokeWidth={1.5} />,
     },
     {
       to: routes.studentGames,
       title: 'Games',
-      subtitle: 'Play, learn, and have fun!',
-      bg: 'bg-violet-100',
+      subtitle: 'Learn through play!',
+      bg: 'bg-violet-50',
       text: 'text-violet-900',
-      icon: <Gamepad2 className="size-14 text-violet-500 drop-shadow-sm" strokeWidth={1.5} />,
+      iconBg: 'bg-violet-500',
+      icon: <Gamepad2 className="size-5 text-white" strokeWidth={2} />,
+      arrowColor: 'text-violet-500',
     },
     {
       to: routes.studentAi,
       title: 'Lens AI',
-      subtitle: 'Ask anything. Discover more.',
-      bg: 'bg-cyan-100',
+      subtitle: 'Your smart learning companion.',
+      bg: 'bg-cyan-50',
       text: 'text-cyan-900',
-      badge: 'New',
-      badgeTone: 'bg-white/90 text-cyan-700',
+      iconBg: 'bg-cyan-500',
+      icon: <span className="text-white text-sm font-bold">AI</span>,
+      arrowColor: 'text-cyan-500',
       imageSrc: lensMascot,
     },
     {
       to: routes.studentProgress,
       title: 'My Progress',
-      subtitle: "See how you're growing!",
-      bg: 'bg-emerald-100',
+      subtitle: 'Track your growth.',
+      bg: 'bg-emerald-50',
       text: 'text-emerald-900',
-      icon: <TrendingUp className="size-14 text-emerald-500 drop-shadow-sm" strokeWidth={1.5} />,
+      iconBg: 'bg-emerald-500',
+      icon: <TrendingUp className="size-5 text-white" strokeWidth={2} />,
+      arrowColor: 'text-emerald-500',
     },
     {
       to: routes.studentProfile,
       title: 'Profile',
-      subtitle: 'Your avatar, achievements & more',
-      bg: 'bg-purple-100',
+      subtitle: 'Your learning journey.',
+      bg: 'bg-purple-50',
       text: 'text-purple-900',
-      icon: <UserRound className="size-14 text-purple-400 drop-shadow-sm" strokeWidth={1.5} />,
+      iconBg: 'bg-purple-500',
+      icon: <UserRound className="size-5 text-white" strokeWidth={2} />,
+      arrowColor: 'text-purple-500',
     },
   ]
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-lg flex-col px-1 pb-8 sm:max-w-2xl">
-      {/* Greeting */}
+    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-lg flex-col px-3 pb-8 sm:max-w-2xl">
+      {/* Greeting + Streak */}
       <div className="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[#14274E] sm:text-4xl">
-            {getAppGreeting().replace(/!$/, '')}, {firstName}!
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#14274E] sm:text-3xl">
+            {getAppGreeting()},{' '}
+            <span className="text-sky-600">{firstName}!</span>
           </h1>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-text-muted sm:text-base">
-            Ready to learn something cool today? 💡
+          <p className="mt-1 text-sm text-text-muted sm:text-base">
+            Ready to learn something today?
           </p>
         </div>
         <div className="shrink-0 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-center shadow-sm">
@@ -168,47 +206,94 @@ export function StudentDashboardPage() {
         </div>
       </div>
 
+      {/* Continue Learning card */}
+      <Link
+        to={continueItem.to}
+        className="mb-5 block overflow-hidden rounded-3xl bg-sky-50 p-4 shadow-sm ring-1 ring-sky-100 transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 sm:p-5"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-amber-400">
+                <div className="size-5 rounded-full border-2 border-white/80" />
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600">
+                Continue Learning
+              </span>
+            </div>
+            <h2 className="text-lg font-extrabold leading-tight text-[#14274E] sm:text-xl">
+              {continueItem.title}
+            </h2>
+            <div className="mt-3">
+              <div className="mb-1 flex items-center justify-between text-xs font-medium text-text-muted">
+                <span>Progress</span>
+                <span>{continueItem.progress}%</span>
+              </div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-sky-100">
+                <div
+                  className="h-full rounded-full bg-sky-500 transition-all"
+                  style={{ width: `${Math.min(100, Math.max(0, continueItem.progress))}%` }}
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500 px-4 py-2 text-sm font-bold text-white shadow-sm">
+                Resume
+                <ArrowRight className="size-4" />
+              </span>
+            </div>
+          </div>
+          <div className="hidden shrink-0 sm:block">
+            <div className="flex size-20 items-center justify-center rounded-full bg-sky-100/80">
+              <Search className="size-10 text-sky-400" strokeWidth={1.5} />
+            </div>
+          </div>
+        </div>
+      </Link>
+
       {/* Card grid */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {cards.map((card) => (
           <Link
             key={card.to}
             to={card.to}
-            className={`group relative flex min-h-[11.5rem] flex-col justify-between overflow-hidden rounded-3xl ${card.bg} p-4 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 sm:min-h-[13rem] sm:p-5`}
+            className={`group relative flex min-h-[9.5rem] flex-col justify-between overflow-hidden rounded-3xl ${card.bg} p-4 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 sm:min-h-[11rem] sm:p-5`}
           >
-            {card.badge && (
-              <span
-                className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[11px] font-bold ${card.badgeTone ?? 'bg-white text-text'}`}
-              >
-                ★ {card.badge}
-              </span>
-            )}
             {card.count != null && card.count > 0 && (
-              <span className="absolute bottom-16 right-4 flex size-7 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white shadow">
+              <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-rose-500 text-[11px] font-bold text-white shadow">
                 {card.count > 9 ? '9+' : card.count}
               </span>
             )}
-            <div className={`pr-6 ${card.text}`}>
-              <h2 className="text-lg font-extrabold leading-tight sm:text-xl">{card.title}</h2>
-              <p className="mt-1 text-xs font-medium opacity-80 sm:text-sm">{card.subtitle}</p>
-            </div>
-            <div className="mt-3 flex justify-end">
-              {card.imageSrc ? (
+
+            <div className="flex items-start justify-between gap-2">
+              <div
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${card.iconBg}`}
+              >
+                {card.icon}
+              </div>
+              {card.imageSrc && (
                 <img
                   src={card.imageSrc}
                   alt=""
-                  className="h-16 w-16 object-contain drop-shadow-md transition group-hover:scale-105 sm:h-20 sm:w-20"
+                  className="h-14 w-14 object-contain drop-shadow-md transition group-hover:scale-105 sm:h-16 sm:w-16"
                   draggable={false}
                 />
-              ) : (
-                <div className="transition group-hover:scale-105">{card.icon}</div>
               )}
+            </div>
+
+            <div className={`mt-3 ${card.text}`}>
+              <h2 className="text-base font-extrabold leading-tight sm:text-lg">{card.title}</h2>
+              <p className="mt-0.5 text-xs font-medium opacity-80 sm:text-sm">{card.subtitle}</p>
+            </div>
+
+            <div className={`mt-2 ${card.arrowColor}`}>
+              <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Official brand footer */}
+      {/* Brand footer */}
       <div className="mt-auto flex flex-col items-center gap-1 pt-10">
         <BrandLogo to={null} size="md" variant="horizontal" />
         <p className="text-[11px] font-medium tracking-wide text-text-muted">
