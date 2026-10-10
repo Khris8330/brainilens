@@ -1,6 +1,5 @@
 import { cn } from '@/utils'
 import type { Size } from '@/types'
-import { BrandLogo } from '@/components/common/BrandLogo'
 
 export interface LoadingSpinnerProps {
   size?: Size
@@ -36,19 +35,30 @@ export function LoadingSpinner({
   )
 }
 
+/** Full-screen loading that matches the boot splash design */
 export function LoadingOverlay({
   label = 'Loading',
 }: {
   label?: string
 }) {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-6">
-      <BrandLogo to={null} size="lg" />
-      <p className="text-sm font-medium tracking-wide text-text-muted">
-        Learn · Explore · Grow
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#FBF8F1] px-6">
+      <img
+        src="/brand/logo-icon.svg?v=embrace3"
+        alt=""
+        width={72}
+        height={113}
+        className="h-auto w-[72px]"
+        draggable={false}
+      />
+      <p className="mt-3.5 text-2xl font-extrabold lowercase leading-tight tracking-tight">
+        <span className="text-[#DC9F42]">b</span>
+        <span className="text-[#14274E]">rainilens</span>
       </p>
-      <LoadingSpinner size="md" label={label} />
-      <p className="text-sm text-text-muted">{label}</p>
+      <p className="mt-2 text-sm font-medium text-gray-500">Learn · Explore · Grow</p>
+      <div className="mt-7">
+        <LoadingSpinner size="md" label={label} />
+      </div>
     </div>
   )
 }
