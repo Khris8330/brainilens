@@ -1,5 +1,6 @@
 import { cn } from '@/utils'
 import type { Size } from '@/types'
+import { BrandLogo } from '@/components/common/BrandLogo'
 
 export interface LoadingSpinnerProps {
   size?: Size
@@ -41,8 +42,12 @@ export function LoadingOverlay({
   label?: string
 }) {
   return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-3">
-      <LoadingSpinner size="lg" label={label} />
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-6">
+      <BrandLogo to={null} size="lg" />
+      <p className="text-sm font-medium tracking-wide text-text-muted">
+        Learn · Explore · Grow
+      </p>
+      <LoadingSpinner size="md" label={label} />
       <p className="text-sm text-text-muted">{label}</p>
     </div>
   )
