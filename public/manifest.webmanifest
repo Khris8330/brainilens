@@ -1,7 +1,7 @@
 {
   "name": "BrainiLens",
   "short_name": "BrainiLens",
-  "description": "Track your child's learning, assignments, progress and academic growth with AI-powered insights.",
+  "description": "Track your child's learning growth with AI-powered insights.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
