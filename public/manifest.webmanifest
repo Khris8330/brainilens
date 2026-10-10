@@ -2,7 +2,7 @@
   "name": "BrainiLens",
   "short_name": "BrainiLens",
   "description": "Track your child's learning growth with AI-powered insights.",
-  "start_url": "/",
+  "start_url": "/auth/role",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -12,21 +12,21 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/brand/logo-icon.svg",
-      "sizes": "any",
+      "src": "/brand/app-icon.svg",
+      "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/brand/logo-icon.svg",
-      "sizes": "any",
+      "src": "/brand/app-icon.svg",
+      "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
     },
     {
-      "src": "/images/lens-mascot.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/brand/logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ]
