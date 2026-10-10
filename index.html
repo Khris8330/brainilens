@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=embrace3" />
     <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=embrace3" />
+    <link rel="apple-touch-icon" href="/brand/app-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="BrainiLens helps parents track their child's learning, assignments, progress and academic growth with AI-powered insights." />
     <meta name="robots" content="index, follow" />
@@ -43,9 +44,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1.25rem;
         background: #FBF8F1;
-        transition: opacity 0.35s ease, visibility 0.35s ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
       }
       #boot-splash.is-hidden {
         opacity: 0;
@@ -53,42 +53,35 @@
         pointer-events: none;
       }
       #boot-splash .mark {
-        width: 88px;
-        height: 88px;
-        object-fit: contain;
-      }
-      #boot-splash .brand {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
-        text-align: center;
-        padding: 0 1.5rem;
+        width: 72px;
+        height: auto;
+        display: block;
       }
       #boot-splash .wordmark {
-        font-size: 1.75rem;
+        margin-top: 14px;
+        font-size: 1.5rem;
         font-weight: 800;
         letter-spacing: -0.03em;
-        line-height: 1.1;
+        line-height: 1.15;
         text-transform: lowercase;
       }
       #boot-splash .wordmark .b { color: #DC9F42; }
       #boot-splash .wordmark .rest { color: #14274E; }
       #boot-splash .tagline {
-        margin: 0;
-        font-size: 0.9rem;
+        margin: 8px 0 0;
+        font-size: 0.875rem;
         font-weight: 500;
-        color: #5c6578;
-        letter-spacing: 0.02em;
+        color: #6b7280;
+        letter-spacing: 0.01em;
       }
       #boot-splash .pulse {
-        width: 28px;
-        height: 28px;
-        margin-top: 0.75rem;
-        border: 3px solid rgba(20, 39, 78, 0.15);
+        width: 26px;
+        height: 26px;
+        margin-top: 28px;
+        border: 2.5px solid rgba(20, 39, 78, 0.12);
         border-top-color: #14274E;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 0.75s linear infinite;
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
@@ -108,13 +101,11 @@
   </head>
   <body>
     <div id="boot-splash" aria-hidden="true">
-      <img class="mark" src="/brand/logo-icon.svg?v=embrace3" alt="" width="88" height="88" />
-      <div class="brand">
-        <div class="wordmark">
-          <span class="b">b</span><span class="rest">rainilens</span>
-        </div>
-        <p class="tagline">Learn · Explore · Grow</p>
+      <img class="mark" src="/brand/logo-icon.svg?v=embrace3" alt="" width="72" height="113" />
+      <div class="wordmark">
+        <span class="b">b</span><span class="rest">rainilens</span>
       </div>
+      <p class="tagline">Learn · Explore · Grow</p>
       <div class="pulse" aria-hidden="true"></div>
     </div>
     <div id="root"></div>
