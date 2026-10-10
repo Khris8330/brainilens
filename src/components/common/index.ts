@@ -11,3 +11,5 @@ export { Footer } from './Footer'
 
 export { BrandLogo, BrandMark } from './BrandLogo'
 export type { BrandLogoProps } from './BrandLogo'
+
+export { InstallPrompt } from './InstallPrompt'
