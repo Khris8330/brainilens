@@ -13,11 +13,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// Register lightweight service worker (production only)
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+// Register lightweight service worker in production
+if (import.meta.env.PROD && typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Silent fail — app still works without SW
-    })
+    void navigator.serviceWorker.register('/sw.js').catch(() => undefined)
   })
 }
