@@ -41,7 +41,6 @@
         inset: 0;
         z-index: 9999;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         background: #FBF8F1;
@@ -52,39 +51,13 @@
         visibility: hidden;
         pointer-events: none;
       }
-      #boot-splash .mark {
-        width: 64px;
+      #boot-splash video {
+        width: min(72vw, 280px);
         height: auto;
         display: block;
-      }
-      #boot-splash .wordmark {
-        margin-top: 16px;
-        font-size: 1.625rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-        text-transform: lowercase;
-      }
-      #boot-splash .wordmark .b { color: #DC9F42; }
-      #boot-splash .wordmark .rest { color: #14274E; }
-      #boot-splash .tagline {
-        margin: 10px 0 0;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #6b7280;
-        letter-spacing: 0.02em;
-      }
-      #boot-splash .pulse {
-        width: 28px;
-        height: 28px;
-        margin-top: 32px;
-        border: 2.5px solid rgba(20, 39, 78, 0.12);
-        border-top-color: #14274E;
-        border-radius: 50%;
-        animation: spin 0.75s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
+        background: transparent;
+        /* Soften hard black letterbox edges of the source video */
+        border-radius: 24px;
       }
     </style>
     <script type="application/ld+json">
@@ -101,12 +74,14 @@
   </head>
   <body>
     <div id="boot-splash" aria-hidden="true">
-      <img class="mark" src="/brand/logo-icon.svg?v=embrace3" alt="" width="64" height="101" />
-      <div class="wordmark">
-        <span class="b">b</span><span class="rest">rainilens</span>
-      </div>
-      <p class="tagline">Learn · Explore · Grow</p>
-      <div class="pulse" aria-hidden="true"></div>
+      <video
+        src="/images/lens-mascot-loader.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      ></video>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
