@@ -35,30 +35,28 @@ export function LoadingSpinner({
   )
 }
 
-/** Full-screen loading that matches the boot splash design */
+/** Full-screen loading — animated mascot only (matches boot splash) */
 export function LoadingOverlay({
   label = 'Loading',
 }: {
   label?: string
 }) {
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#FBF8F1] px-6">
-      <img
-        src="/brand/logo-icon.svg?v=embrace3"
-        alt=""
-        width={72}
-        height={113}
-        className="h-auto w-[72px]"
-        draggable={false}
+    <div
+      className="flex min-h-[100dvh] items-center justify-center bg-[#FBF8F1] px-6"
+      role="status"
+      aria-label={label}
+    >
+      <video
+        src="/images/lens-mascot-loader.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        className="block w-[min(72vw,280px)] rounded-3xl"
       />
-      <p className="mt-3.5 text-2xl font-extrabold lowercase leading-tight tracking-tight">
-        <span className="text-[#DC9F42]">b</span>
-        <span className="text-[#14274E]">rainilens</span>
-      </p>
-      <p className="mt-2 text-sm font-medium text-gray-500">Learn · Explore · Grow</p>
-      <div className="mt-7">
-        <LoadingSpinner size="md" label={label} />
-      </div>
+      <span className="sr-only">{label}</span>
     </div>
   )
 }
