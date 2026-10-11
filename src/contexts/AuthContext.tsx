@@ -5,51 +5,78 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import type { User } from '@/types'
-
-/**
- * MOCK AUTHENTICATION — MILESTONE 1 ONLY
- * ----------------------------------------------------
- * This is NOT real authentication. There is no backend, no password
- * hashing, and no session verification. Any "valid-looking" email and
- * password will succeed. The mock session is stored in localStorage
- * purely so the UI persists across refreshes during development.
- * This will be replaced by real Supabase auth in Milestone 2.
- */
-
-const MOCK_SESSION_KEY = 'gta_mock_session'
+import { supabase } from '@/lib/supabase'
+import { getAuthenticatedStudent } from '@/lib/student-profile'
 
 interface AuthContextValue {
   user: User | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (fullName: string, email: string, password: string) => Promise<void>
-  logout: () => void
+  login: (email: string, password: string) => Promise<User>
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    parentalConsent: boolean,
+    accountRole?: 'parent' | 'teacher',
+  ) => Promise<void>
+  logout: () => Promise<void>
+  /** Call after student-login setSession so user is mapped before navigate */
+  refreshUser: () => Promise<User | null>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function readMockSession(): User | null {
-  try {
-    const raw = localStorage.getItem(MOCK_SESSION_KEY)
-    return raw ? (JSON.parse(raw) as User) : null
-  } catch {
-    return null
+async function mapUser(session: Session | null): Promise<User | null> {
+  const authUser = session?.user
+  if (!authUser) return null
+
+  const [{ data: profile }, student] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, email, role')
+      .eq('id', authUser.id)
+      .maybeSingle(),
+    getAuthenticatedStudent(authUser.id),
+  ])
+
+  const role = student
+    ? 'student'
+    : profile?.role === 'admin'
+      ? 'admin'
+      : profile?.role === 'child'
+        ? 'child'
+        : profile?.role === 'teacher'
+          ? 'teacher'
+          : profile?.role === 'parent'
+            ? 'parent'
+            : null
+
+  if (!role) return null
+
+  return {
+    id: authUser.id,
+    name: student?.fullName ?? profile?.full_name ?? authUser.user_metadata?.full_name ?? 'User',
+    email: profile?.email ?? authUser.email ?? '',
+    avatarUrl: undefined,
+    role,
+    studentId: student?.studentId,
+    grade: student?.grade,
   }
 }
 
-function writeMockSession(user: User) {
-  localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(user))
-}
-
-function nameFromEmail(email: string): string {
-  const local = email.split('@')[0] ?? 'Parent'
-  return local
-    .replace(/[._-]+/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0].toUpperCase() + part.slice(1))
-    .join(' ')
+function authErrorMessage(error: { message: string }) {
+  const message = error.message.toLowerCase()
+  if (message.includes('invalid login credentials') || message.includes('user already registered')) {
+    return 'Invalid email or password.'
+  }
+  if (message.includes('email not confirmed')) {
+    return 'Please confirm your email before logging in.'
+  }
+  if (message.includes('password')) return 'Please choose a stronger password.'
+  if (message.includes('rate limit')) return 'Too many attempts. Please try again later.'
+  return 'We could not complete that request. Please try again.'
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -57,54 +84,116 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setUser(readMockSession())
-    setIsLoading(false)
+    let mounted = true
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (mounted) {
+        setUser(await mapUser(data.session))
+        setIsLoading(false)
+      }
+    })
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      void mapUser(session).then((nextUser) => {
+        if (mounted) {
+          setUser(nextUser)
+          setIsLoading(false)
+        }
+      })
+    })
+
+    return () => {
+      mounted = false
+      data.subscription.unsubscribe()
+    }
   }, [])
 
-  async function login(email: string, password: string) {
-    // Mock auth: any non-empty password is accepted. Referenced only to
-    // keep the signature explicit about what a real login would need.
-    void password
-    await new Promise((resolve) => setTimeout(resolve, 900))
-    const mockUser: User = {
-      id: 'mock-user-1',
-      name: nameFromEmail(email) || 'Parent',
-      email,
-      role: 'parent',
+  async function login(email: string, password: string): Promise<User> {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
+    if (error) throw new Error(authErrorMessage(error))
+
+    const mapped = await mapUser(data.session)
+    if (!mapped) {
+      throw new Error('We could not load your profile. Please try again.')
     }
-    writeMockSession(mockUser)
-    setUser(mockUser)
+    setUser(mapped)
+    setIsLoading(false)
+    return mapped
   }
 
-  async function register(fullName: string, email: string, password: string) {
-    void password
-    await new Promise((resolve) => setTimeout(resolve, 900))
-    const mockUser: User = {
-      id: 'mock-user-1',
-      name: fullName,
-      email,
-      role: 'parent',
-    }
-    writeMockSession(mockUser)
-    setUser(mockUser)
+  async function refreshUser(): Promise<User | null> {
+    const { data } = await supabase.auth.getSession()
+    const mapped = await mapUser(data.session)
+    setUser(mapped)
+    setIsLoading(false)
+    return mapped
   }
 
-  function logout() {
-    localStorage.removeItem(MOCK_SESSION_KEY)
+  async function register(
+    fullName: string,
+    email: string,
+    password: string,
+    parentalConsent: boolean,
+    accountRole: 'parent' | 'teacher' = 'parent',
+  ) {
+    if (accountRole === 'parent' && !parentalConsent) {
+      throw new Error('Parental consent is required to create an account.')
+    }
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          role: accountRole,
+          parental_consent: accountRole === 'parent' ? 'true' : 'n/a',
+          consent_version: '2026-09',
+        },
+        emailRedirectTo:
+          import.meta.env.VITE_SUPABASE_REDIRECT_URL ??
+          `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) throw new Error(authErrorMessage(error))
+    if (!data.session) {
+      throw new Error(
+        'Account created. Check your email to confirm your account before logging in.',
+      )
+    }
+    // Ensure profile role is set (trigger may default to parent)
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName.trim(),
+        email: email.trim(),
+        role: accountRole,
+      })
+    }
+    const mapped = await mapUser(data.session)
+    if (mapped) {
+      setUser(mapped)
+      setIsLoading(false)
+    }
+  }
+
+  async function logout() {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw new Error('We could not log you out. Please try again.')
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider')
   return context
 }

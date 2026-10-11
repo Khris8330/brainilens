@@ -1,283 +1,388 @@
-import { useState, type FormEvent } from 'react'
-import { Plus, Pencil, Trash2, Clock, X } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { BookOpen, LockKeyhole, Plus, Trash2 } from 'lucide-react'
+import { Button, Card, CardContent, EmptyState, Input, LoadingOverlay, Select, TextArea } from '@/components/ui'
+import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import {
-  Card,
-  CardContent,
-  Badge,
-  Button,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  EmptyState,
-} from '@/components/ui'
-import { initialWeeklyLearning, subjects } from '@/data/mockData'
-import type { WeeklyLearningEntry } from '@/types'
+  createLearningPlanItem,
+  deleteLearningPlanItem,
+  getLearningPlanItems,
+  getOwnedChildren,
+  type LearningPlanItemRecord,
+} from '@/lib/learning-data'
 
-const subjectOptions = subjects.map((s) => ({ value: s.name, label: s.name }))
-const understandingLabels = [
-  '1 — Struggling',
-  '2 — Needs practice',
-  '3 — Getting there',
-  '4 — Confident',
-  '5 — Mastered',
-]
+interface Child {
+  id: string
+  name: string
+}
 
-type FormState = Omit<WeeklyLearningEntry, 'id'>
+function StatusBadge({ status }: { status: LearningPlanItemRecord['status'] }) {
+  const styles: Record<LearningPlanItemRecord['status'], string> = {
+    pending: 'bg-background text-text-muted border border-border',
+    generating: 'bg-primary-light text-primary',
+    ready: 'bg-secondary-light text-secondary',
+    failed: 'bg-error/10 text-error',
+  }
+  const labels: Record<LearningPlanItemRecord['status'], string> = {
+    pending: 'Pending',
+    generating: 'Generating…',
+    ready: 'Ready',
+    failed: 'Failed',
+  }
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles[status]}`}>
+      {labels[status]}
+    </span>
+  )
+}
 
-const emptyForm: FormState = {
-  week: 'Week of Aug 10',
-  subject: subjects[0].name,
-  topic: '',
-  description: '',
-  hours: 1,
-  understanding: 3,
-  notes: '',
+function plainGenerationError(code: string | null) {
+  if (!code) return 'Generation failed. You can try again.'
+  const map: Record<string, string> = {
+    AI_NOT_CONFIGURED: 'AI is not configured. Please try again later.',
+    AI_TIMEOUT: 'The AI took too long. Please try again.',
+    AI_OUTPUT_INVALID: 'The AI returned an unexpected format. Please try again.',
+    ALREADY_GENERATING: 'Generation is already in progress.',
+    PERSIST_FAILED: 'Could not save the lesson. Please try again.',
+  }
+  return map[code] ?? 'Generation failed. You can try again.'
 }
 
 export function WeeklyLearningPage() {
-  const [entries, setEntries] = useState<WeeklyLearningEntry[]>(
-    initialWeeklyLearning,
-  )
-  const [selectedWeek, setSelectedWeek] = useState('all')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormState>(emptyForm)
+  const { user } = useAuth()
+  const [children, setChildren] = useState<Child[]>([])
+  const [selectedChildId, setSelectedChildId] = useState('')
+  const [items, setItems] = useState<LearningPlanItemRecord[]>([])
+  const [form, setForm] = useState({ subject: '', topic: '', description: '' })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [generatingItemId, setGeneratingItemId] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
-  const weeks = Array.from(new Set(entries.map((e) => e.week)))
-  const visibleEntries =
-    selectedWeek === 'all'
-      ? entries
-      : entries.filter((e) => e.week === selectedWeek)
+  const selectedChildIdRef = useRef(selectedChildId)
+  selectedChildIdRef.current = selectedChildId
 
-  function openAddModal() {
-    setEditingId(null)
-    setForm(emptyForm)
-    setIsModalOpen(true)
-  }
-
-  function openEditModal(entry: WeeklyLearningEntry) {
-    setEditingId(entry.id)
-    setForm({
-      week: entry.week,
-      subject: entry.subject,
-      topic: entry.topic,
-      description: entry.description,
-      hours: entry.hours,
-      understanding: entry.understanding,
-      notes: entry.notes,
-    })
-    setIsModalOpen(true)
-  }
-
-  function handleDelete(id: string) {
-    setEntries((prev) => prev.filter((e) => e.id !== id))
-  }
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    if (!form.topic.trim()) return
-
-    if (editingId) {
-      setEntries((prev) =>
-        prev.map((e) => (e.id === editingId ? { ...form, id: editingId } : e)),
-      )
-    } else {
-      setEntries((prev) => [
-        { ...form, id: `wl-${Date.now()}` },
-        ...prev,
-      ])
+  const loadItems = useCallback(async (studentId: string, opts?: { quiet?: boolean }) => {
+    const result = await getLearningPlanItems(studentId)
+    if (result.error && !opts?.quiet) {
+      setError('Weekly learning items could not be loaded.')
     }
-    setIsModalOpen(false)
+    setItems(result.data)
+    return result.data
+  }, [])
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    void (async () => {
+      setLoading(true)
+      const { data, error: childError } = await getOwnedChildren(user.id, user.role)
+      if (childError) setError('Child profiles could not be loaded.')
+
+      const next = (data ?? []).map((child) => ({ id: child.id, name: child.full_name }))
+      setChildren(next)
+
+      const initialChildId = next[0]?.id ?? ''
+      setSelectedChildId(initialChildId)
+
+      if (initialChildId) {
+        await loadItems(initialChildId)
+      } else {
+        setItems([])
+      }
+
+      setLoading(false)
+    })()
+  }, [user?.id, user?.role, loadItems])
+
+  useEffect(() => {
+    if (!selectedChildId) return
+    const hasGenerating = items.some((item) => item.status === 'generating') || generatingItemId
+    if (!hasGenerating) return
+
+    const interval = window.setInterval(() => {
+      void loadItems(selectedChildId, { quiet: true }).then((data) => {
+        const stillGenerating = data.some((item) => item.status === 'generating')
+        if (!stillGenerating) {
+          setGeneratingItemId(null)
+        }
+      })
+    }, 2500)
+
+    return () => window.clearInterval(interval)
+  }, [selectedChildId, items, generatingItemId, loadItems])
+
+  useEffect(() => {
+    if (!selectedChildId) return
+
+    const channel = supabase
+      .channel(`learning-plan-${selectedChildId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'learning_plan_items',
+          filter: `student_id=eq.${selectedChildId}`,
+        },
+        () => {
+          void loadItems(selectedChildId, { quiet: true }).then((data) => {
+            const stillGenerating = data.some((item) => item.status === 'generating')
+            if (!stillGenerating) setGeneratingItemId(null)
+          })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [selectedChildId, loadItems])
+
+  async function handleChildChange(studentId: string) {
+    setSelectedChildId(studentId)
+    setLoading(true)
+    setError('')
+    await loadItems(studentId)
+    setLoading(false)
+  }
+
+  async function handleCreate(event: FormEvent) {
+    event.preventDefault()
+    const isTeacher = user?.role === 'teacher'
+    if (!form.subject.trim() || !form.topic.trim()) return
+    if (!isTeacher && !selectedChildId) return
+    if (isTeacher && children.length === 0) {
+      setError('Register students before assigning class learning.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    const targets = isTeacher ? children.map((c) => c.id) : [selectedChildId]
+    let failed = 0
+    for (const studentId of targets) {
+      const result = await createLearningPlanItem(
+        studentId,
+        form.subject.trim(),
+        form.topic.trim(),
+        form.description.trim(),
+      )
+      if (result.error) failed += 1
+    }
+    if (failed === targets.length) setError('Weekly learning item could not be added.')
+    else if (failed > 0) setError(`Assigned to class with ${failed} error(s).`)
+    else {
+      setForm({ subject: '', topic: '', description: '' })
+      if (selectedChildId) await loadItems(selectedChildId)
+    }
+    setSaving(false)
+  }
+
+  async function handleDelete(itemId: string) {
+    const result = await deleteLearningPlanItem(itemId)
+    if (result.error) setError('Weekly learning item could not be deleted.')
+    else setItems((current) => current.filter((item) => item.id !== itemId))
+  }
+
+  async function handleGenerate(itemId: string) {
+    setGeneratingItemId(itemId)
+    setError('')
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId ? { ...item, status: 'generating', errorMessage: null } : item,
+      ),
+    )
+
+    void supabase.functions
+      .invoke('generate-learning-content', {
+        body: { learningPlanItemId: itemId },
+      })
+      .then(async ({ data, error: generationError }) => {
+        if (selectedChildIdRef.current) {
+          await loadItems(selectedChildIdRef.current, { quiet: true })
+        }
+        if (generationError) {
+          const msg = generationError.message || ''
+          if (!/timeout|Failed to fetch|network/i.test(msg)) {
+            setError(msg)
+          }
+        } else if (data?.error) {
+          const code =
+            typeof data.error === 'object' && data.error?.code
+              ? String(data.error.code)
+              : typeof data.error === 'string'
+                ? data.error
+                : 'Generation failed'
+          if (code !== 'ALREADY_GENERATING' && code !== 'ALREADY_GENERATED') {
+            setError(plainGenerationError(code))
+          }
+        }
+        setGeneratingItemId(null)
+      })
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-text">
-            Weekly Learning
-          </h1>
-          <p className="mt-1 text-sm text-text-muted">
-            Log what was studied each week and track understanding over
-            time.
-          </p>
-        </div>
-        <Button onClick={openAddModal}>
-          <Plus className="size-4" aria-hidden="true" />
-          Add learning entry
-        </Button>
+      <div>
+        <h1 className="text-2xl font-semibold text-text">Weekly Learning</h1>
+        <p className="mt-1 text-sm text-text-muted">
+          Plan focus areas for each child. Generate lessons when ready.
+        </p>
       </div>
 
-      <div className="max-w-xs">
-        <Select
-          label="Week"
-          value={selectedWeek}
-          onChange={(e) => setSelectedWeek(e.target.value)}
-          options={[
-            { value: 'all', label: 'All weeks' },
-            ...weeks.map((w) => ({ value: w, label: w })),
-          ]}
-        />
-      </div>
+      {error && (
+        <p className="text-sm text-error" role="alert">
+          {error}
+        </p>
+      )}
 
-      {visibleEntries.length === 0 ? (
+      {children.length === 0 ? (
         <EmptyState
-          icon={Clock}
-          title="No learning entries yet"
-          description="Add your first weekly learning entry to start building a history."
-          action={{ label: 'Add learning entry', onClick: openAddModal }}
+          icon={BookOpen}
+          title="No child profiles yet"
+          description="Create a child profile on the parent dashboard to plan weekly learning."
         />
       ) : (
-        <div className="space-y-4">
-          {visibleEntries.map((entry) => (
-            <Card key={entry.id}>
+        <>
+          <div className="max-w-sm">
+            <Select
+              value={selectedChildId}
+              onChange={(event) => void handleChildChange(event.target.value)}
+              options={children.map((child) => ({ value: child.id, label: child.name }))}
+            />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
+            <Card>
               <CardContent className="p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="primary">{entry.subject}</Badge>
-                      <span className="text-xs text-text-muted">
-                        {entry.week}
-                      </span>
-                    </div>
-                    <h3 className="mt-1.5 text-base font-semibold text-text">
-                      {entry.topic}
-                    </h3>
+                {loading ? (
+                  <LoadingOverlay label="Loading weekly learning" />
+                ) : items.length === 0 ? (
+                  <EmptyState
+                    icon={BookOpen}
+                    title="No focus areas yet"
+                    description="Add a learning focus for this child to get started."
+                  />
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-start justify-between gap-4 rounded-lg border border-border p-4"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-medium uppercase tracking-wide text-primary">
+                              {item.subject}
+                            </p>
+                            <StatusBadge status={item.status} />
+                          </div>
+                          <h2 className="mt-1 font-semibold text-text">{item.topic}</h2>
+                          {item.description && (
+                            <p className="mt-2 text-sm leading-6 text-text-muted">{item.description}</p>
+                          )}
+                          {item.status === 'generating' && (
+                            <p className="mt-2 text-sm text-primary">
+                              Lens is writing the lesson. This can take a minute. Status updates
+                              automatically when it finishes.
+                            </p>
+                          )}
+                          {item.status === 'ready' && item.generatedAssignmentId && (
+                            <p className="mt-2 text-sm text-secondary">
+                              Lesson is ready for your child on Assignments.
+                            </p>
+                          )}
+                          {item.status === 'failed' && (
+                            <p className="mt-2 text-sm text-error">
+                              {plainGenerationError(item.errorMessage)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => void handleDelete(item.id)}
+                            aria-label={`Delete ${item.topic}`}
+                            disabled={item.status === 'generating'}
+                          >
+                            <Trash2 className="size-4" aria-hidden="true" />
+                          </Button>
+                          {(item.status === 'pending' || item.status === 'failed') && (
+                            <Button
+                              size="sm"
+                              onClick={() => void handleGenerate(item.id)}
+                              disabled={generatingItemId !== null}
+                            >
+                              {generatingItemId === item.id
+                                ? 'Generating…'
+                                : item.status === 'failed'
+                                  ? 'Retry'
+                                  : 'Generate lesson'}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Edit ${entry.topic}`}
-                      onClick={() => openEditModal(entry)}
-                    >
-                      <Pencil className="size-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Delete ${entry.topic}`}
-                      onClick={() => handleDelete(entry.id)}
-                    >
-                      <Trash2 className="size-4 text-error" aria-hidden="true" />
-                    </Button>
-                  </div>
-                </div>
-
-                <p className="mt-2 text-sm text-text-muted">
-                  {entry.description}
-                </p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-muted">
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="size-3.5" aria-hidden="true" />
-                    {entry.hours}h studied
-                  </span>
-                  <span>
-                    Understanding:{' '}
-                    <span className="font-medium text-text">
-                      {entry.understanding}/5
-                    </span>
-                  </span>
-                </div>
-
-                {entry.notes && (
-                  <p className="mt-3 rounded-lg bg-background p-3 text-sm text-text">
-                    {entry.notes}
-                  </p>
                 )}
               </CardContent>
             </Card>
-          ))}
-        </div>
+
+            <Card>
+              <CardContent className="p-5">
+                <h2 className="font-semibold text-text">Add focus area</h2>
+                <form className="mt-4 flex flex-col gap-4" onSubmit={handleCreate}>
+                  <label className="flex flex-col gap-1 text-sm font-medium text-text">
+                    Subject
+                    <Input
+                      value={form.subject}
+                      onChange={(event) => setForm({ ...form, subject: event.target.value })}
+                      placeholder="e.g. Geography"
+                      required
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-sm font-medium text-text">
+                    Topic
+                    <Input
+                      value={form.topic}
+                      onChange={(event) => setForm({ ...form, topic: event.target.value })}
+                      placeholder="What should they focus on?"
+                      required
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-sm font-medium text-text">
+                    Description{' '}
+                    <span className="text-xs font-normal text-text-muted">Optional</span>
+                    <TextArea
+                      value={form.description}
+                      onChange={(event) => setForm({ ...form, description: event.target.value })}
+                      placeholder="Add context or encouragement"
+                    />
+                  </label>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? (
+                      'Adding…'
+                    ) : (
+                      <>
+                        <Plus className="size-4" aria-hidden="true" />
+                        {user?.role === 'teacher' ? 'Assign to whole class' : 'Add focus area'}
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? 'Edit learning entry' : 'Add learning entry'}
-        size="lg"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label="Week"
-              value={form.week}
-              onChange={(e) => setForm({ ...form, week: e.target.value })}
-              placeholder="Week of Aug 10"
-            />
-            <Select
-              label="Subject"
-              value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              options={subjectOptions}
-            />
-          </div>
-
-          <Input
-            label="Topic learned"
-            value={form.topic}
-            onChange={(e) => setForm({ ...form, topic: e.target.value })}
-            placeholder="e.g. Multiplying Fractions"
-            required
-          />
-
-          <TextArea
-            label="Description"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-            placeholder="What did they work on this week?"
-          />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label="Hours studied"
-              type="number"
-              min={0}
-              step={0.5}
-              value={form.hours}
-              onChange={(e) =>
-                setForm({ ...form, hours: Number(e.target.value) })
-              }
-            />
-            <Select
-              label="Understanding score"
-              value={String(form.understanding)}
-              onChange={(e) =>
-                setForm({ ...form, understanding: Number(e.target.value) })
-              }
-              options={understandingLabels.map((label, i) => ({
-                value: String(i + 1),
-                label,
-              }))}
-            />
-          </div>
-
-          <TextArea
-            label="Notes"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            placeholder="Anything worth remembering for next week?"
-          />
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <X className="size-4" aria-hidden="true" />
-              Cancel
-            </Button>
-            <Button type="submit">
-              {editingId ? 'Save changes' : 'Add entry'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      <div className="flex items-center gap-2 text-xs text-text-muted">
+        <LockKeyhole className="size-4" aria-hidden="true" />
+        Weekly learning is scoped to your authenticated account.
+      </div>
     </div>
   )
 }
+
+export default WeeklyLearningPage

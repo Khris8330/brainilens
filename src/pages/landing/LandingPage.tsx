@@ -1,7 +1,7 @@
 import { HeroSection } from './sections/HeroSection'
 import { TrustedBySection } from './sections/TrustedBySection'
-import { FeaturesSection } from './sections/FeaturesSection'
 import { HowItWorksSection } from './sections/HowItWorksSection'
+import { FeaturesSection } from './sections/FeaturesSection'
 import { AIHighlightSection } from './sections/AIHighlightSection'
 import { TestimonialsSection } from './sections/TestimonialsSection'
 import { PricingSection } from './sections/PricingSection'
@@ -13,8 +13,8 @@ export function LandingPage() {
     <>
       <HeroSection />
       <TrustedBySection />
-      <FeaturesSection />
       <HowItWorksSection />
+      <FeaturesSection />
       <AIHighlightSection />
       <TestimonialsSection />
       <PricingSection />

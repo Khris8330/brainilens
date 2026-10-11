@@ -35,15 +35,28 @@ export function LoadingSpinner({
   )
 }
 
+/** Full-screen loading — animated mascot only (matches boot splash) */
 export function LoadingOverlay({
   label = 'Loading',
 }: {
   label?: string
 }) {
   return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-3">
-      <LoadingSpinner size="lg" label={label} />
-      <p className="text-sm text-text-muted">{label}</p>
+    <div
+      className="flex min-h-[100dvh] items-center justify-center bg-[#FBF8F1] px-6"
+      role="status"
+      aria-label={label}
+    >
+      <video
+        src="/images/lens-mascot-loader.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        className="block w-[min(72vw,280px)] rounded-3xl"
+      />
+      <span className="sr-only">{label}</span>
     </div>
   )
 }

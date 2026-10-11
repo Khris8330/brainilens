@@ -6,87 +6,143 @@ import {
 } from '@/layouts'
 import { RequireAuth } from '@/components/common/RequireAuth'
 import { LandingPage } from '@/pages/landing/LandingPage'
+import { PrivacyPolicyPage } from '@/pages/legal/PrivacyPolicyPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { StudentLoginPage } from '@/pages/auth/StudentLoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { RoleSelectionPage } from '@/pages/auth/RoleSelectionPage'
+import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage'
 import { ParentDashboardPage } from '@/pages/parent/ParentDashboardPage'
+import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 import { ChildProgressPage } from '@/pages/child/ChildProgressPage'
 import { WeeklyLearningPage } from '@/pages/weekly-learning/WeeklyLearningPage'
 import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage'
 import { ReportsPage } from '@/pages/reports/ReportsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
+import { ChildSettingsPage } from '@/pages/settings/ChildSettingsPage'
 import { AIInsightsPage } from '@/pages/ai/AIInsightsPage'
+import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
+import { StudentLearningPage } from '@/pages/student/StudentLearningPage'
+import { StudentAssignmentsPage } from '@/pages/student/StudentAssignmentsPage'
+import { StudentAssignmentDetailPage } from '@/pages/student/StudentAssignmentDetailPage'
+import { StudentAssessmentPage } from '@/pages/student/StudentAssessmentPage'
+import { StudentProgressPage } from '@/pages/student/StudentProgressPage'
+import { StudentProgressReviewPage } from '@/pages/student/StudentProgressReviewPage'
+import { StudentAIPage } from '@/pages/student/StudentAIPage'
+import { StudentProfilePage } from '@/pages/student/StudentProfilePage'
+import { GamesHubPage } from '@/pages/student/games/GamesHubPage'
+import { WordRushPage } from '@/pages/student/games/WordRushPage'
+import { MathSprintPage } from '@/pages/student/games/MathSprintPage'
+import { ColorBlockPage } from '@/pages/student/games/ColorBlockPage'
+import { CrossmathPage } from '@/pages/student/games/CrossmathPage'
+import { SudokuPage } from '@/pages/student/games/SudokuPage'
+import { ChessPage } from '@/pages/student/games/ChessPage'
 
 export const router = createBrowserRouter([
   {
     element: <LandingLayout />,
     children: [
-      {
-        path: '/',
-        element: <LandingPage />,
-      },
+      { path: '/', element: <LandingPage /> },
+      { path: '/privacy', element: <PrivacyPolicyPage /> },
     ],
   },
   {
     element: <AuthLayout />,
     children: [
-      {
-        path: '/auth/login',
-        element: <LoginPage />,
-      },
-      {
-        path: '/auth/register',
-        element: <RegisterPage />,
-      },
+      { path: '/auth/role', element: <RoleSelectionPage /> },
+      { path: '/auth/login', element: <LoginPage /> },
+      { path: '/auth/student-login', element: <StudentLoginPage /> },
+      { path: '/auth/register', element: <RegisterPage /> },
+      { path: '/auth/callback', element: <AuthCallbackPage /> },
     ],
   },
   {
     element: (
-      <RequireAuth>
+      <RequireAuth role="parent">
         <DashboardLayout />
       </RequireAuth>
     ),
     children: [
-      {
-        path: '/parent',
-        element: <ParentDashboardPage />,
-      },
-      {
-        path: '/child',
-        element: <ChildProgressPage />,
-      },
-      {
-        path: '/weekly-learning',
-        element: <WeeklyLearningPage />,
-      },
-      {
-        path: '/assignments',
-        element: <AssignmentsPage />,
-      },
-      {
-        path: '/reports',
-        element: <ReportsPage />,
-      },
-      {
-        path: '/settings',
-        element: <SettingsPage />,
-      },
-      {
-        path: '/ai',
-        element: <AIInsightsPage />,
-      },
+      { path: '/parent', element: <ParentDashboardPage /> },
+      { path: '/child', element: <ChildProgressPage /> },
+      { path: '/settings/children/:studentId', element: <ChildSettingsPage /> },
+    ],
+  },
+  {
+    element: (
+      <RequireAuth role="teacher">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [{ path: '/teacher', element: <TeacherDashboardPage /> }],
+  },
+  {
+    element: (
+      <RequireAuth role="adult">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [
+      { path: '/weekly-learning', element: <WeeklyLearningPage /> },
+      { path: '/assignments', element: <AssignmentsPage /> },
+      { path: '/reports', element: <ReportsPage /> },
+      { path: '/settings', element: <SettingsPage /> },
+      { path: '/ai', element: <AIInsightsPage /> },
+    ],
+  },
+  {
+    element: (
+      <RequireAuth role="student">
+        <DashboardLayout />
+      </RequireAuth>
+    ),
+    children: [
+      { path: '/student', element: <StudentDashboardPage /> },
+      { path: '/student/learning', element: <StudentLearningPage /> },
+      { path: '/student/assignments', element: <StudentAssignmentsPage /> },
+      { path: '/student/assignments/:assignmentId', element: <StudentAssignmentDetailPage /> },
+      { path: '/student/assignments/:assignmentId/assessment', element: <StudentAssessmentPage /> },
+      { path: '/student/progress', element: <StudentProgressPage /> },
+      { path: '/student/progress/:learningContentId', element: <StudentProgressReviewPage /> },
+      { path: '/student/ai', element: <StudentAIPage /> },
+      { path: '/student/profile', element: <StudentProfilePage /> },
+      { path: '/student/games', element: <GamesHubPage /> },
+      { path: '/student/games/word-rush', element: <WordRushPage /> },
+      { path: '/student/games/math-sprint', element: <MathSprintPage /> },
+      { path: '/student/games/color-block', element: <ColorBlockPage /> },
+      { path: '/student/games/crossmath', element: <CrossmathPage /> },
+      { path: '/student/games/sudoku', element: <SudokuPage /> },
+      { path: '/student/games/chess', element: <ChessPage /> },
     ],
   },
 ])
 
 export const routes = {
   landing: '/',
+  privacy: '/privacy',
+  roleSelection: '/auth/role',
   login: '/auth/login',
+  studentLogin: '/auth/student-login',
   register: '/auth/register',
   parent: '/parent',
+  teacher: '/teacher',
   child: '/child',
   weeklyLearning: '/weekly-learning',
   assignments: '/assignments',
   reports: '/reports',
   settings: '/settings',
   ai: '/ai',
+  student: '/student',
+  studentLearning: '/student/learning',
+  studentAssignments: '/student/assignments',
+  studentProgress: '/student/progress',
+  studentAi: '/student/ai',
+  studentProfile: '/student/profile',
+  studentGames: '/student/games',
+  studentWordRush: '/student/games/word-rush',
+  studentMathSprint: '/student/games/math-sprint',
+  studentColorBlock: '/student/games/color-block',
+  studentCrossmath: '/student/games/crossmath',
+  studentSudoku: '/student/games/sudoku',
+  studentChess: '/student/games/chess',
 } as const

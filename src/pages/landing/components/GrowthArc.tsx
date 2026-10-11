@@ -2,7 +2,7 @@ import { cn } from '@/utils'
 
 /**
  * Signature motif: a gently rising arc with week markers.
- * Echoes the product's core idea — visible, steady weekly growth —
+ * Echoes the product's core idea , visible, steady weekly growth.
  * and reappears (in varying scale/opacity) across the page instead
  * of a generic gradient blob or dot-grid.
  */

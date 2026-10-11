@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Mail, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { Button, Card, CardContent, Input } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
+import { homePathForRole, isParentRole, isStudentRole } from '@/lib/auth-roles'
+import { routes } from '@/routes'
 
 export function LoginPage() {
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -15,9 +17,8 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const redirectTo =
-    (location.state as { from?: { pathname: string } } | null)?.from
-      ?.pathname ?? '/parent'
+  const requestedPath =
+    (location.state as { from?: { pathname: string } } | null)?.from?.pathname
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -37,14 +38,37 @@ export function LoginPage() {
     }
 
     setIsSubmitting(true)
-    await login(email, password)
-    navigate(redirectTo, { replace: true })
-  }
+    try {
+      const mapped = await login(email, password)
 
-  function fillDemoAccount() {
-    setEmail('parent@example.com')
-    setPassword('password123')
-    setError('')
+      // Parent form must not admit student sessions even if credentials exist.
+      if (isStudentRole(mapped.role)) {
+        await logout()
+        setError('This is a student account. Use Student sign in with your Student ID.')
+        return
+      }
+
+      if (!isParentRole(mapped.role)) {
+        await logout()
+        setError('This account cannot use parent sign in.')
+        return
+      }
+
+      const target =
+        requestedPath && !requestedPath.startsWith('/student') && requestedPath.startsWith('/')
+          ? requestedPath
+          : homePathForRole(mapped.role)
+
+      navigate(target, { replace: true })
+    } catch (authError) {
+      setError(
+        authError instanceof Error
+          ? authError.message
+          : 'We could not log you in. Please try again.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -52,17 +76,8 @@ export function LoginPage() {
       <CardContent className="p-6 sm:p-8">
         <h2 className="text-xl font-semibold text-text">Welcome back</h2>
         <p className="mt-1 text-sm text-text-muted">
-          Log in to see this week&apos;s progress.
+          Parent / guardian sign in with email and password.
         </p>
-
-        <button
-          type="button"
-          onClick={fillDemoAccount}
-          className="mt-4 w-full rounded-lg border border-dashed border-primary/30 bg-primary-light px-3 py-2 text-left text-xs text-primary transition-colors hover:bg-primary/10"
-        >
-          <span className="font-semibold">Demo account:</span>{' '}
-          parent@example.com &middot; password123 &mdash; tap to autofill
-        </button>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
           <Input
@@ -92,15 +107,7 @@ export function LoginPage() {
               />
               Remember me
             </label>
-            <button
-              type="button"
-              className="font-medium text-primary hover:underline"
-              onClick={() =>
-                setError('Password reset is a demo action in this milestone.')
-              }
-            >
-              Forgot password?
-            </button>
+            <span className="text-text-muted">Email + password</span>
           </div>
 
           {error && (
@@ -109,44 +116,22 @@ export function LoginPage() {
             </p>
           )}
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            isLoading={isSubmitting}
-          >
+          <Button type="submit" className="w-full" size="lg" isLoading={isSubmitting}>
             {!isSubmitting && <LogIn className="size-4" aria-hidden="true" />}
             Log in
-          </Button>
-
-          <div className="relative py-2 text-center text-xs text-text-muted">
-            <span className="relative bg-surface px-2">or</span>
-            <div
-              className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border"
-              aria-hidden="true"
-            />
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            size="lg"
-            onClick={() =>
-              setError('Google sign-in is a demo action in this milestone.')
-            }
-          >
-            <Mail className="size-4" aria-hidden="true" />
-            Continue with Google
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-text-muted">
+          Student?{' '}
+          <Link to={routes.studentLogin} className="font-medium text-primary hover:underline">
+            Sign in with Student ID
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-sm text-text-muted">
           Don&apos;t have an account?{' '}
-          <Link
-            to="/auth/register"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link to={routes.register} className="font-medium text-primary hover:underline">
             Sign up
           </Link>
         </p>

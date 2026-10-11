@@ -32,7 +32,7 @@ export function TestimonialsSection() {
             Families and teachers see the difference
           </h2>
           <p className="mt-4 text-lg text-text-muted">
-            Real feedback from parents and educators using Growth Tracker AI
+            Real feedback from parents and educators using BrainiLens
             each week.
           </p>
         </div>

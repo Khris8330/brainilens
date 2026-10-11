@@ -9,12 +9,38 @@ import type { BarChartData } from '@/components/charts'
 import type { LineChartData } from '@/components/charts'
 import type { DonutSegment } from '@/components/charts'
 
-export const mockChild = {
-  name: 'Emma Johnson',
-  grade: '4th Grade',
-  streakDays: 12,
-  weeklyHoursGoal: 8,
-  weeklyHoursCompleted: 6.5,
+export interface MockStudent {
+  id: string
+  studentId: string
+  pin: string
+  firstName: string
+  lastName: string
+  grade: number
+  parentId: string
+  streakDays: number
+  progress: number
+}
+
+export const mockStudents: MockStudent[] = [
+  { id: 'student-001', studentId: 'STU-1001', pin: '1234', firstName: 'Alex', lastName: 'Johnson', grade: 6, parentId: 'parent-001', streakDays: 7, progress: 72 },
+  { id: 'student-002', studentId: 'STU-1002', pin: '5678', firstName: 'Maya', lastName: 'Johnson', grade: 4, parentId: 'parent-001', streakDays: 4, progress: 61 },
+]
+
+const MOCK_STUDENTS_KEY = 'gta_mock_students'
+
+export function getMockStudents(): MockStudent[] {
+  try {
+    const raw = localStorage.getItem(MOCK_STUDENTS_KEY)
+    const stored = raw ? (JSON.parse(raw) as MockStudent[]) : []
+    return [...mockStudents, ...stored.filter((student) => !mockStudents.some((base) => base.id === student.id))]
+  } catch {
+    return [...mockStudents]
+  }
+}
+
+export function addMockStudent(student: MockStudent) {
+  const students = getMockStudents().filter((candidate) => candidate.id !== student.id)
+  localStorage.setItem(MOCK_STUDENTS_KEY, JSON.stringify([...students, student]))
 }
 
 export const subjects: Subject[] = [
@@ -54,14 +80,14 @@ export const assignmentCompletionDonut: DonutSegment[] = [
 ]
 
 export const recentActivity: ActivityItem[] = [
-  { id: '1', description: 'Emma completed "Fractions Practice Set 3" — scored 92%', timestamp: '2 hours ago' },
+  { id: '1', description: 'Completed "Fractions Practice Set 3" , scored 92%', timestamp: '2 hours ago' },
   { id: '2', description: 'Weekly learning check-in submitted for Science', timestamp: 'Yesterday' },
-  { id: '3', description: 'AI Study Companion session on long division (18 min)', timestamp: '2 days ago' },
+  { id: '3', description: 'Lens session on long division (18 min)', timestamp: '2 days ago' },
   { id: '4', description: 'New assignment generated: "Reading Comprehension: Ecosystems"', timestamp: '3 days ago' },
 ]
 
 export const aiRecommendations: string[] = [
-  'Spend 15 extra minutes this week on long division — accuracy dipped slightly on the last two attempts.',
+  'Spend 15 extra minutes this week on long division , accuracy dipped slightly on the last two attempts.',
   'Reading comprehension is strong; consider introducing a chapter book above current grade level.',
   'Science vocabulary retention would benefit from short daily flashcard review.',
 ]

@@ -2,15 +2,87 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Learning Growth Tracker AI — Track and accelerate your child's learning journey with AI-powered insights." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=embrace3" />
+    <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=embrace3" />
+    <link rel="apple-touch-icon" href="/brand/app-icon-v2.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="BrainiLens helps parents track their child's learning, assignments, progress and academic growth with AI-powered insights." />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="tAJq0czPpOz4B3VHXL3ugeOhwmu47_dRbmanjpjuyq0" />
+    <link rel="canonical" href="https://brainilens.vercel.app/" />
+    <link rel="manifest" href="/manifest.webmanifest?v=2" />
+    <meta name="theme-color" content="#FBF8F1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="BrainiLens" />
+    <meta property="og:title" content="BrainiLens - Track Your Child's Learning Growth" />
+    <meta property="og:description" content="BrainiLens helps parents track their child's learning, assignments, progress and academic growth with AI-powered insights." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://brainilens.vercel.app/" />
+    <meta property="og:site_name" content="BrainiLens" />
+    <meta property="og:image" content="https://brainilens.vercel.app/images/brainilens-hero.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BrainiLens - Track Your Child's Learning Growth" />
+    <meta name="twitter:description" content="Track your child's learning, assignments, progress and academic growth with AI-powered insights." />
+    <meta name="twitter:image" content="https://brainilens.vercel.app/images/brainilens-hero.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>Learning Growth Tracker AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>BrainiLens</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #FBF8F1;
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #FBF8F1;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+      }
+      #boot-splash.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #boot-splash video {
+        width: min(72vw, 280px);
+        height: auto;
+        display: block;
+        background: transparent;
+        /* Soften hard black letterbox edges of the source video */
+        border-radius: 24px;
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "brainilens",
+        "description": "BrainiLens helps parents track their child's learning, assignments, progress and academic growth with AI-powered insights.",
+        "url": "https://brainilens.vercel.app/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web"
+      }
+    </script>
   </head>
   <body>
+    <div id="boot-splash" aria-hidden="true">
+      <video
+        src="/images/lens-mascot-loader.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

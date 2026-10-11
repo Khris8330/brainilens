@@ -27,7 +27,7 @@ const plans = [
     description: 'Full AI tracking and reporting for the whole household.',
     features: [
       'Up to 4 child profiles',
-      'AI Study Companion',
+      'Lens AI Companion',
       'Assignment management',
       'Advanced progress analytics',
       'Monthly PDF reports',
@@ -116,7 +116,7 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link to={routes.register} className="mt-8">
+              <Link to={routes.roleSelection} className="mt-8">
                 <Button
                   variant={plan.highlighted ? 'primary' : 'outline'}
                   className="w-full"

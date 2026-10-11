@@ -18,12 +18,19 @@ export function LineChart({
   color = '#2563eb',
   className,
 }: LineChartProps) {
+  if (data.length === 0) {
+    return null
+  }
+
   const max = Math.max(...data.map((d) => d.value), 1)
   const padding = 24
   const width = 100
 
   const points = data.map((d, i) => {
-    const x = padding + (i / (data.length - 1)) * (width - padding * 2)
+    const x =
+      data.length === 1
+        ? width / 2
+        : padding + (i / (data.length - 1)) * (width - padding * 2)
     const y = height - padding - (d.value / max) * (height - padding * 2)
     return { x, y, ...d }
   })

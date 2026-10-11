@@ -7,6 +7,7 @@ import {
   NotebookPen,
   ClipboardList,
   TrendingUp,
+  Gamepad2,
 } from 'lucide-react'
 import type { NavItem, User } from '@/types'
 
@@ -21,20 +22,29 @@ export const parentNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/parent', icon: Home },
   { label: 'Weekly Learning', href: '/weekly-learning', icon: NotebookPen },
   { label: 'Assignments', href: '/assignments', icon: ClipboardList },
-  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
+  { label: 'Lens AI', href: '/ai', icon: Bot, badge: 'New' },
+  { label: 'Reports', href: '/reports', icon: BarChart3 },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
+export const teacherNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/teacher', icon: Home },
+  { label: 'Weekly Learning', href: '/weekly-learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
+  { label: 'Lens AI', href: '/ai', icon: Bot, badge: 'New' },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export const childNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/child', icon: Home },
-  { label: 'My Learning', href: '/weekly-learning', icon: NotebookPen },
-  { label: 'Assignments', href: '/assignments', icon: ClipboardList },
-  { label: 'AI Study Companion', href: '/ai', icon: Bot, badge: 'New' },
-  { label: 'Progress', href: '/reports', icon: TrendingUp },
-  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Dashboard', href: '/student', icon: Home },
+  { label: "Today's Learning", href: '/student/learning', icon: NotebookPen },
+  { label: 'Assignments', href: '/student/assignments', icon: ClipboardList },
+  { label: 'Lens AI', href: '/student/ai', icon: Bot, badge: 'New' },
+  { label: 'Progress', href: '/student/progress', icon: TrendingUp },
+  { label: 'Games', href: '/student/games', icon: Gamepad2 },
+  { label: 'Profile', href: '/student/profile', icon: Settings },
 ]
-
 
 export const landingNavItems: NavItem[] = [
   { label: 'Features', href: '/#features', icon: Home },
@@ -45,7 +55,7 @@ export const landingNavItems: NavItem[] = [
 export const footerLinks = {
   features: [
     { label: 'Weekly Tracker', href: '/#features' },
-    { label: 'AI Study Companion', href: '/#features' },
+    { label: 'Lens AI', href: '/#features' },
     { label: 'Progress Analytics', href: '/#features' },
     { label: 'Pricing', href: '/#pricing' },
   ],
@@ -61,7 +71,7 @@ export const footerLinks = {
     { label: 'Guides for Parents', href: '#' },
   ],
   legal: [
-    { label: 'Privacy Policy', href: '#' },
+    { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms', href: '#' },
     { label: 'Cookies', href: '#' },
   ],
