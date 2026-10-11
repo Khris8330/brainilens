@@ -10,7 +10,7 @@
     <meta name="robots" content="index, follow" />
     <meta name="google-site-verification" content="tAJq0czPpOz4B3VHXL3ugeOhwmu47_dRbmanjpjuyq0" />
     <link rel="canonical" href="https://brainilens.vercel.app/" />
-    <link rel="manifest" href="/manifest.webmanifest?v=2" />
+    <link rel="manifest" href="/manifest.webmanifest?v=3" />
     <meta name="theme-color" content="#FBF8F1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="BrainiLens" />
@@ -55,27 +55,16 @@
         width: min(72vw, 280px);
         height: auto;
         display: block;
-        background: transparent;
-        /* Soften hard black letterbox edges of the source video */
+        background: #FBF8F1;
         border-radius: 24px;
       }
     </style>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "brainilens",
-        "description": "BrainiLens helps parents track their child's learning, assignments, progress and academic growth with AI-powered insights.",
-        "url": "https://brainilens.vercel.app/",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web"
-      }
-    </script>
   </head>
   <body>
     <div id="boot-splash" aria-hidden="true">
       <video
-        src="/images/lens-mascot-loader.mp4"
+        src="/images/lens-mascot-loader.mp4?v=1"
+        poster="/images/lens-mascot.png"
         autoplay
         muted
         loop
