@@ -10,7 +10,7 @@
     <meta name="robots" content="index, follow" />
     <meta name="google-site-verification" content="tAJq0czPpOz4B3VHXL3ugeOhwmu47_dRbmanjpjuyq0" />
     <link rel="canonical" href="https://brainilens.vercel.app/" />
-    <link rel="manifest" href="/manifest.webmanifest?v=3" />
+    <link rel="manifest" href="/manifest.webmanifest?v=4" />
     <meta name="theme-color" content="#FBF8F1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="BrainiLens" />
@@ -51,26 +51,22 @@
         visibility: hidden;
         pointer-events: none;
       }
-      #boot-splash video {
+      #boot-splash img {
         width: min(72vw, 280px);
         height: auto;
         display: block;
         background: #FBF8F1;
-        border-radius: 24px;
       }
     </style>
   </head>
   <body>
     <div id="boot-splash" aria-hidden="true">
-      <video
-        src="/images/lens-mascot-loader.mp4?v=1"
-        poster="/images/lens-mascot.png"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="auto"
-      ></video>
+      <img
+        src="/images/lens-mascot.png?v=cream1"
+        alt="BrainiLens"
+        width="280"
+        height="350"
+      />
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
