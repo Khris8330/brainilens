@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import {
   LandingLayout,
   AuthLayout,
@@ -38,11 +38,28 @@ import { CrossmathPage } from '@/pages/student/games/CrossmathPage'
 import { SudokuPage } from '@/pages/student/games/SudokuPage'
 import { ChessPage } from '@/pages/student/games/ChessPage'
 
+/** Capacitor injects window.Capacitor on native; web marketing site keeps landing. */
+function isNativeApp() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Boolean((window as any).Capacitor?.isNativePlatform?.())
+  } catch {
+    return false
+  }
+}
+
+function RootEntry() {
+  if (isNativeApp()) {
+    return <Navigate to="/auth/role" replace />
+  }
+  return <LandingPage />
+}
+
 export const router = createBrowserRouter([
   {
     element: <LandingLayout />,
     children: [
-      { path: '/', element: <LandingPage /> },
+      { path: '/', element: <RootEntry /> },
       { path: '/privacy', element: <PrivacyPolicyPage /> },
     ],
   },
