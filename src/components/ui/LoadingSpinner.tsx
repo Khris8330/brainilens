@@ -35,7 +35,7 @@ export function LoadingSpinner({
   )
 }
 
-/** Full-screen loading — animated mascot only (matches boot splash) */
+/** Full-screen loading — cream mascot only (matches boot splash) */
 export function LoadingOverlay({
   label = 'Loading',
 }: {
@@ -47,14 +47,12 @@ export function LoadingOverlay({
       role="status"
       aria-label={label}
     >
-      <video
-        src="/images/lens-mascot-loader.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        className="block w-[min(72vw,280px)] rounded-3xl"
+      <img
+        src={`${import.meta.env.BASE_URL}images/lens-mascot.png`}
+        alt="BrainiLens"
+        width={280}
+        height={350}
+        className="block w-[min(72vw,280px)] h-auto"
       />
       <span className="sr-only">{label}</span>
     </div>
