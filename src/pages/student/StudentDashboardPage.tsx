@@ -22,7 +22,6 @@ import {
   type LearningActivityRecord,
   type StudentProgressRecord,
 } from '@/lib/learning-data'
-import { lensMascot } from '@/assets/landing'
 
 type DashCard = {
   to: string
@@ -204,53 +203,39 @@ export function StudentDashboardPage() {
         </div>
       </div>
 
-      {/* Continue Learning card — mascot on the right */}
+      {/* Continue Learning card */}
       <Link
         to={continueItem.to}
         className="mb-5 block overflow-hidden rounded-3xl bg-sky-50 p-4 shadow-sm ring-1 ring-sky-100 transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 sm:p-5"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-amber-400">
-                <div className="size-5 rounded-full border-2 border-white/80" />
-              </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600">
-                Continue Learning
-              </span>
-            </div>
-            <h2 className="text-lg font-extrabold leading-tight text-[#14274E] sm:text-xl">
-              {continueItem.title}
-            </h2>
-            <div className="mt-3">
-              <div className="mb-1 flex items-center justify-between text-xs font-medium text-text-muted">
-                <span>Progress</span>
-                <span>{continueItem.progress}%</span>
-              </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-sky-100">
-                <div
-                  className="h-full rounded-full bg-sky-500 transition-all"
-                  style={{ width: `${Math.min(100, Math.max(0, continueItem.progress))}%` }}
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500 px-4 py-2 text-sm font-bold text-white shadow-sm">
-                Resume
-                <ArrowRight className="size-4" />
-              </span>
-            </div>
+        <div className="mb-2 flex items-center gap-2">
+          <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-amber-400">
+            <div className="size-5 rounded-full border-2 border-white/80" />
           </div>
-
-          {/* Official BrainiLens mascot — right side */}
-          <div className="shrink-0">
-            <img
-              src={lensMascot}
-              alt="Lens"
-              className="h-24 w-24 object-contain drop-shadow-md sm:h-28 sm:w-28"
-              draggable={false}
+          <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600">
+            Continue Learning
+          </span>
+        </div>
+        <h2 className="text-lg font-extrabold leading-tight text-[#14274E] sm:text-xl">
+          {continueItem.title}
+        </h2>
+        <div className="mt-3">
+          <div className="mb-1 flex items-center justify-between text-xs font-medium text-text-muted">
+            <span>Progress</span>
+            <span>{continueItem.progress}%</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-sky-100">
+            <div
+              className="h-full rounded-full bg-sky-500 transition-all"
+              style={{ width: `${Math.min(100, Math.max(0, continueItem.progress))}%` }}
             />
           </div>
+        </div>
+        <div className="mt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500 px-4 py-2 text-sm font-bold text-white shadow-sm">
+            Resume
+            <ArrowRight className="size-4" />
+          </span>
         </div>
       </Link>
 
